@@ -1,22 +1,18 @@
-package gorm
+package mongo
 
 import (
-	"database/sql"
-	"errors"
+	"context"
+	"net/url"
 
-	"github.com/huyungtang/go-lib/db"
+	"github.com/huyungtang/go-lib/dbs"
 	"github.com/huyungtang/go-lib/strings"
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlserver"
-	"gorm.io/gorm"
+	base "go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
-
-var errDriverUndefined = errors.New("database driver undefined")
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -26,55 +22,43 @@ var errDriverUndefined = errors.New("database driver undefined")
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// GormDatabase ***************************************************************************************************************************
+// Database
 // ****************************************************************************************************************************************
-type GormDatabase struct {
-	db *gorm.DB
+type Database struct {
+	client *base.Client
+	db     *base.Database
 }
 
-// Init ***********************************************************************************************************************************
+// Init
 // ****************************************************************************************************************************************
-func (o *GormDatabase) Init(dsn string) (err error) {
-	var dial gorm.Dialector
-
-	d := strings.Lower(strings.Find(`^(?i)(mssql|mysql|postgres)://`, dsn))
-	switch d {
-	case "mssql://":
-		dial = sqlserver.Open(dsn[len(d):])
-	case "mysql://":
-		dial = mysql.Open(dsn[len(d):])
-	case "postgres://":
-		dial = postgres.Open(dsn[len(d):])
-	default:
-		return errDriverUndefined
+func (o *Database) Init(dsn string) (err error) {
+	o.client, err = base.Connect(context.TODO(), options.Client().ApplyURI(dsn))
+	if err != nil {
+		return
 	}
 
-	o.db, err = gorm.Open(dial)
+	uri, _ := url.Parse(dsn)
+	o.db = o.client.Database(strings.TrimPrefix(uri.Path, "/"))
 
 	return
 }
 
-// Table **********************************************************************************************************************************
+// Collection
 // ****************************************************************************************************************************************
-func (o *GormDatabase) Table(serv db.ITable, entity interface{}) interface{} {
-	serv.SetContext(o.db.Session(&gorm.Session{NewDB: true}).Model(entity))
+func (o *Database) Collection(serv dbs.IContext, entity dbs.ICollection) interface{} {
+	serv.SetContext(o.db.Collection(entity.CollectionName()))
 
 	return serv
 }
 
-// Close **********************************************************************************************************************************
+// Close
 // ****************************************************************************************************************************************
-func (o *GormDatabase) Close() (err error) {
-	if o.db == nil {
+func (o *Database) Close() (err error) {
+	if o.client == nil {
 		return
 	}
 
-	var db *sql.DB
-	if db, err = o.db.DB(); err != nil {
-		return
-	}
-
-	return db.Close()
+	return o.client.Disconnect(context.TODO())
 }
 
 // private functions **********************************************************************************************************************
