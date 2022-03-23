@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"github.com/huyungtang/go-lib/queues"
 	"github.com/matryer/resync"
 	"github.com/streadway/amqp"
 )
@@ -23,7 +24,7 @@ type Database struct {
 	once    resync.Once
 	db      *amqp.Connection
 	exchgs  map[string]IExchange
-	handler []func(*Context) error
+	handler []queues.ContextHandler
 }
 
 // Init
@@ -36,7 +37,7 @@ func (o *Database) Init(dsn string, opts ...Option) (err error) {
 	}
 
 	o.exchgs = make(map[string]IExchange)
-	o.handler = make([]func(*Context) error, 0)
+	o.handler = make([]queues.ContextHandler, 0)
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
 		case *handlerOption:

@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"github.com/huyungtang/go-lib/queues"
 	"github.com/huyungtang/go-lib/strings"
 	"github.com/streadway/amqp"
 )
@@ -29,6 +30,9 @@ type IExchange interface {
 	// 		body      = nil
 	Publish(opts ...Option) error
 
+	// Consume
+	// 	Options default value
+	// 		queue = nil
 	Consume(opts ...Option) error
 
 	Close() error
@@ -38,7 +42,7 @@ type IExchange interface {
 type exchange struct {
 	name    string
 	channel *amqp.Channel
-	handler []func(*Context) error
+	handler []queues.ContextHandler
 }
 
 // Publish
@@ -54,7 +58,7 @@ func (o *exchange) Publish(opts ...Option) (err error) {
 			mandatory = opt.value
 		case *immediateOption:
 			immediate = opt.value
-		case deliveryOption:
+		case *deliveryOption:
 			delivery = opt.mode
 		case *bodyOption:
 			body = opt.body
@@ -82,14 +86,14 @@ func (o *exchange) Consume(opts ...Option) (err error) {
 					return
 				}
 
-				handlers := make(map[string]func(*Context) error)
+				handlers := make(map[string]*routingOption)
 				for r := 0; r < len(q.routing); r++ {
 					if err = o.channel.QueueBind(q.name, q.routing[r].key, o.name, q.routing[r].noWait, q.routing[r].args); err != nil {
 
 						errChan <- err
 						return
 					}
-					handlers[q.routing[r].key] = q.routing[r].handler
+					handlers[q.routing[r].key] = q.routing[r]
 				}
 
 				var msgs <-chan amqp.Delivery
@@ -101,12 +105,13 @@ func (o *exchange) Consume(opts ...Option) (err error) {
 
 				for msg := range msgs {
 					if h, isOK := handlers[msg.RoutingKey]; isOK {
-						ctx := &Context{
-							msg:      &msg,
-							idx:      -1,
-							handlers: append(o.handler, h),
+						ctx := &queues.Context{
+							Exchange: msg.Exchange,
+							Routing:  msg.RoutingKey,
+							Body:     msg.Body,
 						}
-						ctx.Next()
+						ctx.SetHandler(append(o.handler, h.handler)).
+							Next()
 					}
 				}
 			}(opt)

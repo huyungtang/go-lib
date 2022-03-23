@@ -3,6 +3,7 @@ package rabbit
 import (
 	"encoding/json"
 
+	"github.com/huyungtang/go-lib/queues"
 	"github.com/streadway/amqp"
 )
 
@@ -58,7 +59,7 @@ func ExclusiveOption(v bool) Option {
 
 // HandlerOption
 // ****************************************************************************************************************************************
-func HandlerOption(handler func(*Context) error) Option {
+func HandlerOption(handler queues.ContextHandler) Option {
 	return &handlerOption{handler: handler}
 }
 
@@ -142,7 +143,7 @@ func QueueOption(name string, opts ...Option) Option {
 // 		noWait     = *false / true
 // 		table      = nil
 // ****************************************************************************************************************************************
-func RoutingOption(key string, handler func(*Context) error, opts ...Option) Option {
+func RoutingOption(key string, handler queues.ContextHandler, opts ...Option) Option {
 	o := &routingOption{
 		key:     key,
 		noWait:  false,
@@ -173,11 +174,21 @@ func TableOption(args map[string]interface{}) Option {
 // Option
 // ****************************************************************************************************************************************
 type Option interface {
+	Option()
+}
+
+// option *********************************************************************************************************************************
+type option struct {
+}
+
+// option
+// ****************************************************************************************************************************************
+func (o *option) Option() {
 }
 
 // boolOption *****************************************************************************************************************************
 type boolOption struct {
-	Option
+	option
 	value bool
 }
 
@@ -228,7 +239,7 @@ type noWaitOption struct {
 
 // stringOption ***************************************************************************************************************************
 type stringOption struct {
-	Option
+	option
 	value string
 }
 
@@ -239,25 +250,25 @@ type modeOption struct {
 
 // bodyOption *****************************************************************************************************************************
 type bodyOption struct {
-	Option
+	option
 	body []byte
 }
 
 // deliveryOption *************************************************************************************************************************
 type deliveryOption struct {
-	Option
+	option
 	mode uint8
 }
 
 // handlerOption **************************************************************************************************************************
 type handlerOption struct {
-	Option
-	handler func(*Context) error
+	option
+	handler queues.ContextHandler
 }
 
 // queueOption ****************************************************************************************************************************
 type queueOption struct {
-	Option
+	option
 	name       string
 	durable    bool
 	autoDelete bool
@@ -271,16 +282,16 @@ type queueOption struct {
 
 // routingOption **************************************************************************************************************************
 type routingOption struct {
-	Option
+	option
 	key     string
 	noWait  bool
 	args    amqp.Table
-	handler func(*Context) error
+	handler queues.ContextHandler
 }
 
 // tableOption ****************************************************************************************************************************
 type tableOption struct {
-	Option
+	option
 	value amqp.Table
 }
 
