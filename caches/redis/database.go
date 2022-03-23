@@ -64,6 +64,8 @@ func (o *Database) Get(key string, val interface{}, defa func(interface{}) (int6
 	if defa == nil {
 		return o.getCore(key, val, expire)
 	} else {
+		defer once.Reset()
+
 		once.Do(func() {
 			if err = o.getCore(key, val, expire); err == base.Nil {
 				var exp int64
@@ -73,7 +75,6 @@ func (o *Database) Get(key string, val interface{}, defa func(interface{}) (int6
 				err = o.Set(key, val, exp, true)
 			}
 		})
-		once.Reset()
 	}
 
 	return
