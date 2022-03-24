@@ -31,8 +31,13 @@ type Context struct {
 // ****************************************************************************************************************************************
 func (o *Context) Next() {
 	o.idx++
-	if o.idx < len(o.handlers) && o.handlers[o.idx] != nil {
-		o.err = o.handlers[o.idx](o)
+	if o.idx >= len(o.handlers) || o.handlers[o.idx] == nil {
+		return
+	}
+
+	if err := o.handlers[o.idx](o); err != nil {
+		o.err = err
+		return
 	}
 }
 
@@ -41,14 +46,6 @@ func (o *Context) Next() {
 func (o *Context) SetHandler(hs []ContextHandler) *Context {
 	o.idx = -1
 	o.handlers = hs
-
-	return o
-}
-
-// SetError
-// ****************************************************************************************************************************************
-func (o *Context) SetError(e error) *Context {
-	o.err = e
 
 	return o
 }
