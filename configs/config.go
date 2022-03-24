@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/huyungtang/go-lib/encrypts"
 	"github.com/huyungtang/go-lib/reflects"
 	"github.com/huyungtang/go-lib/strings"
 	"github.com/spf13/viper"
@@ -16,6 +17,7 @@ import (
 // ****************************************************************************************************************************************
 
 var errOptionNotMatched = errors.New("given option not matched")
+var errNotStruct = errors.New("not a struct")
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -25,30 +27,30 @@ var errOptionNotMatched = errors.New("given option not matched")
 // ****************************************************************************************************************************************
 func Init(opts ...Option) (cfg IConfig, err error) {
 	c := &config{
-		Viper:        viper.New(),
+		db:           viper.New(),
 		configName:   "config",
 		configType:   "yaml",
 		suffixOption: make([]*suffixOption, 0),
 	}
-	c.AutomaticEnv()
-	c.AddConfigPath(".")
+	c.db.AutomaticEnv()
+	c.db.AddConfigPath(".")
 
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
 		case *nameOption:
 			c.configName = opt.name
-			c.SetConfigName(opt.name)
+			c.db.SetConfigName(opt.name)
 		case *typeOption:
 			c.configType = opt.tp
-			c.SetConfigType(opt.tp)
+			c.db.SetConfigType(opt.tp)
 		case *pathOption:
-			c.AddConfigPath(opt.path)
+			c.db.AddConfigPath(opt.path)
 		case *suffixOption:
 			c.suffixOption = append(c.suffixOption, opt)
 		}
 	}
 
-	if err = c.ReadInConfig(); err != nil {
+	if err = c.db.ReadInConfig(); err != nil {
 		return
 	}
 
@@ -82,7 +84,7 @@ type IConfig interface {
 
 // config *********************************************************************************************************************************
 type config struct {
-	*viper.Viper
+	db           *viper.Viper
 	configName   string
 	configType   string
 	suffixOption []*suffixOption
@@ -96,10 +98,10 @@ func (o *config) MergeConfig(opt Option) (err error) {
 		return errOptionNotMatched
 	}
 
-	if s := o.Viper.GetString(suf.varName); s != "" {
-		o.SetConfigName(strings.Format("%s-%s", o.configName, s))
+	if s := o.db.GetString(suf.varName); s != "" {
+		o.db.SetConfigName(strings.Format("%s-%s", o.configName, s))
 
-		return o.MergeInConfig()
+		return o.db.MergeInConfig()
 	}
 
 	return
@@ -143,8 +145,10 @@ func (o *config) GetUInt64(key string, defa uint64) uint64 {
 
 // GetString
 // ****************************************************************************************************************************************
-func (o *config) GetString(key, defa string) string {
-	return o.getCore(key, defa).(string)
+func (o *config) GetString(key, defa string) (s string) {
+	s, _ = encrypts.Decrypt(o.getCore(key, defa).(string))
+
+	return
 }
 
 // GetStringSlice
@@ -167,7 +171,7 @@ func (o *config) GetStruct(dto interface{}, opts ...Option) (err error) {
 
 	tp := reflects.TypeOf(dto)
 	if tp.Kind() != reflect.Struct {
-		return errors.New("not a struct")
+		return errNotStruct
 	}
 
 	val := reflects.ValueOf(dto)
@@ -223,25 +227,25 @@ func (o *config) GetStruct(dto interface{}, opts ...Option) (err error) {
 
 // getCore *******************************************************************************************************************************
 func (o *config) getCore(key string, defa interface{}) interface{} {
-	if !o.IsSet(key) {
+	if !o.db.IsSet(key) {
 		return defa
 	}
 
 	switch reflects.KindOf(defa) {
 	case reflect.Bool:
-		return o.Viper.GetBool(key)
+		return o.db.GetBool(key)
 	case reflect.Int:
-		return o.Viper.GetInt(key)
+		return o.db.GetInt(key)
 	case reflect.Int64:
-		return o.Viper.GetInt64(key)
+		return o.db.GetInt64(key)
 	case reflect.Uint64:
-		return o.Viper.GetUint64(key)
+		return o.db.GetUint64(key)
 	case reflect.String:
-		return o.Viper.GetString(key)
+		return o.db.GetString(key)
 	case reflect.Slice:
 		switch reflects.TypeOf(defa).Elem().Kind() {
 		case reflect.Int:
-			val := o.Viper.GetIntSlice(key)
+			val := o.db.GetIntSlice(key)
 			rtn := make([]int, len(val))
 			for i := 0; i < len(val); i++ {
 				rtn[i] = int(val[i])
@@ -249,7 +253,7 @@ func (o *config) getCore(key string, defa interface{}) interface{} {
 
 			return rtn
 		case reflect.Int64:
-			val := o.Viper.GetIntSlice(key)
+			val := o.db.GetIntSlice(key)
 			rtn := make([]int64, len(val))
 			for i := 0; i < len(val); i++ {
 				rtn[i] = int64(val[i])
@@ -257,7 +261,7 @@ func (o *config) getCore(key string, defa interface{}) interface{} {
 
 			return rtn
 		case reflect.String:
-			return o.Viper.GetStringSlice(key)
+			return o.db.GetStringSlice(key)
 		}
 	}
 
