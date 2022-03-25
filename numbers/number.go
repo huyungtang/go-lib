@@ -1,13 +1,18 @@
-package strings
+package numbers
 
-import "github.com/huyungtang/go-lib/numbers"
+import (
+	"math/rand"
+	"sync"
+
+	"github.com/huyungtang/go-lib/times"
+)
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
 var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
+	mute sync.Mutex
 )
 
 // public functions ***********************************************************************************************************************
@@ -16,14 +21,12 @@ var (
 
 // Random
 // ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[numbers.Random(0, m)]
-	}
+func Random(mi, mx int) int {
+	mute.Lock()
+	rand.Seed(times.UnixMicro())
+	mute.Unlock()
 
-	return string(b)
+	return rand.Intn(mx-mi) + mi
 }
 
 // type defineds **************************************************************************************************************************

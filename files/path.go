@@ -14,12 +14,19 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// PathJoin
+// Home
 // ****************************************************************************************************************************************
-func PathJoin(root string, dirs ...string) string {
-	pathes := append([]string{root}, dirs...)
+func Home(dirs ...string) string {
+	home, _ := os.UserHomeDir()
 
-	return path.Clean(path.Join(pathes...))
+	return PathJoin(home, dirs...)
+}
+
+// Temp
+// ****************************************************************************************************************************************
+func Temp(dirs ...string) string {
+
+	return PathJoin(os.TempDir(), dirs...)
 }
 
 // Path
@@ -31,6 +38,14 @@ func Path(root string, dirs ...string) string {
 	root, _ = filepath.Abs(filepath.Dir(root))
 
 	return PathJoin(root, dirs...)
+}
+
+// PathJoin
+// ****************************************************************************************************************************************
+func PathJoin(root string, dirs ...string) string {
+	pathes := append([]string{root}, dirs...)
+
+	return path.Clean(path.Join(pathes...))
 }
 
 // type defineds **************************************************************************************************************************

@@ -49,6 +49,14 @@ func (o *Database) Init(dsn string, opts ...Option) (err error) {
 }
 
 // ExchangeDeclare
+// 	Options default value
+// 		mode       = ExchangeDirect
+// 		durable    = true
+// 		autoDelete = false
+// 		internal   = false
+// 		noWait     = false
+// 		args       = nil
+// 		handler    = false
 // ****************************************************************************************************************************************
 func (o *Database) ExchangeDeclare(name string, opts ...Option) (e IExchange, err error) {
 	defer o.once.Reset()

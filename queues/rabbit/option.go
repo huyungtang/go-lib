@@ -95,7 +95,7 @@ func NoWaitOption(v bool) Option {
 
 // QueueOption
 // 	Options default value
-// 		durable    = *false / true
+// 		durable    = false / *true
 // 		autoDelete = *false / true
 // 		exclusive  = *false / true
 // 		noWait     = *false / true
@@ -107,7 +107,7 @@ func NoWaitOption(v bool) Option {
 func QueueOption(name string, opts ...Option) Option {
 	o := &queueOption{
 		name:       name,
-		durable:    false,
+		durable:    true,
 		autoDelete: false,
 		exclusive:  false,
 		noWait:     false,
