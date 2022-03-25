@@ -27,9 +27,9 @@ var (
 // ****************************************************************************************************************************************
 func Encrypt(str string, cost int) (enc string, err error) {
 	switch {
-	case cost >= 32:
-		cost = 32
 	case cost >= 24:
+		cost = 32
+	case cost >= 16:
 		cost = 24
 	default:
 		cost = 16

@@ -105,13 +105,13 @@ func (o *exchange) Consume(opts ...Option) (err error) {
 
 				for msg := range msgs {
 					if h, isOK := handlers[msg.RoutingKey]; isOK {
-						ctx := &queues.Context{
-							Exchange: msg.Exchange,
-							Routing:  msg.RoutingKey,
-							Body:     msg.Body,
+						ctx := &context{
+							exg: msg.Exchange,
+							rut: msg.RoutingKey,
+							bdy: msg.Body,
+							hdl: append(o.handler, h.handler),
 						}
-						ctx.SetHandler(append(o.handler, h.handler)).
-							Next()
+						ctx.exec()
 					}
 				}
 			}(opt)
