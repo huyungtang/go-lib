@@ -95,12 +95,12 @@ func NoWaitOption(v bool) Option {
 
 // QueueOption
 // 	Options default value
-// 		durable    = false / *true
-// 		autoDelete = *false / true
-// 		exclusive  = *false / true
-// 		noWait     = *false / true
-// 		autoAck    = false / *true
-// 		noLocal    = *false / true
+// 		durable    = true
+// 		autoDelete = false
+// 		exclusive  = false
+// 		noWait     = false
+// 		autoAck    = true
+// 		noLocal    = false
 // 		table      = nil
 // 		routing    = nil
 // ****************************************************************************************************************************************

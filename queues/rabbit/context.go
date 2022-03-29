@@ -24,8 +24,8 @@ type context struct {
 	rut string
 	bdy []byte
 	err error
-	idx int
 	hdl []queues.ContextHandler
+	val map[string]interface{}
 }
 
 // Deadline
@@ -73,20 +73,36 @@ func (o *context) Body() []byte {
 // Next
 // ****************************************************************************************************************************************
 func (o *context) Next() {
-	o.idx++
-	if o.idx >= len(o.hdl) || o.hdl[o.idx] == nil {
+	if len(o.hdl) == 0 || o.hdl[0] == nil {
 		return
 	}
 
-	if err := o.hdl[o.idx](o); err != nil {
+	var hdl queues.ContextHandler
+	hdl, o.hdl = o.hdl[0], o.hdl[1:]
+
+	if err := hdl(o); err != nil {
 		o.err = err
 		return
 	}
 }
 
+// Set
+// ****************************************************************************************************************************************
+func (o *context) Set(key string, val interface{}) {
+	if o.val == nil {
+		o.val = make(map[string]interface{})
+	}
+	o.val[key] = val
+}
+
+// Get
+// ****************************************************************************************************************************************
+func (o *context) Get(key string) interface{} {
+	return o.val[key]
+}
+
 // exec ***********************************************************************************************************************************
 func (o *context) exec() {
-	o.idx = -1
 	o.Next()
 }
 

@@ -27,8 +27,8 @@ var errNotStruct = errors.New("not a struct")
 // 	Options default value
 // 		name   = "config"
 // 		type   = "yaml"
-// 		path   = ""
-// 		suffix = ""
+// 		path   = "" ex. "/etc/app/config"
+// 		suffix = "" ex. "CFG_ENV"
 // ****************************************************************************************************************************************
 func Init(opts ...Option) (cfg IConfig, err error) {
 	c := &config{

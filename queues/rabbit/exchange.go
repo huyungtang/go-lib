@@ -24,9 +24,9 @@ type IExchange interface {
 	// Publish
 	// 	Options default value
 	// 		routing   = ""
-	// 		mandatory = *false / true
-	// 		immediate = *false / true
-	// 		delivery  = *Persistent / Transient
+	// 		mandatory = false
+	// 		immediate = false
+	// 		delivery  = *Persistent | Transient
 	// 		body      = nil
 	Publish(opts ...Option) error
 

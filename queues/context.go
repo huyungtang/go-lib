@@ -26,6 +26,8 @@ type Context interface {
 	Routing() string
 	Body() []byte
 	Next()
+	Set(string, interface{})
+	Get(string) interface{}
 }
 
 // private functions **********************************************************************************************************************
