@@ -1,86 +1,81 @@
-package strings
+package gorm
 
 import (
-	"fmt"
-	"regexp"
-	base "strings"
+	"database/sql"
+	"errors"
 
-	"github.com/huyungtang/go-lib/number"
+	"github.com/huyungtang/go-lib/db"
+	"github.com/huyungtang/go-lib/strings"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlserver"
+	base "gorm.io/gorm"
 )
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
-)
+var errDriverUndefined = errors.New("database driver undefined")
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// EmitEmpty
-// ****************************************************************************************************************************************
-func EmitEmpty(strs []string) []string {
-	for i := len(strs) - 1; i >= 0; i-- {
-		if strs[i] == "" {
-			strs = append(strs[0:i], strs[i+1:]...)
-		}
-	}
-
-	return strs
-}
-
-// Find
-// ****************************************************************************************************************************************
-func Find(pattern, str string) string {
-	return regexp.MustCompile(pattern).FindString(str)
-}
-
-// Format
-// ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
-}
-
-// Join
-// ****************************************************************************************************************************************
-func Join(sep string, isEmitEmpty bool, strs ...string) string {
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return base.Join(strs, sep)
-}
-
-// Random
-// ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
-	}
-
-	return string(b)
-}
-
-// Split
-// ****************************************************************************************************************************************
-func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return
-
-}
-
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+// Database
+// ****************************************************************************************************************************************
+type Database struct {
+	db *base.DB
+}
+
+// Init
+// ****************************************************************************************************************************************
+func (o *Database) Init(dsn string) (err error) {
+	var dial base.Dialector
+
+	d := strings.Lower(strings.Find(`^(?i)(sqlserver|mysql|postgres)://`, dsn))
+	switch d {
+	case "sqlserver://":
+		dial = sqlserver.Open(dsn[len(d):])
+	case "mysql://":
+		dial = mysql.Open(dsn[len(d):])
+	case "postgres://":
+		dial = postgres.Open(dsn[len(d):])
+	default:
+		return errDriverUndefined
+	}
+
+	o.db, err = base.Open(dial)
+
+	return
+}
+
+// Table
+// ****************************************************************************************************************************************
+func (o *Database) Table(serv db.Context, entity interface{}) interface{} {
+	serv.SetContext(o.db.Session(&base.Session{NewDB: true}).Model(entity))
+
+	return serv
+}
+
+// Close
+// ****************************************************************************************************************************************
+func (o *Database) Close() (err error) {
+	if o.db == nil {
+		return
+	}
+
+	var db *sql.DB
+	if db, err = o.db.DB(); err != nil {
+		return
+	}
+
+	return db.Close()
+}
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

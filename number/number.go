@@ -1,11 +1,10 @@
-package strings
+package number
 
 import (
-	"fmt"
-	"regexp"
-	base "strings"
+	"math/rand"
+	"sync"
 
-	"github.com/huyungtang/go-lib/number"
+	"github.com/huyungtang/go-lib/times"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -13,69 +12,21 @@ import (
 // ****************************************************************************************************************************************
 
 var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
+	mute sync.Mutex
 )
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// EmitEmpty
-// ****************************************************************************************************************************************
-func EmitEmpty(strs []string) []string {
-	for i := len(strs) - 1; i >= 0; i-- {
-		if strs[i] == "" {
-			strs = append(strs[0:i], strs[i+1:]...)
-		}
-	}
-
-	return strs
-}
-
-// Find
-// ****************************************************************************************************************************************
-func Find(pattern, str string) string {
-	return regexp.MustCompile(pattern).FindString(str)
-}
-
-// Format
-// ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
-}
-
-// Join
-// ****************************************************************************************************************************************
-func Join(sep string, isEmitEmpty bool, strs ...string) string {
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return base.Join(strs, sep)
-}
-
 // Random
 // ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
-	}
+func Random(mi, mx int) int {
+	mute.Lock()
+	rand.Seed(times.UnixMicro())
+	mute.Unlock()
 
-	return string(b)
-}
-
-// Split
-// ****************************************************************************************************************************************
-func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return
-
+	return rand.Intn(mx-mi) + mi
 }
 
 // type defineds **************************************************************************************************************************

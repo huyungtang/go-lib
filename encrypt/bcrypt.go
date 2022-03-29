@@ -1,81 +1,38 @@
-package strings
+package encrypt
 
-import (
-	"fmt"
-	"regexp"
-	base "strings"
-
-	"github.com/huyungtang/go-lib/number"
-)
+import "golang.org/x/crypto/bcrypt"
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
-)
-
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// EmitEmpty
+// BCrypt
 // ****************************************************************************************************************************************
-func EmitEmpty(strs []string) []string {
-	for i := len(strs) - 1; i >= 0; i-- {
-		if strs[i] == "" {
-			strs = append(strs[0:i], strs[i+1:]...)
-		}
+func BCrypt(str string, cost int) (enc string, err error) {
+	switch {
+	case cost < bcrypt.MinCost:
+		cost = bcrypt.MinCost
+	case cost > bcrypt.MaxCost:
+		cost = bcrypt.MaxCost
 	}
 
-	return strs
-}
-
-// Find
-// ****************************************************************************************************************************************
-func Find(pattern, str string) string {
-	return regexp.MustCompile(pattern).FindString(str)
-}
-
-// Format
-// ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
-}
-
-// Join
-// ****************************************************************************************************************************************
-func Join(sep string, isEmitEmpty bool, strs ...string) string {
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
+	var bs []byte
+	if bs, err = bcrypt.GenerateFromPassword([]byte(str), cost); err != nil {
+		return
 	}
 
-	return base.Join(strs, sep)
+	return string(bs), nil
 }
 
-// Random
+// BCryptVerify
 // ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
-	}
+func BCryptVerify(hash, str string) (err error) {
 
-	return string(b)
-}
-
-// Split
-// ****************************************************************************************************************************************
-func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return
-
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(str))
 }
 
 // type defineds **************************************************************************************************************************

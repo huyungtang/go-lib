@@ -1,81 +1,51 @@
-package strings
+package file
 
 import (
-	"fmt"
-	"regexp"
-	base "strings"
-
-	"github.com/huyungtang/go-lib/number"
+	"os"
+	"path"
+	"path/filepath"
 )
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
-)
-
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// EmitEmpty
+// Home
 // ****************************************************************************************************************************************
-func EmitEmpty(strs []string) []string {
-	for i := len(strs) - 1; i >= 0; i-- {
-		if strs[i] == "" {
-			strs = append(strs[0:i], strs[i+1:]...)
-		}
+func Home(dirs ...string) string {
+	home, _ := os.UserHomeDir()
+
+	return PathJoin(home, dirs...)
+}
+
+// Temp
+// ****************************************************************************************************************************************
+func Temp(dirs ...string) string {
+
+	return PathJoin(os.TempDir(), dirs...)
+}
+
+// Path
+// ****************************************************************************************************************************************
+func Path(root string, dirs ...string) string {
+	if root == "" {
+		root = os.Args[0]
 	}
+	root, _ = filepath.Abs(filepath.Dir(root))
 
-	return strs
+	return PathJoin(root, dirs...)
 }
 
-// Find
+// PathJoin
 // ****************************************************************************************************************************************
-func Find(pattern, str string) string {
-	return regexp.MustCompile(pattern).FindString(str)
-}
+func PathJoin(root string, dirs ...string) string {
+	pathes := append([]string{root}, dirs...)
 
-// Format
-// ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
-}
-
-// Join
-// ****************************************************************************************************************************************
-func Join(sep string, isEmitEmpty bool, strs ...string) string {
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return base.Join(strs, sep)
-}
-
-// Random
-// ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
-	}
-
-	return string(b)
-}
-
-// Split
-// ****************************************************************************************************************************************
-func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
-
-	return
-
+	return path.Clean(path.Join(pathes...))
 }
 
 // type defineds **************************************************************************************************************************

@@ -1,11 +1,12 @@
-package strings
+package encrypt
 
 import (
-	"fmt"
-	"regexp"
-	base "strings"
-
-	"github.com/huyungtang/go-lib/number"
+	"crypto/md5"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
+	"errors"
+	"hash"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -13,69 +14,53 @@ import (
 // ****************************************************************************************************************************************
 
 var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
+	errHashedNotMatched = errors.New("encrypt hash not matched")
 )
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// EmitEmpty
+// MD5
 // ****************************************************************************************************************************************
-func EmitEmpty(strs []string) []string {
-	for i := len(strs) - 1; i >= 0; i-- {
-		if strs[i] == "" {
-			strs = append(strs[0:i], strs[i+1:]...)
-		}
-	}
+func MD5(str string) (enc string, err error) {
 
-	return strs
+	return cryptoEncrypt(md5.New(), str)
 }
 
-// Find
+// MD5Verify
 // ****************************************************************************************************************************************
-func Find(pattern, str string) string {
-	return regexp.MustCompile(pattern).FindString(str)
+func MD5Verify(hash, str string) (err error) {
+
+	return cryptoEncryptVerify(md5.New(), hash, str)
 }
 
-// Format
+// SHA256
 // ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
+func SHA256(str string) (enc string, err error) {
+
+	return cryptoEncrypt(sha256.New(), str)
 }
 
-// Join
+// SHA256Verify
 // ****************************************************************************************************************************************
-func Join(sep string, isEmitEmpty bool, strs ...string) string {
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
+func SHA256Verify(hash, str string) (err error) {
 
-	return base.Join(strs, sep)
+	return cryptoEncryptVerify(sha256.New(), hash, str)
 }
 
-// Random
+// SHA512
 // ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
-	}
+func SHA512(str string) (enc string, err error) {
 
-	return string(b)
+	return cryptoEncrypt(sha512.New(), str)
 }
 
-// Split
+// SHA512Verify
 // ****************************************************************************************************************************************
-func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
-	}
+func SHA512Verify(hash, str string) (err error) {
 
-	return
-
+	return cryptoEncryptVerify(sha512.New(), hash, str)
 }
 
 // type defineds **************************************************************************************************************************
@@ -85,3 +70,26 @@ func Split(str, sep string, isEmitEmpty bool) (strs []string) {
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+// cryptoEncrypt **************************************************************************************************************************
+func cryptoEncrypt(hash hash.Hash, str string) (enc string, err error) {
+	if _, err = hash.Write([]byte(str)); err != nil {
+		return
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// cryptoEncryptVerify ********************************************************************************************************************
+// ****************************************************************************************************************************************
+func cryptoEncryptVerify(hash hash.Hash, hstr, str string) (err error) {
+	if str, err = cryptoEncrypt(hash, str); err != nil {
+		return
+	}
+
+	if hstr != str {
+		return errHashedNotMatched
+	}
+
+	return
+}

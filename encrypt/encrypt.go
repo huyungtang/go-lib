@@ -1,11 +1,14 @@
-package strings
+package encrypt
 
 import (
-	"fmt"
-	"regexp"
-	base "strings"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
+	"io"
 
-	"github.com/huyungtang/go-lib/number"
+	"github.com/huyungtang/go-lib/strings"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -13,69 +16,79 @@ import (
 // ****************************************************************************************************************************************
 
 var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
+	errorEncryptFormat = errors.New("hashed string not match the format")
 )
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// EmitEmpty
+// Encrypt
 // ****************************************************************************************************************************************
-func EmitEmpty(strs []string) []string {
-	for i := len(strs) - 1; i >= 0; i-- {
-		if strs[i] == "" {
-			strs = append(strs[0:i], strs[i+1:]...)
-		}
+func Encrypt(str string, cost int) (enc string, err error) {
+	switch {
+	case cost >= 24:
+		cost = 32
+	case cost >= 16:
+		cost = 24
+	default:
+		cost = 16
 	}
 
-	return strs
-}
-
-// Find
-// ****************************************************************************************************************************************
-func Find(pattern, str string) string {
-	return regexp.MustCompile(pattern).FindString(str)
-}
-
-// Format
-// ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
-}
-
-// Join
-// ****************************************************************************************************************************************
-func Join(sep string, isEmitEmpty bool, strs ...string) string {
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
+	cipherText := make([]byte, aes.BlockSize+len(str))
+	iv := cipherText[:aes.BlockSize]
+	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
+		return
 	}
 
-	return base.Join(strs, sep)
-}
-
-// Random
-// ****************************************************************************************************************************************
-func Random(size int) string {
-	b := make([]rune, size)
-	m := len(randomChars) - 1
-	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
+	var block cipher.Block
+	key := strings.Random(cost)
+	if block, err = aes.NewCipher([]byte(key)); err != nil {
+		return
 	}
 
-	return string(b)
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], []byte(str))
+
+	return strings.Format("$a%d$%s%s", cost, key, base64.URLEncoding.EncodeToString(cipherText)), nil
 }
 
-// Split
+// Decrypt
 // ****************************************************************************************************************************************
-func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
-	if isEmitEmpty {
-		strs = EmitEmpty(strs)
+func Decrypt(hash string) (str string, err error) {
+	var cost int
+	switch strings.Find(`^\$a(16|24|32)\$`, hash) {
+	case "$a16$":
+		cost = 16
+	case "$a24$":
+		cost = 24
+	case "$a32$":
+		cost = 32
+	default:
+		return hash, errorEncryptFormat
 	}
 
-	return
+	hash = hash[5:]
+	if len(hash) < cost {
+		return hash, errorEncryptFormat
+	}
 
+	var cipherText []byte
+	if cipherText, err = base64.URLEncoding.DecodeString(hash[cost:]); err != nil {
+		return
+	}
+
+	var block cipher.Block
+	if block, err = aes.NewCipher([]byte(hash[0:cost])); err != nil {
+		return
+	}
+
+	iv := cipherText[:aes.BlockSize]
+	cipherText = cipherText[aes.BlockSize:]
+	stream := cipher.NewCFBDecrypter(block, iv)
+	stream.XORKeyStream(cipherText, cipherText)
+
+	return string(cipherText), nil
 }
 
 // type defineds **************************************************************************************************************************
