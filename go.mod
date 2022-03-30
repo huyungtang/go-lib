@@ -1,5 +1,7 @@
 module github.com/huyungtang/go-lib
 
+replace golang.org/x/text => ./../golang.text
+
 go 1.17
 
 require (
@@ -13,6 +15,7 @@ require (
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/driver/sqlserver v1.3.1
 	gorm.io/gorm v1.23.2
+	golang.org/x/text v0.3.7
 )
 
 require (

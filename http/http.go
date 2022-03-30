@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/huyungtang/go-lib/file"
+	"github.com/huyungtang/go-lib/file/path"
 	"github.com/huyungtang/go-lib/reflects"
 )
 
@@ -187,7 +187,7 @@ func (o *context) getUri(uri string) (rtn string) {
 	if err != nil {
 		return
 	}
-	val.Path = file.PathJoin(val.Path, uri)
+	val.Path = path.Join(val.Path, uri)
 
 	return val.String()
 }
