@@ -50,7 +50,7 @@ func Init(fn string, opts ...file.Option) (rdr Reader, err error) {
 type Reader interface {
 	Close() error
 
-	Read() (<-chan *readerDTO, error)
+	Read() (<-chan ReaderDTO, error)
 	ReadAll() ([]byte, error)
 }
 
@@ -72,21 +72,21 @@ func (o *reader) Close() (err error) {
 
 // Read
 // ****************************************************************************************************************************************
-func (o *reader) Read() (ch <-chan *readerDTO, err error) {
-	rtn := make(chan *readerDTO)
+func (o *reader) Read() (ch <-chan ReaderDTO, err error) {
+	rtn := make(chan ReaderDTO)
 
-	go func(r io.Reader, c chan<- *readerDTO) {
+	go func(r io.Reader, c chan<- ReaderDTO) {
 		s := bufio.NewScanner(r)
 		ln := 0
 
 	LOOP:
 		for {
 			if isOK := s.Scan(); !isOK {
-				c <- &readerDTO{IsEOF: true}
+				c <- &readerDTO{isEOF: true}
 				break LOOP
 			}
 			ln++
-			c <- &readerDTO{Line: ln, Data: s.Text()}
+			c <- &readerDTO{line: ln, data: s.Text()}
 		}
 	}(o.getReader(), rtn)
 
@@ -114,11 +114,37 @@ func (o *reader) getReader() io.Reader {
 	return o.file
 }
 
+// ReaderDTO
+// ****************************************************************************************************************************************
+type ReaderDTO interface {
+	Line() int
+	String() string
+	IsEOF() bool
+}
+
 // readerDTO ******************************************************************************************************************************
 type readerDTO struct {
-	Line  int
-	Data  string
-	IsEOF bool
+	line  int
+	data  string
+	isEOF bool
+}
+
+// Line()
+// ****************************************************************************************************************************************
+func (o *readerDTO) Line() int {
+	return o.line
+}
+
+// String
+// ****************************************************************************************************************************************
+func (o *readerDTO) String() string {
+	return o.data
+}
+
+// IsEOF
+// ****************************************************************************************************************************************
+func (o *readerDTO) IsEOF() bool {
+	return o.isEOF
 }
 
 // private functions **********************************************************************************************************************
