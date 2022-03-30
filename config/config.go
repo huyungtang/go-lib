@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"reflect"
 	"strconv"
 
@@ -15,9 +14,6 @@ import (
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
-
-var errOptionNotMatched = errors.New("given option not matched")
-var errNotStruct = errors.New("not a struct")
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -100,7 +96,7 @@ type config struct {
 func (o *config) MergeConfig(opt Option) (err error) {
 	suf, isOK := opt.(*suffixOption)
 	if !isOK {
-		return errOptionNotMatched
+		return ErrNotSuffixOption
 	}
 
 	if s := o.db.GetString(suf.varName); s != "" {
@@ -176,7 +172,7 @@ func (o *config) GetStruct(dto interface{}, opts ...Option) (err error) {
 
 	tp := reflects.TypeOf(dto)
 	if tp.Kind() != reflect.Struct {
-		return errNotStruct
+		return ErrStructNeeded
 	}
 
 	val := reflects.ValueOf(dto)

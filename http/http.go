@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	base "net/http"
 	"net/url"
-	"reflect"
 	"strings"
 
 	"github.com/huyungtang/go-lib/file"
@@ -65,7 +64,8 @@ type Context interface {
 type Response interface {
 	StatusCode() int
 	Status() string
-	Body() string
+	Body() []byte
+	String() string
 	Parse(interface{}) error
 	Err() error
 }
@@ -100,7 +100,7 @@ func (o *context) Next() {
 // Get
 // ****************************************************************************************************************************************
 func (o *context) Get(uri string) Response {
-	ctx := o.clone()
+	ctx := reflects.Clone(o).(*context)
 	ctx.hdls = append(ctx.hdls, ctx.requestCore(base.MethodGet, ctx.getUri(uri), nil))
 	ctx.Next()
 
@@ -114,9 +114,9 @@ func (o *context) Get(uri string) Response {
 // Post
 // ****************************************************************************************************************************************
 func (o *context) Post(uri string, opts ...Option) Response {
-	ctx := o.clone()
-	ctp := &headerOption{key: "Content-Type", value: "application/x-www-form-urlencoded"}
+	ctx := reflects.Clone(o).(*context)
 	val := &url.Values{}
+	ctp := &headerOption{key: "Content-Type", value: "application/x-www-form-urlencoded"}
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
 		case *paramOption:
@@ -125,8 +125,8 @@ func (o *context) Post(uri string, opts ...Option) Response {
 			ctp.value = opt.value
 		}
 	}
-	ctx.headers = append(ctx.headers, ctp)
 
+	ctx.headers = append(ctx.headers, ctp)
 	ctx.hdls = append(ctx.hdls, ctx.requestCore(base.MethodGet, ctx.getUri(uri), strings.NewReader(val.Encode())))
 	ctx.Next()
 
@@ -157,7 +157,17 @@ func (o *context) Status() string {
 
 // Body
 // ****************************************************************************************************************************************
-func (o *context) Body() string {
+func (o *context) Body() (bs []byte) {
+	if o.resp.StatusCode != base.StatusOK {
+		return []byte(o.resp.Status)
+	}
+
+	return o.body
+}
+
+// String
+// ****************************************************************************************************************************************
+func (o *context) String() string {
 	if o.resp.StatusCode != base.StatusOK {
 		return o.resp.Status
 	}
@@ -180,14 +190,6 @@ func (o *context) getUri(uri string) (rtn string) {
 	val.Path = file.PathJoin(val.Path, uri)
 
 	return val.String()
-}
-
-// clone **********************************************************************************************************************************
-func (o *context) clone() *context {
-	tar := reflect.New(reflects.TypeOf(o))
-	tar.Elem().Set(reflects.ValueOf(o))
-
-	return tar.Interface().(*context)
 }
 
 // requestCore ****************************************************************************************************************************

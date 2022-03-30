@@ -75,7 +75,23 @@ func Split(str, sep string, isEmitEmpty bool) (strs []string) {
 	}
 
 	return
+}
 
+// Fixed
+// ****************************************************************************************************************************************
+func Fixed(str string, ln int) (strs []string) {
+	strs = make([]string, 0)
+	for {
+		if len(str) > ln {
+			strs = append(strs, str[:ln])
+			str = str[ln:]
+		} else {
+			strs = append(strs, str)
+			break
+		}
+	}
+
+	return
 }
 
 // type defineds **************************************************************************************************************************

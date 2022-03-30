@@ -5,7 +5,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"io"
 
 	"github.com/huyungtang/go-lib/strings"
@@ -14,10 +13,6 @@ import (
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
-
-var (
-	errorEncryptFormat = errors.New("hashed string not match the format")
-)
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -65,12 +60,12 @@ func Decrypt(hash string) (str string, err error) {
 	case "$a32$":
 		cost = 32
 	default:
-		return hash, errorEncryptFormat
+		return hash, ErrEncryptFormat
 	}
 
 	hash = hash[5:]
 	if len(hash) < cost {
-		return hash, errorEncryptFormat
+		return hash, ErrEncryptFormat
 	}
 
 	var cipherText []byte
