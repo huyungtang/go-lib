@@ -4,6 +4,8 @@ import (
 	"os"
 	base "path"
 	"path/filepath"
+
+	"github.com/huyungtang/go-lib/file"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -43,6 +45,35 @@ func Join(root string, dirs ...string) string {
 	ps := append([]string{root}, dirs...)
 
 	return base.Clean(base.Join(ps...))
+}
+
+// Dir
+// ****************************************************************************************************************************************
+func Dir(path string) string {
+	return filepath.Dir(path)
+}
+
+// CreateDir
+// ****************************************************************************************************************************************
+func CreateDir(path string) (err error) {
+	if IsDirExists(path) {
+		return
+	} else if IsFileExists(path) {
+		return file.ErrFoundFile
+	}
+
+	return os.MkdirAll(path, os.ModePerm)
+}
+
+// IsDirExists
+// ****************************************************************************************************************************************
+func IsDirExists(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil || os.IsNotExist(err) {
+		return false
+	}
+
+	return fi.IsDir()
 }
 
 // IsFileExists

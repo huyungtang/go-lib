@@ -1,9 +1,8 @@
-package reader
+package writer
 
 import (
-	"bufio"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/huyungtang/go-lib/file"
@@ -21,48 +20,62 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(fn string, opts ...Option) (read Reader, err error) {
-	if !path.IsFileExists(fn) {
-		return nil, file.ErrFileNotFound
+func Init(fn string, opts ...Option) (write Writer, err error) {
+	if path.IsDirExists(fn) {
+		return nil, file.ErrFoundDirectory
 	}
 
-	r := new(reader)
-	if r.file, err = os.OpenFile(fn, os.O_RDONLY, os.ModePerm); err != nil {
+	if err = path.CreateDir(path.Dir(fn)); err != nil {
 		return
 	}
 
+	var enc *encodingOption
+	mode := Append.(*modeOption)
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
+		case *modeOption:
+			mode = opt
 		case *encodingOption:
-			r.enc = opt
+			enc = opt
 		}
 	}
 
-	return r, nil
+	w := new(writer)
+	if w.file, err = os.OpenFile(fn, mode.mode, os.ModePerm); err != nil {
+		return
+	}
+
+	if enc == nil {
+		w.writer = w.file
+	} else {
+		w.writer = transform.NewWriter(w.file, enc.encoder())
+	}
+
+	return w, nil
 }
 
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Reader
+// Writer
 // ****************************************************************************************************************************************
-type Reader interface {
+type Writer interface {
 	Close() error
 
-	Read() ([]byte, error)
-	Readln() (<-chan ReaderDTO, error)
+	Write(string) error
+	Writeln(string) error
 }
 
-// reader *********************************************************************************************************************************
-type reader struct {
-	file *os.File
-	enc  *encodingOption
+// writer *********************************************************************************************************************************
+type writer struct {
+	file   *os.File
+	writer io.Writer
 }
 
 // Close
 // ****************************************************************************************************************************************
-func (o *reader) Close() (err error) {
+func (o *writer) Close() (err error) {
 	if o.file == nil {
 		return
 	}
@@ -70,81 +83,20 @@ func (o *reader) Close() (err error) {
 	return o.file.Close()
 }
 
-// Read
+// Write
 // ****************************************************************************************************************************************
-func (o *reader) Read() (bs []byte, err error) {
-	if bs, err = ioutil.ReadAll(o.getReader()); err != nil {
-		return
-	}
+func (o *writer) Write(str string) (err error) {
+	_, err = fmt.Fprint(o.writer, str)
 
 	return
 }
 
-// Readln
+// Writeln
 // ****************************************************************************************************************************************
-func (o *reader) Readln() (ch <-chan ReaderDTO, err error) {
-	rtn := make(chan ReaderDTO)
+func (o *writer) Writeln(str string) (err error) {
+	_, err = fmt.Fprintln(o.writer, str)
 
-	go func(r io.Reader, c chan<- ReaderDTO) {
-		s := bufio.NewScanner(r)
-		ln := 0
-
-	LOOP:
-		for {
-			if isOK := s.Scan(); !isOK {
-				c <- &readerDTO{eof: true}
-				break LOOP
-			}
-			ln++
-			c <- &readerDTO{ln: ln, str: s.Text()}
-		}
-	}(o.getReader(), rtn)
-
-	return rtn, nil
-}
-
-// getReader ******************************************************************************************************************************
-func (o *reader) getReader() io.Reader {
-	o.file.Seek(0, 0)
-
-	if o.enc != nil {
-		return transform.NewReader(o.file, o.enc.decoder())
-	}
-
-	return o.file
-}
-
-// ReaderDTO
-// ****************************************************************************************************************************************
-type ReaderDTO interface {
-	LineNO() int
-	String() string
-	IsEOF() bool
-}
-
-// readerDTO ******************************************************************************************************************************
-type readerDTO struct {
-	ln  int
-	str string
-	eof bool
-}
-
-// LineNO
-// ****************************************************************************************************************************************
-func (o *readerDTO) LineNO() int {
-	return o.ln
-}
-
-// String
-// ****************************************************************************************************************************************
-func (o *readerDTO) String() string {
-	return o.str
-}
-
-// IsEOF
-// ****************************************************************************************************************************************
-func (o *readerDTO) IsEOF() bool {
-	return o.eof
+	return
 }
 
 // private functions **********************************************************************************************************************

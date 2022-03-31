@@ -1,4 +1,4 @@
-package file
+package reader
 
 import (
 	"golang.org/x/text/encoding"
@@ -10,7 +10,7 @@ import (
 // ****************************************************************************************************************************************
 
 var (
-	Big5Option Option = &EncodingOption{enc: traditionalchinese.Big5}
+	Big5 Option = &encodingOption{enc: traditionalchinese.Big5}
 )
 
 // public functions ***********************************************************************************************************************
@@ -35,16 +35,14 @@ type option int
 func (o *option) Option() {
 }
 
-// EncodingOption
-// ****************************************************************************************************************************************
-type EncodingOption struct {
+// encodingOption *************************************************************************************************************************
+type encodingOption struct {
 	option
 	enc encoding.Encoding
 }
 
-// Decoder
-// ****************************************************************************************************************************************
-func (o *EncodingOption) Decoder() *encoding.Decoder {
+// decoder ********************************************************************************************************************************
+func (o *encodingOption) decoder() *encoding.Decoder {
 	return o.enc.NewDecoder()
 }
 
