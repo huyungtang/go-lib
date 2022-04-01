@@ -1,14 +1,9 @@
-package reader
+package watcher
 
 import (
-	"bufio"
-	"io"
-	"io/ioutil"
-	"os"
+	"regexp"
 
-	"github.com/huyungtang/go-lib/file"
-	"github.com/huyungtang/go-lib/file/path"
-	"golang.org/x/text/transform"
+	"github.com/fsnotify/fsnotify"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -21,104 +16,81 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(fn string, opts ...Option) (read Reader, err error) {
-	if !path.IsFileExists(fn) {
-		return nil, file.ErrFileNotFound
-	}
-
-	r := new(reader)
-	if r.file, err = os.OpenFile(fn, os.O_RDONLY, os.ModePerm); err != nil {
+func Init(path string, opts ...Option) (w Watcher, err error) {
+	var fw *fsnotify.Watcher
+	if fw, err = fsnotify.NewWatcher(); err != nil {
 		return
 	}
 
+	rtn := &watcher{watcher: fw, path: path, events: allEvent}
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
-		case *encodingOption:
-			r.enc = opt
+		case *subscribeOption:
+			rtn.events = opt.events
+		case *patternOption:
+			rtn.regex = opt.regex
 		}
 	}
 
-	return r, nil
+	return rtn, nil
 }
 
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Reader
+// Watcher
 // ****************************************************************************************************************************************
-type Reader interface {
+type Watcher interface {
 	Close() error
 
-	Read() ([]byte, error)
-	Readln() <-chan *ReaderEvent
+	Subscribe() <-chan *WatcherEvent
 }
 
-// reader *********************************************************************************************************************************
-type reader struct {
-	file *os.File
-	enc  *encodingOption
+// watcher ********************************************************************************************************************************
+type watcher struct {
+	watcher *fsnotify.Watcher
+	path    string
+	events  watcherEvent
+	regex   *regexp.Regexp
 }
 
 // Close
 // ****************************************************************************************************************************************
-func (o *reader) Close() (err error) {
-	if o.file == nil {
+func (o *watcher) Close() (err error) {
+	if o.watcher == nil {
 		return
 	}
 
-	return o.file.Close()
+	return o.watcher.Close()
 }
 
-// Read
+// Subscribe
 // ****************************************************************************************************************************************
-func (o *reader) Read() (bs []byte, err error) {
-	if bs, err = ioutil.ReadAll(o.getReader()); err != nil {
-		return
-	}
+func (o *watcher) Subscribe() (evt <-chan *WatcherEvent) {
+	rtnChan := make(chan *WatcherEvent)
 
-	return
-}
-
-// Readln
-// ****************************************************************************************************************************************
-func (o *reader) Readln() (ch <-chan *ReaderEvent) {
-	rtn := make(chan *ReaderEvent)
-
-	go func(r io.Reader, c chan<- *ReaderEvent) {
-		s := bufio.NewScanner(r)
-		ln := uint(0)
-
-	LOOP:
+	go func(ch chan<- *WatcherEvent) {
 		for {
-			if isOK := s.Scan(); !isOK {
-				c <- &ReaderEvent{Event: EOF}
-				break LOOP
+			select {
+			case e, isOK := <-o.watcher.Events:
+				if !isOK || !(fsnotify.Op(o.events)&e.Op == e.Op) ||
+					(o.regex != nil && !o.regex.MatchString(e.Name)) {
+					continue
+				}
+				ch <- &WatcherEvent{Event: watcherEvent(e.Op), Name: e.Name}
+			case e, isOK := <-o.watcher.Errors:
+				if !isOK || !(o.events&Error == Error) {
+					continue
+				}
+				ch <- &WatcherEvent{Event: Error, Err: e}
 			}
-
-			if err := s.Err(); err != nil {
-				c <- &ReaderEvent{Event: Error, Err: err}
-				continue
-			}
-
-			ln++
-
-			c <- &ReaderEvent{Event: Read, LineNO: ln, String: s.Text()}
 		}
-	}(o.getReader(), rtn)
+	}(rtnChan)
 
-	return rtn
-}
+	o.watcher.Add(o.path)
 
-// getReader ******************************************************************************************************************************
-func (o *reader) getReader() io.Reader {
-	o.file.Seek(0, 0)
-
-	if o.enc != nil {
-		return transform.NewReader(o.file, o.enc.decoder())
-	}
-
-	return o.file
+	return rtnChan
 }
 
 // private functions **********************************************************************************************************************
