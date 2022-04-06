@@ -1,7 +1,7 @@
-package reflects
+package reflect
 
 import (
-	base "reflect"
+	reflect_ "reflect"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -18,14 +18,14 @@ import (
 
 // TypeOf
 // ****************************************************************************************************************************************
-func TypeOf(elem interface{}) base.Type {
-	return unPointer(base.TypeOf(elem))
+func TypeOf(elem interface{}) reflect_.Type {
+	return unPointer(reflect_.TypeOf(elem))
 }
 
 // Clone
 // ****************************************************************************************************************************************
 func Clone(elem interface{}) interface{} {
-	tar := base.New(TypeOf(elem))
+	tar := reflect_.New(TypeOf(elem))
 	tar.Elem().Set(ValueOf(elem))
 
 	return tar.Interface()
@@ -36,8 +36,8 @@ func Clone(elem interface{}) interface{} {
 // ****************************************************************************************************************************************
 
 // unPointer ******************************************************************************************************************************
-func unPointer(tp base.Type) base.Type {
-	if tp.Kind() == base.Ptr {
+func unPointer(tp reflect_.Type) reflect_.Type {
+	if tp.Kind() == reflect_.Ptr {
 		return unPointer(tp.Elem())
 	}
 

@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/huyungtang/go-lib/times"
+	"github.com/huyungtang/go-lib/time"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -23,7 +23,7 @@ var (
 // ****************************************************************************************************************************************
 func Random(mi, mx int) int {
 	mute.Lock()
-	rand.Seed(times.UnixMicro())
+	rand.Seed(time.UnixMicro())
 	mute.Unlock()
 
 	return rand.Intn(mx-mi) + mi

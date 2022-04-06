@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	base "net/http"
+	http_ "net/http"
 	"net/url"
-	"strings"
+	strings_ "strings"
 
 	"github.com/huyungtang/go-lib/file/path"
-	"github.com/huyungtang/go-lib/reflects"
+	"github.com/huyungtang/go-lib/reflect"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -24,7 +24,7 @@ import (
 // ****************************************************************************************************************************************
 func New(host string, opts ...Option) Context {
 	ctx := &context{
-		client:  new(base.Client),
+		client:  new(http_.Client),
 		host:    host,
 		hdls:    make([]contextHandler, 0),
 		headers: make([]*headerOption, 0),
@@ -72,15 +72,15 @@ type Response interface {
 
 // context ********************************************************************************************************************************
 type context struct {
-	client  *base.Client
+	client  *http_.Client
 	host    string
 	err     error
 	idx     int
 	hdls    []contextHandler
 	headers []*headerOption
 	body    []byte
-	resp    *base.Response
-	cookies []*base.Cookie
+	resp    *http_.Response
+	cookies []*http_.Cookie
 }
 
 // Next
@@ -100,8 +100,8 @@ func (o *context) Next() {
 // Get
 // ****************************************************************************************************************************************
 func (o *context) Get(uri string) Response {
-	ctx := reflects.Clone(o).(*context)
-	ctx.hdls = append(ctx.hdls, ctx.requestCore(base.MethodGet, ctx.getUri(uri), nil))
+	ctx := reflect.Clone(o).(*context)
+	ctx.hdls = append(ctx.hdls, ctx.requestCore(http_.MethodGet, ctx.getUri(uri), nil))
 	ctx.Next()
 
 	if ctx.Err() == nil {
@@ -114,7 +114,7 @@ func (o *context) Get(uri string) Response {
 // Post
 // ****************************************************************************************************************************************
 func (o *context) Post(uri string, opts ...Option) Response {
-	ctx := reflects.Clone(o).(*context)
+	ctx := reflect.Clone(o).(*context)
 	val := &url.Values{}
 	ctp := &headerOption{key: "Content-Type", value: "application/x-www-form-urlencoded"}
 	for i := 0; i < len(opts); i++ {
@@ -127,7 +127,7 @@ func (o *context) Post(uri string, opts ...Option) Response {
 	}
 
 	ctx.headers = append(ctx.headers, ctp)
-	ctx.hdls = append(ctx.hdls, ctx.requestCore(base.MethodGet, ctx.getUri(uri), strings.NewReader(val.Encode())))
+	ctx.hdls = append(ctx.hdls, ctx.requestCore(http_.MethodGet, ctx.getUri(uri), strings_.NewReader(val.Encode())))
 	ctx.Next()
 
 	if ctx.Err() == nil {
@@ -158,7 +158,7 @@ func (o *context) Status() string {
 // Body
 // ****************************************************************************************************************************************
 func (o *context) Body() (bs []byte) {
-	if o.resp.StatusCode != base.StatusOK {
+	if o.resp.StatusCode != http_.StatusOK {
 		return []byte(o.resp.Status)
 	}
 
@@ -168,7 +168,7 @@ func (o *context) Body() (bs []byte) {
 // String
 // ****************************************************************************************************************************************
 func (o *context) String() string {
-	if o.resp.StatusCode != base.StatusOK {
+	if o.resp.StatusCode != http_.StatusOK {
 		return o.resp.Status
 	}
 
@@ -195,8 +195,8 @@ func (o *context) getUri(uri string) (rtn string) {
 // requestCore ****************************************************************************************************************************
 func (o *context) requestCore(method, uri string, body io.Reader) contextHandler {
 	return func(ctx Context) (err error) {
-		var req *base.Request
-		if req, err = base.NewRequest(method, uri, body); err != nil {
+		var req *http_.Request
+		if req, err = http_.NewRequest(method, uri, body); err != nil {
 			o.err = err
 			return
 		}

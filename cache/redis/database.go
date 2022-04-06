@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	base "github.com/go-redis/redis/v8"
+	redis_ "github.com/go-redis/redis/v8"
 	"github.com/huyungtang/go-lib/cache"
-	"github.com/huyungtang/go-lib/times"
+	"github.com/huyungtang/go-lib/time"
 	"github.com/matryer/resync"
 )
 
@@ -27,18 +27,18 @@ var once resync.Once
 // Database
 // ****************************************************************************************************************************************
 type Database struct {
-	db *base.Client
+	db *redis_.Client
 }
 
 // Init
 // ****************************************************************************************************************************************
 func (o *Database) Init(dsn string) (err error) {
-	var opt *base.Options
-	if opt, err = base.ParseURL(dsn); err != nil {
+	var opt *redis_.Options
+	if opt, err = redis_.ParseURL(dsn); err != nil {
 		return
 	}
 
-	o.db = base.NewClient(opt)
+	o.db = redis_.NewClient(opt)
 
 	return o.db.Ping(context.TODO()).Err()
 }
@@ -67,7 +67,7 @@ func (o *Database) Get(key string, val interface{}, defa func(interface{}) (int6
 		defer once.Reset()
 
 		once.Do(func() {
-			if err = o.getCore(key, val, expire); err == base.Nil {
+			if err = o.getCore(key, val, expire); err == redis_.Nil {
 				var exp int64
 				if exp, err = defa(val); err != nil {
 					return
@@ -110,13 +110,13 @@ func (o *Database) getCore(key string, val interface{}, expire int64) (err error
 }
 
 // setterCmder ****************************************************************************************************************************
-func (o *Database) setterCmder(key string, val interface{}, expire int64, isOverride bool) (cmd *base.Cmd) {
+func (o *Database) setterCmder(key string, val interface{}, expire int64, isOverride bool) (cmd *redis_.Cmd) {
 	args := make([]interface{}, 3, 6)
 	args[0] = "SET"
 	args[1] = key
 	args[2], _ = json.Marshal(val)
 
-	if expire > times.UnixSecond() {
+	if expire > time.UnixSecond() {
 		args = append(args, "EXAT", expire)
 	} else if expire > cache.KeepTTL {
 		args = append(args, "EX", expire)
@@ -128,20 +128,20 @@ func (o *Database) setterCmder(key string, val interface{}, expire int64, isOver
 		args = append(args, "NX")
 	}
 
-	return base.NewCmd(context.TODO(), args...)
+	return redis_.NewCmd(context.TODO(), args...)
 }
 
 // expireCmder ****************************************************************************************************************************
-func (o *Database) expireCmder(key string, secs int64) (cmd *base.Cmd) {
+func (o *Database) expireCmder(key string, secs int64) (cmd *redis_.Cmd) {
 	ctx := context.TODO()
-	if secs > times.UnixSecond() {
-		cmd = base.NewCmd(ctx, "EXPIREAT", key, secs)
+	if secs > time.UnixSecond() {
+		cmd = redis_.NewCmd(ctx, "EXPIREAT", key, secs)
 	} else if secs > 0 {
-		cmd = base.NewCmd(ctx, "EXPIRE", key, secs)
+		cmd = redis_.NewCmd(ctx, "EXPIRE", key, secs)
 	} else if secs == cache.Static {
-		cmd = base.NewCmd(ctx, "PERSIST", key)
+		cmd = redis_.NewCmd(ctx, "PERSIST", key)
 	} else if secs != cache.KeepTTL {
-		cmd = base.NewCmd(ctx, "EXPIRE", key, secs)
+		cmd = redis_.NewCmd(ctx, "EXPIRE", key, secs)
 	}
 
 	return

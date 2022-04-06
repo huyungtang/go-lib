@@ -2,11 +2,11 @@ package config
 
 import (
 	"encoding/json"
-	"reflect"
+	reflect_ "reflect"
 	"strconv"
 
 	"github.com/huyungtang/go-lib/encrypt"
-	"github.com/huyungtang/go-lib/reflects"
+	"github.com/huyungtang/go-lib/reflect"
 	"github.com/huyungtang/go-lib/strings"
 	"github.com/spf13/viper"
 )
@@ -170,12 +170,12 @@ func (o *config) GetStruct(dto interface{}, opts ...Option) (err error) {
 		}
 	}
 
-	tp := reflects.TypeOf(dto)
-	if tp.Kind() != reflect.Struct {
+	tp := reflect.TypeOf(dto)
+	if tp.Kind() != reflect_.Struct {
 		return ErrStructNeeded
 	}
 
-	val := reflects.ValueOf(dto)
+	val := reflect.ValueOf(dto)
 	for i := 0; i < tp.NumField(); i++ {
 		vf := val.Field(i)
 		if !vf.CanSet() {
@@ -183,7 +183,7 @@ func (o *config) GetStruct(dto interface{}, opts ...Option) (err error) {
 		}
 
 		ff := tp.Field(i)
-		ft := reflects.GetTags(ff, "config")
+		ft := reflect.GetTags(ff, "config")
 		if _, isIgnore := ft["ignore"]; isIgnore {
 			continue
 		}
@@ -194,31 +194,31 @@ func (o *config) GetStruct(dto interface{}, opts ...Option) (err error) {
 		ft["key"] = strings.Join(".", true, node, ft["key"])
 
 		switch vf.Type().Kind() {
-		case reflect.Bool:
+		case reflect_.Bool:
 			vf.SetBool(o.GetBool(ft["key"], ft["defa"] == "true"))
-		case reflect.String:
+		case reflect_.String:
 			vf.SetString(o.GetString(ft["key"], ft["defa"]))
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		case reflect_.Int, reflect_.Int8, reflect_.Int16, reflect_.Int32, reflect_.Int64:
 			defa, _ := strconv.ParseInt(ft["defa"], 10, 64)
 			vf.SetInt(int64(o.GetInt(ft["key"], int(defa))))
-		case reflect.Struct:
-			sv := reflect.New(vf.Type()).Interface()
+		case reflect_.Struct:
+			sv := reflect_.New(vf.Type()).Interface()
 			o.GetStruct(sv, PathOption(ft["key"]))
-			vf.Set(reflects.ValueOf(sv))
-		case reflect.Slice:
+			vf.Set(reflect.ValueOf(sv))
+		case reflect_.Slice:
 			switch vf.Type().Elem().Kind() {
-			case reflect.String:
+			case reflect_.String:
 				var defa []string
 				if d := ft["defa"]; d != "" {
 					json.Unmarshal([]byte(d), &defa)
 				}
-				vf.Set(reflect.ValueOf(o.GetStringSlice(ft["key"], defa)))
-			case reflect.Int:
+				vf.Set(reflect_.ValueOf(o.GetStringSlice(ft["key"], defa)))
+			case reflect_.Int:
 				var defa []int
 				if d := ft["defa"]; d != "" {
 					json.Unmarshal([]byte(d), &defa)
 				}
-				vf.Set(reflect.ValueOf(o.GetIntSlice(ft["key"], defa)))
+				vf.Set(reflect_.ValueOf(o.GetIntSlice(ft["key"], defa)))
 			}
 		}
 	}
@@ -232,20 +232,20 @@ func (o *config) getCore(key string, defa interface{}) interface{} {
 		return defa
 	}
 
-	switch reflects.KindOf(defa) {
-	case reflect.Bool:
+	switch reflect.KindOf(defa) {
+	case reflect_.Bool:
 		return o.db.GetBool(key)
-	case reflect.Int:
+	case reflect_.Int:
 		return o.db.GetInt(key)
-	case reflect.Int64:
+	case reflect_.Int64:
 		return o.db.GetInt64(key)
-	case reflect.Uint64:
+	case reflect_.Uint64:
 		return o.db.GetUint64(key)
-	case reflect.String:
+	case reflect_.String:
 		return o.db.GetString(key)
-	case reflect.Slice:
-		switch reflects.TypeOf(defa).Elem().Kind() {
-		case reflect.Int:
+	case reflect_.Slice:
+		switch reflect.TypeOf(defa).Elem().Kind() {
+		case reflect_.Int:
 			val := o.db.GetIntSlice(key)
 			rtn := make([]int, len(val))
 			for i := 0; i < len(val); i++ {
@@ -253,7 +253,7 @@ func (o *config) getCore(key string, defa interface{}) interface{} {
 			}
 
 			return rtn
-		case reflect.Int64:
+		case reflect_.Int64:
 			val := o.db.GetIntSlice(key)
 			rtn := make([]int64, len(val))
 			for i := 0; i < len(val); i++ {
@@ -261,7 +261,7 @@ func (o *config) getCore(key string, defa interface{}) interface{} {
 			}
 
 			return rtn
-		case reflect.String:
+		case reflect_.String:
 			return o.db.GetStringSlice(key)
 		}
 	}

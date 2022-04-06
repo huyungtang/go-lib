@@ -2,12 +2,12 @@ package mongo
 
 import (
 	"context"
-	"reflect"
+	reflect_ "reflect"
 
 	"github.com/huyungtang/go-lib/db"
-	"github.com/huyungtang/go-lib/reflects"
+	"github.com/huyungtang/go-lib/reflect"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	base "go.mongodb.org/mongo-driver/mongo"
+	mongo_ "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -49,7 +49,7 @@ type Collections interface {
 // Collection
 // ****************************************************************************************************************************************
 type Collection struct {
-	db *base.Collection
+	db *mongo_.Collection
 
 	opts []*options.FindOptions
 }
@@ -57,7 +57,7 @@ type Collection struct {
 // SetContext
 // ****************************************************************************************************************************************
 func (o *Collection) SetContext(ctx interface{}) {
-	o.db = ctx.(*base.Collection)
+	o.db = ctx.(*mongo_.Collection)
 	o.opts = make([]*options.FindOptions, 0)
 }
 
@@ -68,14 +68,14 @@ func (o *Collection) SetContext(ctx interface{}) {
 // Create
 // ****************************************************************************************************************************************
 func (o *Collection) Create(dto interface{}) (err error) {
-	switch reflects.KindOf(dto) {
-	case reflect.Map:
+	switch reflect.KindOf(dto) {
+	case reflect_.Map:
 		_, err = o.db.InsertOne(context.TODO(), dto)
-	case reflect.Struct:
+	case reflect_.Struct:
 		beforeCreate(dto)
 		_, err = o.db.InsertOne(context.TODO(), dto)
-	case reflect.Slice:
-		vals := reflects.ValueOf(dto)
+	case reflect_.Slice:
+		vals := reflect.ValueOf(dto)
 		dtos := make([]interface{}, vals.Len())
 		for i := 0; i < vals.Len(); i++ {
 			dtos[i] = vals.Index(i).Interface()
@@ -103,13 +103,13 @@ func (o *Collection) Find(dto interface{}, fileter interface{}) (err error) {
 		p.Count(recs)
 		o.Skip(int64(p.Offset())).Limit(int64(p.PageSize()))
 		tar = p.GetData()
-	} else if reflects.KindOf(dto) == reflect.Struct {
+	} else if reflect.KindOf(dto) == reflect_.Struct {
 		o.Limit(1)
 	} else {
 		tar = dto
 	}
 
-	var res *base.Cursor
+	var res *mongo_.Cursor
 	if res, err = o.db.Find(context.TODO(), fileter, o.opts...); err != nil {
 		return
 	}

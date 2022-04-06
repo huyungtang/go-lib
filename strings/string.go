@@ -3,7 +3,7 @@ package strings
 import (
 	"fmt"
 	"regexp"
-	base "strings"
+	strings_ "strings"
 
 	"github.com/huyungtang/go-lib/number"
 )
@@ -51,7 +51,7 @@ func Join(sep string, isEmitEmpty bool, strs ...string) string {
 		strs = EmitEmpty(strs)
 	}
 
-	return base.Join(strs, sep)
+	return strings_.Join(strs, sep)
 }
 
 // Random
@@ -69,7 +69,7 @@ func Random(size int) string {
 // Split
 // ****************************************************************************************************************************************
 func Split(str, sep string, isEmitEmpty bool) (strs []string) {
-	strs = base.Split(str, sep)
+	strs = strings_.Split(str, sep)
 	if isEmitEmpty {
 		strs = EmitEmpty(strs)
 	}

@@ -1,6 +1,8 @@
-package times
+package time
 
-import "time"
+import (
+	time_ "time"
+)
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -12,8 +14,8 @@ import "time"
 
 // Local
 // ****************************************************************************************************************************************
-func Local(tm time.Time) time.Time {
-	return time.Date(tm.Year(), tm.Month(), tm.Day(), tm.Hour(), tm.Minute(), tm.Second(), tm.Nanosecond(), time.Local)
+func Local(tm time_.Time) time_.Time {
+	return time_.Date(tm.Year(), tm.Month(), tm.Day(), tm.Hour(), tm.Minute(), tm.Second(), tm.Nanosecond(), time_.Local)
 }
 
 // type defineds **************************************************************************************************************************

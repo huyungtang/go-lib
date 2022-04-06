@@ -1,41 +1,41 @@
-package reflects
+package reflect
 
 import (
-	"reflect"
-
-	"github.com/huyungtang/go-lib/strings"
+	reflect_ "reflect"
 )
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-const (
-	tagSplitStr  = ";"
-	tagAssignStr = "="
-)
-
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// GetTags
+// KindOf never return reflect.Ptr
 // ****************************************************************************************************************************************
-func GetTags(field reflect.StructField, tag string) map[string]string {
-	m := make(map[string]string)
-	tags, isOk := field.Tag.Lookup(tag)
-	switch {
-	case tags == "-":
-		m["ignore"] = "true"
-	case isOk:
-		ss := strings.Split(tags, tagSplitStr, true)
-		for i := 0; i < len(ss); i++ {
-			s := strings.Split(ss[i]+"=", tagAssignStr, false)
-			m[strings.Lower(s[0])] = s[1]
-		}
-	}
+func KindOf(elem interface{}) reflect_.Kind {
+	tp := unPointer(reflect_.TypeOf(elem))
 
-	return m
+	return tp.Kind()
+}
+
+// IsPointer
+// ****************************************************************************************************************************************
+func IsPointer(elem interface{}) bool {
+	return reflect_.TypeOf(elem).Kind() == reflect_.Ptr
+}
+
+// IsString
+// ****************************************************************************************************************************************
+func IsString(elem interface{}) bool {
+	return unPointer(reflect_.TypeOf(elem)).Kind() == reflect_.String
+}
+
+// IsStruct
+// ****************************************************************************************************************************************
+func IsStruct(elem interface{}) bool {
+	return unPointer(reflect_.TypeOf(elem)).Kind() == reflect_.Struct
 }
 
 // type defineds **************************************************************************************************************************

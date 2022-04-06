@@ -5,8 +5,9 @@ import (
 	"net/url"
 
 	"github.com/huyungtang/go-lib/db"
+	"github.com/huyungtang/go-lib/reflect"
 	"github.com/huyungtang/go-lib/strings"
-	base "go.mongodb.org/mongo-driver/mongo"
+	mongo_ "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -25,14 +26,14 @@ import (
 // Database
 // ****************************************************************************************************************************************
 type Database struct {
-	client *base.Client
-	db     *base.Database
+	client *mongo_.Client
+	db     *mongo_.Database
 }
 
 // Init
 // ****************************************************************************************************************************************
 func (o *Database) Init(dsn string) (err error) {
-	o.client, err = base.Connect(context.TODO(), options.Client().ApplyURI(dsn))
+	o.client, err = mongo_.Connect(context.TODO(), options.Client().ApplyURI(dsn))
 	if err != nil {
 		return
 	}
@@ -45,8 +46,20 @@ func (o *Database) Init(dsn string) (err error) {
 
 // Collection
 // ****************************************************************************************************************************************
-func (o *Database) Collection(serv db.Context, entity db.Collection) interface{} {
-	serv.SetContext(o.db.Collection(entity.CollectionName()))
+func (o *Database) Collection(serv db.Context, entity interface{}) interface{} {
+	var cn string
+	if ins, isOK := entity.(db.Collection); isOK {
+		cn = ins.CollectionName()
+	} else if reflect.IsString(entity) {
+		cn = entity.(string)
+	} else if reflect.IsStruct(entity) {
+		tp := reflect.TypeOf(entity)
+		cn = tp.Name()
+	} else {
+		return nil
+	}
+
+	serv.SetContext(o.db.Collection(cn))
 
 	return serv
 }

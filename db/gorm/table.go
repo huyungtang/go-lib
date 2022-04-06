@@ -1,10 +1,10 @@
 package gorm
 
 import (
-	"reflect"
+	reflect_ "reflect"
 
 	"github.com/huyungtang/go-lib/db"
-	"github.com/huyungtang/go-lib/reflects"
+	"github.com/huyungtang/go-lib/reflect"
 	"github.com/huyungtang/go-lib/strings"
 	base "gorm.io/gorm"
 )
@@ -64,12 +64,12 @@ func (o *Table) SetContext(ctx interface{}) {
 // Create
 // ****************************************************************************************************************************************
 func (o *Table) Create(dto interface{}) (err error) {
-	switch reflects.KindOf(dto) {
-	case reflect.Struct:
+	switch reflect.KindOf(dto) {
+	case reflect_.Struct:
 		beforeCreate(dto)
 		err = o.db.Create(dto).Error
-	case reflect.Slice:
-		val := reflects.ValueOf(dto)
+	case reflect_.Slice:
+		val := reflect.ValueOf(dto)
 		dtos := make([]interface{}, val.Len())
 		for i := 0; i < val.Len(); i++ {
 			dtos[i] = val.Index(i).Interface()
@@ -95,7 +95,7 @@ func (o *Table) Get(dto interface{}) (err error) {
 		}
 		p.Count(recs)
 		err = o.db.Offset(p.Offset()).Limit(p.PageSize()).Find(p.GetData()).Error
-	} else if reflects.KindOf(dto) == reflect.Struct {
+	} else if reflect.KindOf(dto) == reflect_.Struct {
 		err = o.db.Take(dto).Error
 	} else {
 		err = o.db.Find(dto).Error

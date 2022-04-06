@@ -1,6 +1,8 @@
 package strings
 
-import base "strings"
+import (
+	strings_ "strings"
+)
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -13,14 +15,14 @@ import base "strings"
 // Lower
 // ****************************************************************************************************************************************
 func Lower(str string) string {
-	return base.ToLower(str)
+	return strings_.ToLower(str)
 }
 
 // Lowers
 // ****************************************************************************************************************************************
 func Lowers(strs ...string) []string {
 	for i := 0; i < len(strs); i++ {
-		strs[i] = base.ToLower(strs[i])
+		strs[i] = strings_.ToLower(strs[i])
 	}
 
 	return strs
@@ -29,14 +31,14 @@ func Lowers(strs ...string) []string {
 // Upper
 // ****************************************************************************************************************************************
 func Upper(str string) string {
-	return base.ToUpper(str)
+	return strings_.ToUpper(str)
 }
 
 // Uppers
 // ****************************************************************************************************************************************
 func Uppers(strs ...string) []string {
 	for i := 0; i < len(strs); i++ {
-		strs[i] = base.ToUpper(strs[i])
+		strs[i] = strings_.ToUpper(strs[i])
 	}
 
 	return strs
