@@ -1,14 +1,6 @@
 package encrypt
 
-import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
-	"encoding/base64"
-	"io"
-
-	"github.com/huyungtang/go-lib/strings"
-)
+import "testing"
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -18,72 +10,79 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Encrypt
+// TestBCrypt
 // ****************************************************************************************************************************************
-func Encrypt(str string, cost int) (enc string, err error) {
-	switch {
-	case cost > 24:
-		cost = 32
-	case cost > 16:
-		cost = 24
-	default:
-		cost = 16
+func TestBCrypt(t *testing.T) {
+	str := "Hello World"
+	hash, err := BCrypt(str, 4)
+	if err != nil {
+		t.Error(err)
 	}
 
-	cipherText := make([]byte, aes.BlockSize+len(str))
-	iv := cipherText[:aes.BlockSize]
-	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
-		return
+	if err = BCryptVerify(hash, str); err != nil {
+		t.Error(err)
 	}
-
-	var block cipher.Block
-	key := strings.Random(cost)
-	if block, err = aes.NewCipher([]byte(key)); err != nil {
-		return
-	}
-
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(cipherText[aes.BlockSize:], []byte(str))
-
-	return strings.Format("$a%d$%s%s", cost, key, base64.URLEncoding.EncodeToString(cipherText)), nil
 }
 
-// Decrypt
+// TestMD5
 // ****************************************************************************************************************************************
-func Decrypt(hash string) (str string, err error) {
-	var cost int
-	switch strings.Find(`^\$a(16|24|32)\$`, hash) {
-	case "$a16$":
-		cost = 16
-	case "$a24$":
-		cost = 24
-	case "$a32$":
-		cost = 32
-	default:
-		return hash, ErrEncryptFormat
+func TestMD5(t *testing.T) {
+	str := "Hello World"
+	hash, err := MD5(str)
+	if err != nil {
+		t.Error(err)
 	}
 
-	hash = hash[5:]
-	if len(hash) < cost {
-		return hash, ErrEncryptFormat
+	if err = MD5Verify(hash, str); err != nil {
+		t.Error(err)
+	}
+}
+
+// TestSHA256
+// ****************************************************************************************************************************************
+func TestSHA256(t *testing.T) {
+	str := "Hello World"
+	hash, err := SHA256(str)
+	if err != nil {
+		t.Error(err)
 	}
 
-	var cipherText []byte
-	if cipherText, err = base64.URLEncoding.DecodeString(hash[cost:]); err != nil {
-		return
+	if err = SHA256Verify(hash, str); err != nil {
+		t.Error(err)
+	}
+}
+
+// TestSHA512
+// ****************************************************************************************************************************************
+func TestSHA512(t *testing.T) {
+	str := "Hello World"
+	hash, err := SHA512(str)
+	if err != nil {
+		t.Error(err)
 	}
 
-	var block cipher.Block
-	if block, err = aes.NewCipher([]byte(hash[0:cost])); err != nil {
-		return
+	if err = SHA512Verify(hash, str); err != nil {
+		t.Error(err)
+	}
+}
+
+// TestEncrypt
+// ****************************************************************************************************************************************
+func TestEncrypt(t *testing.T) {
+	str := "Hello World"
+	hash, err := Encrypt(str, 0)
+	if err != nil {
+		t.Error(err)
 	}
 
-	iv := cipherText[:aes.BlockSize]
-	cipherText = cipherText[aes.BlockSize:]
-	stream := cipher.NewCFBDecrypter(block, iv)
-	stream.XORKeyStream(cipherText, cipherText)
+	hash, err = Decrypt(hash)
+	if err != nil {
+		t.Error(err)
+	}
 
-	return string(cipherText), nil
+	if str != hash {
+		t.Fail()
+	}
 }
 
 // type defineds **************************************************************************************************************************
