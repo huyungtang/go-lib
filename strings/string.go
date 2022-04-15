@@ -66,6 +66,17 @@ func Random(size int) string {
 	return string(b)
 }
 
+// Reverse
+// ****************************************************************************************************************************************
+func Reverse(str string) string {
+	r := []rune(str)
+	for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
+		r[i], r[j] = r[j], r[i]
+	}
+
+	return string(r)
+}
+
 // Split
 // ****************************************************************************************************************************************
 func Split(str, sep string, isEmitEmpty bool) (strs []string) {
@@ -77,14 +88,14 @@ func Split(str, sep string, isEmitEmpty bool) (strs []string) {
 	return
 }
 
-// Fixed
+// Splitln
 // ****************************************************************************************************************************************
-func Fixed(str string, ln int) (strs []string) {
+func Splitln(str string, leng int) (strs []string) {
 	strs = make([]string, 0)
 	for {
-		if len(str) > ln {
-			strs = append(strs, str[:ln])
-			str = str[ln:]
+		if len(str) > leng {
+			strs = append(strs, str[:leng])
+			str = str[leng:]
 		} else {
 			strs = append(strs, str)
 			break

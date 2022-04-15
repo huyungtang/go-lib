@@ -31,6 +31,10 @@ func New(host string, opts ...Option) Context {
 		idx:     -1,
 	}
 
+	if ctx.host[len(ctx.host)-1] != '/' {
+		ctx.host = ctx.host + "/"
+	}
+
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
 		case *handlerOption:

@@ -45,9 +45,19 @@ func (o *Database) Init(dsn string) (err error) {
 
 // Set
 // ****************************************************************************************************************************************
-func (o *Database) Set(key string, val interface{}, expire int64, isOverride bool) (err error) {
+func (o *Database) Set(key string, val interface{}, opts ...Option) (err error) {
+	exp := cache.Static
+	ove := false
+	for i := 0; i < len(opts); i++ {
+		switch opt := opts[i].(type) {
+		case *expireOption:
+			exp = opt.exp
+		case *overrideOption:
+			ove = true
+		}
+	}
 
-	return o.db.Process(context.TODO(), o.setterCmder(key, val, expire, isOverride))
+	return o.db.Process(context.TODO(), o.setterCmder(key, val, exp, ove))
 }
 
 // Exists
@@ -60,19 +70,34 @@ func (o *Database) Exists(key string) bool {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *Database) Get(key string, val interface{}, defa func(interface{}) (int64, error), expire int64) (err error) {
+func (o *Database) Get(key string, val interface{}, opts ...Option) (err error) {
+	var defa defaultFunc
+	sexp := cache.Static
+	rexp := cache.KeepTTL
+	for i := 0; i < len(opts); i++ {
+		switch opt := opts[i].(type) {
+		case *defaultOption:
+			defa = opt.fn
+		case *expireOption:
+			if opt.isRenew {
+				rexp = opt.exp
+			} else {
+				sexp = opt.exp
+			}
+		}
+	}
+
 	if defa == nil {
-		return o.getCore(key, val, expire)
+		return o.getCore(key, val, rexp)
 	} else {
 		defer once.Reset()
 
 		once.Do(func() {
-			if err = o.getCore(key, val, expire); err == redis_.Nil {
-				var exp int64
-				if exp, err = defa(val); err != nil {
+			if err = o.getCore(key, val, rexp); err == redis_.Nil {
+				if err = defa(val); err != nil {
 					return
 				}
-				err = o.Set(key, val, exp, true)
+				err = o.Set(key, val, ExpireOption(sexp), OverrideOption())
 			}
 		})
 	}
