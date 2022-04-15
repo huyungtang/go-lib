@@ -44,16 +44,19 @@ func (o *Database) Init(dsn string) (err error) {
 }
 
 // Set
+// 	Options default value
+// 		expire   = cache.Static
+// 		override = true
 // ****************************************************************************************************************************************
 func (o *Database) Set(key string, val interface{}, opts ...Option) (err error) {
 	exp := cache.Static
-	ove := false
+	ove := true
 	for i := 0; i < len(opts); i++ {
 		switch opt := opts[i].(type) {
 		case *expireOption:
 			exp = opt.exp
 		case *overrideOption:
-			ove = true
+			ove = opt.isOverride
 		}
 	}
 
@@ -69,6 +72,10 @@ func (o *Database) Exists(key string) bool {
 }
 
 // Get
+// 	Options default value
+// 		defaFunc    = nil
+// 		expire      = cache.Static
+// 		renewExpire = cache.KeepTTL
 // ****************************************************************************************************************************************
 func (o *Database) Get(key string, val interface{}, opts ...Option) (err error) {
 	var defa defaultFunc
@@ -97,7 +104,7 @@ func (o *Database) Get(key string, val interface{}, opts ...Option) (err error) 
 				if err = defa(val); err != nil {
 					return
 				}
-				err = o.Set(key, val, ExpireOption(sexp), OverrideOption())
+				err = o.Set(key, val, ExpireOption(sexp), OverrideOption(true))
 			}
 		})
 	}

@@ -57,8 +57,8 @@ func ExpireImmedOption() Option {
 
 // OverrideOption
 // ****************************************************************************************************************************************
-func OverrideOption() Option {
-	return &overrideOption{}
+func OverrideOption(isOverride bool) Option {
+	return &overrideOption{isOverride: isOverride}
 }
 
 // type defineds **************************************************************************************************************************
@@ -98,6 +98,7 @@ type expireOption struct {
 // overrideOption *************************************************************************************************************************
 type overrideOption struct {
 	option
+	isOverride bool
 }
 
 // private functions **********************************************************************************************************************
