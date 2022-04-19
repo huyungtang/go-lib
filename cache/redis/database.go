@@ -112,6 +112,40 @@ func (o *Database) Get(key string, val interface{}, opts ...Option) (err error) 
 	return
 }
 
+// Pub
+// ****************************************************************************************************************************************
+func (o *Database) Pub(ch string, val interface{}) (err error) {
+	var bs []byte
+	if bs, err = json.Marshal(val); err != nil {
+		return
+	}
+
+	cmd := o.db.Publish(context.TODO(), ch, bs)
+
+	return cmd.Err()
+}
+
+// Sub
+// ****************************************************************************************************************************************
+func (o *Database) Sub(ch ...string) (ctx <-chan Context, err error) {
+	mctx := make(chan Context)
+
+	go func(mc chan<- Context) {
+		var msg *redis_.Message
+		sub := o.db.Subscribe(context.TODO(), ch...)
+
+		for {
+			if msg, err = sub.ReceiveMessage(context.TODO()); err != nil {
+				break
+			}
+
+			mc <- &messageContext{m: msg}
+		}
+	}(mctx)
+
+	return mctx, err
+}
+
 // Close
 // ****************************************************************************************************************************************
 func (o *Database) Close() (err error) {
