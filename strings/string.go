@@ -13,7 +13,8 @@ import (
 // ****************************************************************************************************************************************
 
 var (
-	randomChars = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
+	randomChars   = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789zyxwvutsrqponmlkjihgfedcba")
+	randomCharLen = len(randomChars)
 )
 
 // public functions ***********************************************************************************************************************
@@ -58,9 +59,8 @@ func Join(sep string, isEmitEmpty bool, strs ...string) string {
 // ****************************************************************************************************************************************
 func Random(size int) string {
 	b := make([]rune, size)
-	m := len(randomChars) - 1
 	for i := 0; i < size; i++ {
-		b[i] = randomChars[number.Random(0, m)]
+		b[i] = randomChars[number.Random(0, randomCharLen)]
 	}
 
 	return string(b)
