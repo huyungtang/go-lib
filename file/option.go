@@ -44,9 +44,9 @@ func FilterOption(pattern string) Options {
 
 // OperationOption
 // ****************************************************************************************************************************************
-func OperationOption(op fileOp) Options {
+func OperationOption(op FileOp) Options {
 	return func(o *Option) {
-		o.FileOp = o.FileOp | op
+		o.Op = o.Op | op
 	}
 }
 
@@ -67,8 +67,8 @@ func PathOption(pathes ...string) Options {
 type Option struct {
 	encoding.Encoding
 	Flag   int
-	FileOp fileOp
 	Filter *regexp.Regexp
+	Op     FileOp
 	Path   []string
 }
 

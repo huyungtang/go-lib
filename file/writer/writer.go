@@ -1,4 +1,4 @@
-package file
+package writer
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/huyungtang/go-lib/file"
 	"golang.org/x/text/transform"
 )
 
@@ -17,19 +18,21 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// InitWriter
+// Init
 // ****************************************************************************************************************************************
-func InitWriter(filename string, opts ...Options) (w Writer, err error) {
-	if isExist := IsExist(filename); isExist == IsDir {
+func Init(filename string, opts ...file.Options) (w Writer, err error) {
+	if isExist := file.IsExist(filename); isExist == file.IsDir {
 		return nil, errors.New("target is pointed to a directory")
 	}
 
-	if err = MakeDir(Dir(filename)); err != nil {
+	if err = file.MakeDir(file.Dir(filename)); err != nil {
 		return
 	}
 
-	opts = append([]Options{Override}, opts...)
-	cfg := ApplyOptions(opts)
+	opts = append([]file.Options{
+		file.Override,
+	}, opts...)
+	cfg := file.ApplyOptions(opts)
 
 	var file *os.File
 	if file, err = os.OpenFile(filename, cfg.Flag, os.ModePerm); err != nil {

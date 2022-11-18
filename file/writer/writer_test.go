@@ -1,9 +1,9 @@
-package file
+package writer
 
 import (
 	"testing"
 
-	"github.com/huyungtang/go-lib/strings"
+	"github.com/huyungtang/go-lib/file"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -14,40 +14,24 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// TestReader
+// TestWriter
 // ****************************************************************************************************************************************
-func TestReader(t *testing.T) {
-	reader, err := InitReader(PathWorking("_testing/big5.txt"), Big5)
+func TestWriter(t *testing.T) {
+	writer, err := Init(file.PathWorking("./../_testing/big5w.txt"), file.Big5)
 	if err != nil {
 		t.Error(err)
 	}
-	defer reader.Close()
+	defer writer.Close()
 
-	bs, _ := reader.ReadAll()
-	if len(bs) != 6228 {
-		t.Fail()
-	}
+	writer.Writeln("測試 big 編碼錯字")
 
-	evt := reader.Readln()
-	line := 0
-LOOP:
-	for {
-		select {
-		case <-evt.EOF:
-			break LOOP
-		case err = <-evt.Error:
-			t.Error(err)
-			break LOOP
-		case read := <-evt.Read:
-			if line = int(read.LineNo); line == 40 && !strings.HasSuffix(read.Content, "蘇瑜婷") {
-				t.Fail()
-			}
-		}
-	}
+	writer.Write("瑜")
+	writer.Write("瑜")
+	writer.Writeln("瑜")
 
-	if line != 89 {
-		t.Fail()
-	}
+	writer.Write("婷")
+	writer.Write("婷")
+	writer.Writeln("婷")
 }
 
 // type defineds **************************************************************************************************************************

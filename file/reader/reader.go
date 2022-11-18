@@ -1,43 +1,38 @@
-package file
+package reader
 
 import (
+	"bufio"
 	"errors"
+	"io"
+	"os"
 
-	"github.com/fsnotify/fsnotify"
+	"github.com/huyungtang/go-lib/file"
+	"golang.org/x/text/transform"
 )
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-const (
-	Create fileOp = 1 << iota
-	Write
-	Remove
-	Rename
-	Chmod
-)
-
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// InitWatcher
+// Init
 // ****************************************************************************************************************************************
-func InitWatcher(opts ...Options) (event Watcher, err error) {
-	var fw *fsnotify.Watcher
-	if fw, err = fsnotify.NewWatcher(); err != nil {
+func Init(filename string, opts ...file.Options) (r Reader, err error) {
+	if isExist := file.IsExist(filename); isExist != file.IsFile {
+		return nil, errors.New("file not found")
+	}
+
+	var f *os.File
+	if f, err = os.OpenFile(filename, os.O_RDONLY, os.ModePerm); err != nil {
 		return
 	}
 
-	cfg := ApplyOptions(opts)
-	if len(cfg.Path) == 0 {
-		return nil, errors.New("no path to watch")
-	}
-
-	return &watcher{
-		Watcher: fw,
-		Option:  cfg,
+	return &reader{
+		File:   f,
+		Option: file.ApplyOptions(opts),
 	}, nil
 }
 
@@ -45,73 +40,91 @@ func InitWatcher(opts ...Options) (event Watcher, err error) {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// watcher ********************************************************************************************************************************
-type watcher struct {
-	*fsnotify.Watcher
-	*Option
+// reader *********************************************************************************************************************************
+type reader struct {
+	*os.File
+	*file.Option
 }
 
-// Watcher
+// reader *********************************************************************************************************************************
+func (o *reader) reader() io.Reader {
+	o.File.Seek(0, 0)
+
+	if o.Option.Encoding == nil {
+		return o.File
+	}
+
+	return transform.NewReader(o.File, o.Option.Encoding.NewDecoder().Transformer)
+}
+
+// Reader
 // ****************************************************************************************************************************************
-type Watcher interface {
-	Watch() *watcherEvent
+type Reader interface {
+	ReadAll() ([]byte, error)
+	Readln() *readerEvent
 	Close() error
 }
 
-// Event
+// ReadAll
 // ****************************************************************************************************************************************
-func (o *watcher) Watch() (event *watcherEvent) {
-	event = &watcherEvent{
-		Watch: make(chan *watcherContext),
+func (o *reader) ReadAll() (bs []byte, err error) {
+	return io.ReadAll(o.reader())
+}
+
+// Readln
+// ****************************************************************************************************************************************
+func (o *reader) Readln() (evt *readerEvent) {
+	evt = &readerEvent{
+		Read:  make(chan *readerContext),
+		EOF:   make(chan bool),
 		Error: make(chan error),
 	}
 
-	go func(evt *watcherEvent) {
+	go func(r io.Reader, c *readerEvent) {
+		s := bufio.NewScanner(r)
+		ln := uint64(0)
+
+	LOOP:
 		for {
-			select {
-			case e, isOK := <-o.Watcher.Events:
-				if isOK &&
-					(e.Op&fsnotify.Op(o.Option.FileOp) == e.Op) &&
-					(o.Option.Filter == nil || o.Option.Filter.MatchString(e.Name)) {
-					evt.Watch <- &watcherContext{Event: fileOp(e.Op), Name: e.Name}
+			if isOK := s.Scan(); isOK {
+				ln++
+				c.Read <- &readerContext{LineNo: ln, Content: s.Text()}
+			} else {
+				if err := s.Err(); err != nil {
+					c.Error <- err
+				} else {
+					c.EOF <- true
 				}
-			case e := <-o.Watcher.Errors:
-				evt.Error <- e
+				break LOOP
 			}
 		}
-	}(event)
+	}(o.reader(), evt)
 
-	for _, path := range o.Option.Path {
-		o.Watcher.Add(path)
-	}
-
-	return
+	return evt
 }
 
 // Close
 // ****************************************************************************************************************************************
-func (o *watcher) Close() (err error) {
-	if o.Watcher != nil {
-		err = o.Watcher.Close()
+func (o *reader) Close() (err error) {
+	if o.File != nil {
+		err = o.File.Close()
 	}
 
 	return
 }
 
-// watcherEvent ***************************************************************************************************************************
-type watcherEvent struct {
-	Watch chan *watcherContext
+// readerEvent ****************************************************************************************************************************
+type readerEvent struct {
+	Read  chan *readerContext
+	EOF   chan bool
 	Error chan error
 }
 
-// watcherContext *************************************************************************************************************************
-type watcherContext struct {
-	Event fileOp
-	Name  string
+// readerContext **************************************************************************************************************************
+type readerContext struct {
+	LineNo  uint64
+	Content string
 }
-
-// fileOp *********************************************************************************************************************************
-type fileOp uint32
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
