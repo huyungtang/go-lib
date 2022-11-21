@@ -53,6 +53,14 @@ func EventDurationOption(dur time.Duration) google.Options {
 	}
 }
 
+// EventEndOption
+// ****************************************************************************************************************************************
+func EventEndOption(tm time.Time) google.Options {
+	return func(o *google.Option) {
+		o.EndTime = tm
+	}
+}
+
 // RecurrenceOtpion
 // ****************************************************************************************************************************************
 func RecurrenceOtpion(recs ...string) google.Options {

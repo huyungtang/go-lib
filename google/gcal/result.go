@@ -1,15 +1,6 @@
-package google
+package gcal
 
-import (
-	"context"
-	"encoding/json"
-	"net/mail"
-	"time"
-
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/option"
-)
+import base "google.golang.org/api/calendar/v3"
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -19,70 +10,34 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// ConfigOption
-// ****************************************************************************************************************************************
-func ConfigOption(jsonKey, scope string) Options {
-	return func(o *Option) {
-		if config, err := google.ConfigFromJSON([]byte(jsonKey), scope); err == nil {
-			o.Config = config
-		}
-	}
-}
-
-// OAuthTokenOption
-// ****************************************************************************************************************************************
-func OAuthTokenOption(token string) Options {
-	return func(o *Option) {
-		tkn := new(oauth2.Token)
-		if err := json.Unmarshal([]byte(token), tkn); err == nil {
-			o.Token = tkn
-		}
-	}
-}
-
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Option
-// ****************************************************************************************************************************************
-type Option struct {
-	*oauth2.Config
-	*oauth2.Token
-
-	AllDay   bool
-	CalId    string
-	Desc     string
-	Recur    []string
-	Duration time.Duration
-	TZone    string
-	EndTime  time.Time
-
-	MailTo  []*mail.Address
-	MailCc  []*mail.Address
-	MailBcc []*mail.Address
+// result *********************************************************************************************************************************
+type result struct {
+	*base.Event
+	err error
 }
 
-// ApplyOptions
+// EventResult
 // ****************************************************************************************************************************************
-func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
-	opts = append(defa, opts...)
-	for _, optFn := range opts {
-		optFn(o)
-	}
-
-	return o
+type EventResult interface {
+	EventId() string
+	Err() error
 }
 
-// GetClientOption
+// EventId
 // ****************************************************************************************************************************************
-func (o *Option) GetClientOption() option.ClientOption {
-	return option.WithHTTPClient(o.Config.Client(context.Background(), o.Token))
+func (o *result) EventId() string {
+	return o.Event.Id
 }
 
-// Options
+// Err
 // ****************************************************************************************************************************************
-type Options func(*Option)
+func (o *result) Err() (err error) {
+	return o.err
+}
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

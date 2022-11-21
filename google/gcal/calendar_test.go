@@ -2,6 +2,12 @@ package gcal
 
 import (
 	"testing"
+	"time"
+
+	"github.com/huyungtang/go-lib/config"
+	"github.com/huyungtang/go-lib/config/viper"
+	"github.com/huyungtang/go-lib/file"
+	"github.com/huyungtang/go-lib/google"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -15,25 +21,31 @@ import (
 // TestCalendar
 // ****************************************************************************************************************************************
 func TestCalendar(t *testing.T) {
-	// c, err := viper.Init(
-	// 	config.PathOption(file.PathWorking("./../_testing")),
-	// 	config.EnvironmentOption("prod"),
-	// )
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	c, err := viper.Init(
+		config.PathOption(file.PathWorking("./../_testing")),
+		config.EnvironmentOption("prod"),
+	)
+	if err != nil {
+		t.Error(err)
+	}
 
-	// var serv Service
-	// if serv, err = Init(
-	// 	CalendarScopeOption(c.GetString("Calendar.Credential", "")),
-	// 	google.OAuthTokenOption(c.GetString("Calendar.Token", "")),
-	// ); err != nil {
-	// 	t.Error(err)
-	// }
+	var serv Service
+	if serv, err = Init(
+		CalendarScopeOption(c.GetString("Calendar.Credential", "")),
+		google.OAuthTokenOption(c.GetString("Calendar.Token", "")),
+	); err != nil {
+		t.Error(err)
+	}
 
-	// if err = serv.AddEvent("", time.Now()); err != nil {
-	// 	t.Error(err)
-	// }
+	res := serv.AddEvent(
+		"test summary 2",
+		time.Now(),
+		AllDayEventOption(),
+		RecurrenceOtpion("RRULE:FREQ=MONTHLY;COUNT=3;INTERVAL=3", "RRULE:FREQ=YEARLY"),
+	)
+	if res.Err() != nil {
+		t.Error(res.Err())
+	}
 }
 
 // type defineds **************************************************************************************************************************

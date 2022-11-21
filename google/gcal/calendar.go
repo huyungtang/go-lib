@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/huyungtang/go-lib/google"
-	"github.com/huyungtang/go-lib/times"
 	base "google.golang.org/api/calendar/v3"
 )
 
@@ -47,21 +46,48 @@ type service struct {
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
-	AddEvent(string, time.Time, ...google.Options) error
+	AddEvent(string, time.Time, ...google.Options) EventResult
 }
 
 // AddEvent()
 // ****************************************************************************************************************************************
-func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options) (err error) {
-	_, err = o.Events.Insert("primary", &base.Event{
-		Summary: "testing calendar event 2",
-		Start:   &base.EventDateTime{Date: times.Now().Format(times.RCF3339)[0:10]},
-		End:     &base.EventDateTime{Date: times.Now().Add(0, 0, 0, 1).Format(times.RCF3339)[0:10]},
-	}).Do()
+func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options) EventResult {
+	opt := &google.Option{
+		CalId:    o.CalId,
+		Duration: o.Duration,
+	}
+	opt.ApplyOptions(opts,
+		EventEndOption(tm.Add(opt.Duration)),
+	)
 
-	return
+	evt := &base.Event{
+		Summary:     summary,
+		Description: opt.Desc,
+		Recurrence:  opt.Recur,
+		Start:       getEventDateTime(tm, opt.TZone, opt.AllDay),
+		End:         getEventDateTime(opt.EndTime, opt.TZone, opt.AllDay),
+	}
+
+	res := new(result)
+	res.Event, res.err = o.Events.Insert(opt.CalId, evt).Do()
+
+	return res
 }
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+// getEventDateTime ***********************************************************************************************************************
+func getEventDateTime(tm time.Time, tz string, allDay bool) (evt *base.EventDateTime) {
+	evt = &base.EventDateTime{
+		TimeZone: tz,
+	}
+	if allDay {
+		evt.Date = tm.Format(time.RFC3339)[0:10]
+	} else {
+		evt.DateTime = tm.Format(time.RFC3339)
+	}
+
+	return
+}
