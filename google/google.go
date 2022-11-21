@@ -20,7 +20,7 @@ import (
 // TokenFromWeb
 // ****************************************************************************************************************************************
 func TokenFromWeb(option Options) {
-	cfg := ApplyOptions([]Options{option})
+	cfg := new(Option).ApplyOptions([]Options{option})
 	if cfg.Config == nil {
 		return
 	}

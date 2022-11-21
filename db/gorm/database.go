@@ -38,10 +38,10 @@ func Init(dsn string, opts ...db.Options) (sqlDB db.SqlDB, err error) {
 		return nil, errors.New("cannot identify the database driver")
 	}
 
-	opts = append([]db.Options{
-		db.SkipDefaultTransactionOption(true),
-	}, opts...)
-	cfg := db.ApplyOptions(opts)
+	cfg := new(db.Option).
+		ApplyOptions(opts,
+			db.SkipDefaultTransactionOption(true),
+		)
 
 	var conn *base.DB
 	if conn, err = base.Open(dial, &base.Config{

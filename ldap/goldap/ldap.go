@@ -31,10 +31,10 @@ func Init(dsn string, opts ...ldap.Options) (client ldap.Client, err error) {
 	}
 
 	pswd, _ := u.User.Password()
-	opts = append([]ldap.Options{
-		ldap.BindRequestOption(u.User.Username(), pswd),
-	}, opts...)
-	cfg := ldap.ApplyOptions(opts)
+	cfg := new(ldap.Option).
+		ApplyOptions(opts,
+			ldap.BindRequestOption(u.User.Username(), pswd),
+		)
 	if _, err = conn.SimpleBind(cfg.SimpleBindRequest); err != nil {
 		return
 	}
@@ -93,11 +93,11 @@ func (o *database) GetGroups(groups []string, opts ...ldap.Options) (rtn ldap.Re
 // Search
 // ****************************************************************************************************************************************
 func (o *database) Search(filter string, opts ...ldap.Options) (rtn ldap.Result, err error) {
-	opts = append([]ldap.Options{
-		ldap.BaseDNOption(o.Option.BaseDN),
-		ldap.ScopeWholeSubtreeOption,
-	}, opts...)
-	cfg := ldap.ApplyOptions(opts)
+	cfg := new(ldap.Option).
+		ApplyOptions(opts,
+			ldap.BaseDNOption(o.Option.BaseDN),
+			ldap.ScopeWholeSubtreeOption,
+		)
 	req := base.NewSearchRequest(
 		cfg.BaseDN,
 		cfg.Scope,

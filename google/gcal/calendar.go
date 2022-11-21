@@ -2,10 +2,11 @@ package gcal
 
 import (
 	"context"
+	"time"
 
 	"github.com/huyungtang/go-lib/google"
 	"github.com/huyungtang/go-lib/times"
-	"google.golang.org/api/calendar/v3"
+	base "google.golang.org/api/calendar/v3"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -19,13 +20,18 @@ import (
 // Init
 // ****************************************************************************************************************************************
 func Init(opts ...google.Options) (serv Service, err error) {
-	var s *calendar.Service
-	cfg := google.ApplyOptions(opts)
-	if s, err = calendar.NewService(context.Background(), cfg.GetClientOption()); err != nil {
+	cfg := new(google.Option).
+		ApplyOptions(opts,
+			CalendarIdOption("primary"),
+			EventDurationOption(time.Hour),
+		)
+
+	var cal *base.Service
+	if cal, err = base.NewService(context.Background(), cfg.GetClientOption()); err != nil {
 		return
 	}
 
-	return &service{s}, nil
+	return &service{cal, cfg}, nil
 }
 
 // type defineds **************************************************************************************************************************
@@ -34,23 +40,23 @@ func Init(opts ...google.Options) (serv Service, err error) {
 
 // service ********************************************************************************************************************************
 type service struct {
-	*calendar.Service
+	*base.Service
+	*google.Option
 }
 
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
-	// TODO: Not Implemented
-	AddEvent() error
+	AddEvent(string, time.Time, ...google.Options) error
 }
 
 // AddEvent()
 // ****************************************************************************************************************************************
-func (o *service) AddEvent() (err error) {
-	_, err = o.Events.Insert("primary", &calendar.Event{
+func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options) (err error) {
+	_, err = o.Events.Insert("primary", &base.Event{
 		Summary: "testing calendar event 2",
-		Start:   &calendar.EventDateTime{DateTime: times.Now().Format(times.RCF3339), TimeZone: "Asia/Taipei"},
-		End:     &calendar.EventDateTime{DateTime: times.Now().Add(0, 0, 0, 1).Format(times.RCF3339), TimeZone: "Asia/Taipei"},
+		Start:   &base.EventDateTime{Date: times.Now().Format(times.RCF3339)[0:10]},
+		End:     &base.EventDateTime{Date: times.Now().Add(0, 0, 0, 1).Format(times.RCF3339)[0:10]},
 	}).Do()
 
 	return

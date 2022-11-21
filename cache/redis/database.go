@@ -54,10 +54,10 @@ func (o *database) Exists(key string) bool {
 // Get
 // ****************************************************************************************************************************************
 func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err error) {
-	opts = append([]cache.Options{
-		cache.KeepTTLOption,
-	}, opts...)
-	cfg := cache.ApplyOptions(opts)
+	cfg := new(cache.Option).
+		ApplyOptions(opts,
+			cache.KeepTTLOption,
+		)
 
 	ctx := context.Background()
 	if o.Exists(key) {
@@ -93,7 +93,7 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 // Set
 // ****************************************************************************************************************************************
 func (o *database) Set(key string, val interface{}, opts ...cache.Options) (err error) {
-	cfg := cache.ApplyOptions(opts)
+	cfg := new(cache.Option).ApplyOptions(opts)
 	args := base.SetArgs{
 		Mode: cfg.Override,
 	}

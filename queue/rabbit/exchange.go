@@ -30,7 +30,7 @@ type exchange struct {
 // Publish
 // ****************************************************************************************************************************************
 func (o *exchange) Publish(routing string, opts ...queue.Options) (err error) {
-	cfg := queue.ApplyOptions(opts)
+	cfg := new(queue.Option).ApplyOptions(opts)
 	for _, msg := range cfg.Messages {
 		if err = o.Channel.
 			PublishWithContext(
@@ -51,10 +51,10 @@ func (o *exchange) Publish(routing string, opts ...queue.Options) (err error) {
 // QueueBind
 // ****************************************************************************************************************************************
 func (o *exchange) QueueBind(name string, opts ...queue.Options) (err error) {
-	opts = append([]queue.Options{
-		queue.DurableOption(true),
-	}, opts...)
-	cfg := queue.ApplyOptions(opts)
+	cfg := new(queue.Option).
+		ApplyOptions(opts,
+			queue.DurableOption(true),
+		)
 
 	if _, err = o.Channel.QueueDeclare(name, cfg.Durable, cfg.AutoDelete, cfg.Exclusive, cfg.NoWait, cfg.Arguments); err != nil {
 		return
@@ -72,11 +72,11 @@ func (o *exchange) QueueBind(name string, opts ...queue.Options) (err error) {
 // Consume
 // ****************************************************************************************************************************************
 func (o *exchange) Consume(queueName string, errChan chan<- error, opts ...queue.Options) {
-	opts = append([]queue.Options{
-		queue.AutoAckOption(true),
-		queue.HandlerOption(o.handlers...),
-	}, opts...)
-	cfg := queue.ApplyOptions(opts)
+	cfg := new(queue.Option).
+		ApplyOptions(opts,
+			queue.AutoAckOption(true),
+			queue.HandlerOption(o.handlers...),
+		)
 
 	msgs, err := o.Channel.
 		Consume(

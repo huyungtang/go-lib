@@ -30,7 +30,7 @@ func Init(hostURL string, opts ...Options) (client Client, err error) {
 	}, opts...)
 
 	return &context{
-		Option: ApplyOptions(opts),
+		Option: new(Option).ApplyOptions(opts),
 	}, nil
 }
 

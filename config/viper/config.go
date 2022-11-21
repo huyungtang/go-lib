@@ -29,10 +29,10 @@ func Init(opts ...config.Options) (cfgs config.Config, err error) {
 	v.AutomaticEnv()
 	v.AddConfigPath(".")
 
-	opts = append([]config.Options{
-		config.NameOption("config"),
-	}, opts...)
-	cfg := config.ApplyOptions(opts)
+	cfg := new(config.Option).
+		ApplyOptions(opts,
+			config.NameOption("config"),
+		)
 
 	v.SetConfigName(cfg.Name)
 	v.SetConfigType(cfg.FileType)
@@ -117,10 +117,10 @@ func (o *database) GetStruct(dto interface{}, opts ...config.Options) (err error
 		return errors.New("target is not a struct")
 	}
 
-	opts = append([]config.Options{
-		config.PathOption(""),
-	}, opts...)
-	cfg := config.ApplyOptions(opts)
+	cfg := new(config.Option).
+		ApplyOptions(opts,
+			config.PathOption(""),
+		)
 
 	val := reflect.ValueOf(dto)
 	for i := 0; i < tp.NumField(); i++ {

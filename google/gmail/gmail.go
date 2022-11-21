@@ -19,7 +19,7 @@ import (
 // ****************************************************************************************************************************************
 func Init(opts ...google.Options) (serv Service, err error) {
 	var s *base.Service
-	cfg := google.ApplyOptions(opts)
+	cfg := new(google.Option).ApplyOptions(opts)
 	if s, err = base.NewService(context.Background(), cfg.GetClientOption()); err != nil {
 		return
 	}

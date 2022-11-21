@@ -23,7 +23,7 @@ func Init(opts ...file.Options) (event Watcher, err error) {
 		return
 	}
 
-	cfg := file.ApplyOptions(opts)
+	cfg := new(file.Option).ApplyOptions(opts)
 	if len(cfg.Path) == 0 {
 		return nil, errors.New("no path to watch")
 	}

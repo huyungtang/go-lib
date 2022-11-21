@@ -32,7 +32,7 @@ func Init(filename string, opts ...file.Options) (r Reader, err error) {
 
 	return &reader{
 		File:   f,
-		Option: file.ApplyOptions(opts),
+		Option: new(file.Option).ApplyOptions(opts),
 	}, nil
 }
 

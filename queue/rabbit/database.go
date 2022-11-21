@@ -21,7 +21,7 @@ func Init(dsn string, opts ...queue.Options) (db queue.Database, err error) {
 		return
 	}
 
-	cfg := queue.ApplyOptions(opts)
+	cfg := new(queue.Option).ApplyOptions(opts)
 
 	return &database{conn, cfg.Handlers}, nil
 }
@@ -45,13 +45,13 @@ func (o *database) Exchange(name string, opts ...queue.Options) (exg queue.Excha
 		return
 	}
 
-	opts = append([]queue.Options{
-		queue.NameOption(name),
-		queue.ExchangeDirect,
-		queue.DurableOption(true),
-		queue.HandlerOption(o.handlers...),
-	}, opts...)
-	cfg := queue.ApplyOptions(opts)
+	cfg := new(queue.Option).
+		ApplyOptions(opts,
+			queue.NameOption(name),
+			queue.ExchangeDirect,
+			queue.DurableOption(true),
+			queue.HandlerOption(o.handlers...),
+		)
 	if err = ch.ExchangeDeclare(cfg.Name, cfg.Kind, cfg.Durable, cfg.AutoDelete, cfg.Internal, cfg.NoWait, cfg.Arguments); err != nil {
 		return
 	}

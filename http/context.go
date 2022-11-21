@@ -40,7 +40,7 @@ func (o *context) Get(path string, opts ...Options) {
 // ****************************************************************************************************************************************
 func (o *context) Post(path string, opts ...Options) {
 	ctx := reflect.Clone(o).(*context)
-	opts = append(opts, urlencodedOption)
+	ctx.ApplyOptions(opts, urlencodedOption)
 	ctx.requestCore(base.MethodGet, path, opts)
 }
 
@@ -92,8 +92,7 @@ func (o *context) requestCore(method, path string, opts []Options) {
 		sc.Next()
 	})
 
-	opts = append([]Options{handler}, opts...)
-	o.Option = ApplyOptions(opts, o.Option)
+	o.Option.ApplyOptions(opts, handler)
 	o.Handler = -1
 	o.Next()
 }

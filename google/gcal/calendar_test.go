@@ -31,7 +31,7 @@ func TestCalendar(t *testing.T) {
 	// 	t.Error(err)
 	// }
 
-	// if err = serv.AddEvent(); err != nil {
+	// if err = serv.AddEvent("", time.Now()); err != nil {
 	// 	t.Error(err)
 	// }
 }

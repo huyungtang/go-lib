@@ -29,10 +29,10 @@ func Init(filename string, opts ...file.Options) (w Writer, err error) {
 		return
 	}
 
-	opts = append([]file.Options{
-		file.Override,
-	}, opts...)
-	cfg := file.ApplyOptions(opts)
+	cfg := new(file.Option).
+		ApplyOptions(opts,
+			file.Override,
+		)
 
 	var file *os.File
 	if file, err = os.OpenFile(filename, cfg.Flag, os.ModePerm); err != nil {

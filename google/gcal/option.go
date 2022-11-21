@@ -1,6 +1,8 @@
 package gcal
 
 import (
+	"time"
+
 	"github.com/huyungtang/go-lib/google"
 	"google.golang.org/api/calendar/v3"
 )
@@ -17,6 +19,54 @@ import (
 // ****************************************************************************************************************************************
 func CalendarScopeOption(jsonKey string) google.Options {
 	return google.ConfigOption(jsonKey, calendar.CalendarScope)
+}
+
+// AllDayEventOption
+// ****************************************************************************************************************************************
+func AllDayEventOption() google.Options {
+	return func(o *google.Option) {
+		o.AllDay = true
+	}
+}
+
+// CalendarIdOption
+// ****************************************************************************************************************************************
+func CalendarIdOption(id string) google.Options {
+	return func(o *google.Option) {
+		o.CalId = id
+	}
+}
+
+// DescriptionOption
+// ****************************************************************************************************************************************
+func DescriptionOption(desc string) google.Options {
+	return func(o *google.Option) {
+		o.Desc = desc
+	}
+}
+
+// EventDurationOption
+// ****************************************************************************************************************************************
+func EventDurationOption(dur time.Duration) google.Options {
+	return func(o *google.Option) {
+		o.Duration = dur
+	}
+}
+
+// RecurrenceOtpion
+// ****************************************************************************************************************************************
+func RecurrenceOtpion(recs ...string) google.Options {
+	return func(o *google.Option) {
+		o.Recur = append(o.Recur, recs...)
+	}
+}
+
+// TimezoneOption
+// ****************************************************************************************************************************************
+func TimezoneOption(tz string) google.Options {
+	return func(o *google.Option) {
+		o.TZone = tz
+	}
 }
 
 // type defineds **************************************************************************************************************************
