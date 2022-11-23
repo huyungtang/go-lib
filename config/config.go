@@ -22,6 +22,8 @@ type Config interface {
 	GetString(string, string) string
 	GetStringSlice(string, []string) []string
 	GetStruct(interface{}, ...Options) error
+
+	MergeInConfig(...Options) error
 }
 
 // private functions **********************************************************************************************************************

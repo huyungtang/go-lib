@@ -46,30 +46,32 @@ type service struct {
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
-	AddEvent(string, time.Time, ...google.Options) EventResult
+	AddEvent(string, time.Time, ...google.Options) google.EventResult
 }
 
 // AddEvent()
 // ****************************************************************************************************************************************
-func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options) EventResult {
+func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options) google.EventResult {
 	opt := &google.Option{
-		CalId:    o.CalId,
-		Duration: o.Duration,
+		CalendarId:   o.CalendarId,
+		Duration:     o.Duration,
+		Transparency: "transparent",
 	}
 	opt.ApplyOptions(opts,
 		EventEndOption(tm.Add(opt.Duration)),
 	)
 
 	evt := &base.Event{
-		Summary:     summary,
-		Description: opt.Desc,
-		Recurrence:  opt.Recur,
-		Start:       getEventDateTime(tm, opt.TZone, opt.AllDay),
-		End:         getEventDateTime(opt.EndTime, opt.TZone, opt.AllDay),
+		Summary:      summary,
+		Description:  opt.Description,
+		Recurrence:   opt.Recurrency,
+		Start:        getEventDateTime(tm, opt.Timezone, opt.AllDay),
+		End:          getEventDateTime(opt.EndTime, opt.Timezone, opt.AllDay),
+		Transparency: opt.Transparency,
 	}
 
 	res := new(result)
-	res.Event, res.err = o.Events.Insert(opt.CalId, evt).Do()
+	res.Event, res.err = o.Events.Insert(opt.CalendarId, evt).Do()
 
 	return res
 }

@@ -52,7 +52,8 @@ func Init(opts ...config.Options) (cfgs config.Config, err error) {
 	}
 
 	return &database{
-		Viper: v,
+		Viper:  v,
+		Option: cfg,
 	}, nil
 }
 
@@ -63,6 +64,7 @@ func Init(opts ...config.Options) (cfgs config.Config, err error) {
 // database *******************************************************************************************************************************
 type database struct {
 	*viper.Viper
+	*config.Option
 }
 
 // GetBool
@@ -169,6 +171,21 @@ func (o *database) GetStruct(dto interface{}, opts ...config.Options) (err error
 	}
 
 	return
+}
+
+// MergeInConfig
+// ****************************************************************************************************************************************
+func (o *database) MergeInConfig(opts ...config.Options) (err error) {
+	cfg := new(config.Option).
+		ApplyOptions(
+			opts,
+			config.NameOption(o.Name),
+		)
+	for _, env := range cfg.Envs {
+		o.Viper.SetConfigName(strings.Format("%s-%s", cfg.Name, env))
+	}
+
+	return o.Viper.MergeInConfig()
 }
 
 // getCore ********************************************************************************************************************************

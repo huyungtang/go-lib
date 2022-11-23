@@ -50,13 +50,14 @@ type Option struct {
 	*oauth2.Config
 	*oauth2.Token
 
-	AllDay   bool
-	CalId    string
-	Desc     string
-	Recur    []string
-	Duration time.Duration
-	TZone    string
-	EndTime  time.Time
+	AllDay       bool
+	CalendarId   string
+	Description  string
+	Recurrency   []string
+	Duration     time.Duration
+	Timezone     string
+	EndTime      time.Time
+	Transparency string
 
 	MailTo  []*mail.Address
 	MailCc  []*mail.Address

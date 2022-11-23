@@ -33,7 +33,7 @@ func AllDayEventOption() google.Options {
 // ****************************************************************************************************************************************
 func CalendarIdOption(id string) google.Options {
 	return func(o *google.Option) {
-		o.CalId = id
+		o.CalendarId = id
 	}
 }
 
@@ -41,7 +41,7 @@ func CalendarIdOption(id string) google.Options {
 // ****************************************************************************************************************************************
 func DescriptionOption(desc string) google.Options {
 	return func(o *google.Option) {
-		o.Desc = desc
+		o.Description = desc
 	}
 }
 
@@ -50,6 +50,14 @@ func DescriptionOption(desc string) google.Options {
 func EventDurationOption(dur time.Duration) google.Options {
 	return func(o *google.Option) {
 		o.Duration = dur
+	}
+}
+
+// EventBusyOption
+// ****************************************************************************************************************************************
+func EventBusyOption() google.Options {
+	return func(o *google.Option) {
+		o.Transparency = "opaque"
 	}
 }
 
@@ -65,7 +73,7 @@ func EventEndOption(tm time.Time) google.Options {
 // ****************************************************************************************************************************************
 func RecurrenceOtpion(recs ...string) google.Options {
 	return func(o *google.Option) {
-		o.Recur = append(o.Recur, recs...)
+		o.Recurrency = append(o.Recurrency, recs...)
 	}
 }
 
@@ -73,7 +81,7 @@ func RecurrenceOtpion(recs ...string) google.Options {
 // ****************************************************************************************************************************************
 func TimezoneOption(tz string) google.Options {
 	return func(o *google.Option) {
-		o.TZone = tz
+		o.Timezone = tz
 	}
 }
 
