@@ -2,6 +2,7 @@ package gmail
 
 import (
 	"net/mail"
+	"os"
 
 	"github.com/huyungtang/go-lib/google"
 	"google.golang.org/api/gmail/v1"
@@ -12,9 +13,12 @@ import (
 // ****************************************************************************************************************************************
 
 const (
-	mailTo  mailReceiver = "to"
-	mailCc  mailReceiver = "cc"
-	mailBcc mailReceiver = "bcc"
+	headerSubject string = "Subject"
+	headerContent string = "Content-Type"
+	headerHtml    string = "text/html; charset=utf-8"
+	headerSendTos string = "To"
+	headerSendCcs string = "Cc"
+	headerSendBcc string = "Bcc"
 )
 
 // public functions ***********************************************************************************************************************
@@ -27,46 +31,69 @@ func GmailModifyScopeOption(jsonKey string) google.Options {
 	return google.ConfigOption(jsonKey, gmail.GmailModifyScope)
 }
 
-// MailSendToOption
+// AttachOption
 // ****************************************************************************************************************************************
-func MailSendToOption(addr, name string) google.Options {
-	return mailReceiverOption(mailTo, addr, name)
+func AttachOption(filename string) google.Options {
+	return func(o *google.Option) {
+		o.AttachOnce.Do(func() {
+			o.Attach = make(map[string][]byte)
+		})
+
+		if file, err := os.Open(filename); err == nil {
+			defer file.Close()
+
+			info, _ := file.Stat()
+			buff := make([]byte, info.Size())
+			file.Read(buff)
+			o.Attach[info.Name()] = buff
+		}
+	}
 }
 
-// MailSendCcOption
+// SubjectOption
 // ****************************************************************************************************************************************
-func MailSendCcOption(addr, name string) google.Options {
-	return mailReceiverOption(mailCc, addr, name)
+func SubjectOption(subject string) google.Options {
+	return func(o *google.Option) {
+		o.Header.Set(headerSubject, bEncode(subject))
+	}
 }
 
-// MailSendBccOption
+// SendToOption
 // ****************************************************************************************************************************************
-func MailSendBccOption(addr, name string) google.Options {
-	return mailReceiverOption(mailBcc, addr, name)
+func SendToOption(addr, name string) google.Options {
+	return func(o *google.Option) {
+		o.Header.Add(headerSendTos, (&mail.Address{Name: name, Address: addr}).String())
+	}
+}
+
+// SendCcOption
+// ****************************************************************************************************************************************
+func SendCcOption(addr, name string) google.Options {
+	return func(o *google.Option) {
+		o.Header.Add(headerSendCcs, (&mail.Address{Name: name, Address: addr}).String())
+	}
+}
+
+// SendBccOption
+// ****************************************************************************************************************************************
+func SendBccOption(addr, name string) google.Options {
+	return func(o *google.Option) {
+		o.Header.Add(headerSendBcc, (&mail.Address{Name: name, Address: addr}).String())
+	}
+}
+
+// BodyOption
+// ****************************************************************************************************************************************
+func BodyOption(body string) google.Options {
+	return func(o *google.Option) {
+		o.Body = []byte(body)
+	}
 }
 
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// mailReceiver ***************************************************************************************************************************
-type mailReceiver = string
-
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
-
-// mailReceiverOption *********************************************************************************************************************
-func mailReceiverOption(key mailReceiver, addr, name string) google.Options {
-	return func(o *google.Option) {
-		m := &mail.Address{Name: name, Address: addr}
-		switch key {
-		case mailTo:
-			o.MailTo = append(o.MailTo, m)
-		case mailCc:
-			o.MailCc = append(o.MailCc, m)
-		case mailBcc:
-			o.MailBcc = append(o.MailBcc, m)
-		}
-	}
-}

@@ -2,6 +2,11 @@ package gmail
 
 import (
 	"testing"
+
+	"github.com/huyungtang/go-lib/config"
+	"github.com/huyungtang/go-lib/config/viper"
+	"github.com/huyungtang/go-lib/file"
+	"github.com/huyungtang/go-lib/google"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -15,53 +20,48 @@ import (
 // TestSendMail
 // ****************************************************************************************************************************************
 func TestSendMail(t *testing.T) {
-	// c, err := viper.Init(
-	// 	config.PathOption(file.PathWorking("_testing")),
-	// 	config.EnvironmentOption("prod"),
-	// )
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	c, err := viper.Init(
+		config.PathOption(file.PathWorking("./../_testing")),
+		config.EnvironmentOption("prod"),
+	)
+	if err != nil {
+		t.Error(err)
+	}
 
-	// opt := new(Option)
-	// cfg.ApplyOptions([]Options{
-	// 	GmailModifyScopeOption(c.GetString("Mail.Credential", "")),
-	// 	OAuthTokenOption(c.GetString("Mail.Token", "")),
-	// })
+	var mail Service
+	if mail, err = Init(
+		GmailModifyScopeOption(c.GetString("Mail.Credential", "")),
+		google.OAuthTokenOption(c.GetString("Mail.Token", "")),
+	); err != nil {
+		t.Error(err)
+	}
 
-	// serv, err := gmail.NewService(context.Background(), opt.GetClientOption())
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// to1 := &mail.Address{Name: "morris", Address: "huyungtang@Gmail.com"}
-	// to2 := &mail.Address{Name: "hu_yt", Address: "hu_yt@hotmail.com"}
-	// // tos := []string{to1.String(), to2.String()}
+	body := `<!doctype html><html lang=en-us><head><title>永盛車電 - 全球電動車發展現況</title><meta property="og:title" content="全球電動車發展現況"><meta property="og:description" content="
+	電動車銷售量占全球電動車市場 2.2%
+	電動車已是汽車產業未來發展趨勢，但大多數車廠和一階OEM在銷售電動車和零組件業務上並沒有獲利。主因是電動車市場經濟規模尚小，製造成本仍高於人們願意為之支付的價格、充電便利等因素影響買氣。對比去年同期，2019 年 11 月電動車銷售量下跌 26%，占全球總汽車市場 2.2%。
+	"><meta property="og:type" content="article"><meta property="og:url" content="https://news.autotronic.com.tw/angosm1quwzxmsrb/"><meta property="article:section" content="industry"><meta property="article:published_time" content="2020-01-30T10:00:00+08:00"><meta property="article:modified_time" content="2022-02-15T16:09:42+08:00"><meta name=description content="汽車電子產品設計研發部"><meta name=keywords content="電動車,特斯拉,永盛車電,鋰電池,自駕車,電池,排放法規,WLTP"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta http-equiv=x-ua-compatible content="ie=edge"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4ECYDT0H4D"></script>
+	<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','G-4ECYDT0H4D')</script><link rel=icon type=image/png href=https://news.autotronic.com.tw/images/favicon.png><link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel=stylesheet><link rel=stylesheet type=text/css href=https://news.autotronic.com.tw/css/style.min.4af33fcaa12b367786bab33b272970f422cbb4cc38fc781175552578924a4d0a.css integrity="sha256-SvM/yqErNneGurM7Jylw9CLLtMw4/HgRdVUleJJKTQo="><link rel=stylesheet type=text/css href=https://news.autotronic.com.tw/css/icons.css></head><body><nav class="navbar is-fresh is-transparent no-shadow navbar-header" role=navigation aria-label="main navigation"><div class=container><div class=navbar-brand><a class=navbar-item href=https://news.autotronic.com.tw/><img src=https://news.autotronic.com.tw/images/logos/title.svg alt width=112 height=28></a>
+	<a role=button class=navbar-burger aria-label=menu aria-expanded=false data-target=navbar-menu><span aria-hidden=true></span>
+	<span aria-hidden=true></span>
+	<span aria-hidden=true></span></a></div><div id=navbar-menu class="navbar-menu is-static"><div class=navbar-end><div class="navbar-item has-dropdown is-hoverable"><a class=navbar-link>精選文章</a><div class=navbar-dropdown><ul class=link-list><li><a href=https://news.autotronic.com.tw/industry/ class=navbar-item>產業分析</a></li><li><a href=https://news.autotronic.com.tw/activity/ class=navbar-item>活動訊息</a></li><li><a href=https://news.autotronic.com.tw/avec/ class=navbar-item>電控概論</a></li></ul></div></div><a href=https://news.autotronic.com.tw/branches/ class="navbar-item is-secondary">營業據點</a>
+	<a href=https://www.autotronic.com.tw/ class="navbar-item is-secondary" target=_blank>永盛官網</a>
+	<a href=https://tech.autotronic.com.tw/ class="navbar-item is-secondary" target=_blank>技術聯盟</a></div></div></div></nav><div id=preloader><div id=status></div></div><div class=container><section class=section><div class=columns><div class="column is-centered-tablet-portrait"><nav class="breadcrumb is-right" aria-label=breadcrumbs><ul><li><a href=https://news.autotronic.com.tw/ class=has-text-grey>首頁</a></li><li><a href=https://news.autotronic.com.tw/industry/ class=has-text-info>產業分析</a></li></ul></nav><h1 class="title section-title">全球電動車發展現況</h1><h5 class="subtitle is-5 is-muted"></h5><div class=divider></div></div></div><div class=content><blockquote><h4 id=電動車銷售量占全球電動車市場-22>電動車銷售量占全球電動車市場 2.2%</h4><p>電動車已是汽車產業未來發展趨勢，但大多數車廠和一階OEM在銷售電動車和零組件業務上並沒有獲利。主因是電動車市場經濟規模尚小，製造成本仍高於人們願意為之支付的價格、充電便利等因素影響買氣。對比去年同期，2019 年 11 月電動車銷售量下跌 26%，占全球總汽車市場 2.2%。</p></blockquote><p>電動車已是汽車產業未來發展趨勢，但大多數車廠和一階OEM在銷售電動車和零組件業務上並沒有獲利。主因是電動車市場經濟規模尚小，製造成本仍高於人們願意為之支付的價格、充電便利等因素影響買氣。對比去年同期，2019 年 11 月電動車銷售量下跌 26%，占全球總汽車市場 2.2%（資料來源：<a href=https://insideevs.com class=has-text-info target=_blank>
+	https://insideevs.com
+	</a>）。企業目前很難攤平早期投入研發及模具的成本，主要是面對日趨嚴格的燃料經濟和排放政策，解決產品技術和商業模式的要素，並搶先在專利上布局卡位，使他們在電動車世代來臨時，優先確保通路及先機。科技人陸續放棄打造整輛電動車計畫，發展技術轉向以資訊娛樂系統，以及自動駕駛軟體和大數據導航圖資應用等。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image01.png><div class="has-text-grey is-size-7"></div></div></section><h3 id=電動車銷售前景一片光明>電動車銷售前景一片光明</h3><p>消費者比以往任何時候都更願意考慮購買電動汽車，並且銷量正在快速增長。儘管基數不多，但大多數主要市場近年來一直保持50％至60％的增長率。愈來愈多的汽車製造商湧現出更多新車型，性能和可靠性方面也在不斷提高，因此消費者更容易找到合適的電動車。主要汽車市場（中國，歐盟和美國）的法規要求汽車製造商生產更多的電動車，並鼓勵消費者購買電動車。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image02.png><div class="has-text-grey is-size-7">資料來源：彭博新能源財經（BNEF）</div></div></section><h3 id=營業額降低但卻能獲利>營業額降低但卻能獲利</h3><p>電動車龍頭特斯拉，2017營收為117.59億美元，汽車業務96.41億美元，淨損22.41億美元；2018營收為214.61億美元，汽車業務185.15億美元，淨損10.63億美元。2019終結前二季虧損後，第三季財報雖繳出獲利成績，淨利有1.43億美元，但和2018同期3.11億美元，衰退54%。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image03.jpeg style=width:80%><div class="has-text-grey is-size-7">資料來源：特斯拉</div></div></section><p>2019年3月1日，特斯拉無預警的將部份車款全球大降價，試圖以價制量，汽車銷售量增加，已連續二季銷售量站穩9萬輛，單季邁向10萬大關。但總營業額受降價影響而下降，儘管2019第三季虧轉盈，但對比去年同期營收衰退8%，這也是特斯拉成立以來首見，轉盈主要是製造成本及營業費用降低所賜。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image04.png style=width:40%><div class="has-text-grey is-size-7"></div></div></section><p>近年來特斯拉大舉關閉實體門市以及裁員，轉而逐步進行網路銷售，執行長馬斯克（Elon Musk）還公布一項嚴格的撙節成本計畫：他和財務長親自審查公司每筆支出，在支出表上由財務長逐頁審查簽名，在厲行節約下，加上電池成本降低，2019第三季特斯拉的營運成本為51.1億美元以及營運費用9.3億美元，雙雙降到今年以來最低。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image05.jpeg style=width:80%><div class="has-text-grey is-size-7">資料來源：特斯拉</div></div></section><h3 id=電池價格每年10以上降幅>電池價格每年10%以上降幅</h3><p>彭博新能源財經（BNEF）發布最新鋰離子電池價格調查結果，發現2019年產業加權平均電池組價格已經降至每千瓦時156美元。這比2018年的平均價格180美元降低了13％以上，BNEF預計電池成本將繼續降低，到2023年可能達到$100 / kWh。每千瓦時100美元也是特斯拉一直努力不斷改進電池組設計，進一步降低電池成本所設定的目標。</p><p>BNEF在2019年12月發布了第十次電池價格調查的結果，該系列於2012年開始，並回顧了最早於2010年的數據，BNEF年度價格調查已成為產業的重要基準。值得注意的是，從2010年至2019年，電池組的加權平均價格降了87％，且每年超過10%降幅。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image06.jpeg><div class="has-text-grey is-size-7">電池成本以每年超過 10% 降幅</div></div></section><h3 id=相比特斯拉蔚來還未擺脫虧損>相比特斯拉，蔚來還未擺脫虧損</h3><p>在全球最大電動車市場中國，有號稱中國特斯拉的蔚來汽車 (NYSE : NIO)，公布2019第二季財報淨損32.9億人民幣（約4.65億美元），較去年同期大幅擴大83%，第三季營收雖與第二季增長21.8%，與去年同期（2018 Q3）增長25%，來到18.368億人民幣（約2.57億美元），但還是淨損25.217億人民幣（約3.528億美元）。</p><p>結至2019年9月30日，蔚來汽車持有的現金、現金等價物、限制用途現金和短期投資總額為19.607億人民幣（約合2.743億美元），已不足20億人民幣。為緩解財務危機，蔚來汽車2018年9月底前計畫將透過私募向騰訊控股（Tencent Holdings Limited）有限公司的關聯公司與李斌發行可轉換債券，藉此募集 2 億美元資金。財務長謝東螢（Louis Hsieh）表示，已經開始組織重整，將部分非核心業務分割出去，降低僱用的員工數量。</p><h3 id=成本提高壓縮各大車廠利潤>成本提高壓縮各大車廠利潤</h3><p>德國戴姆勒賓士公司公布2019第三季財報，淨利雖有16.9億歐元，但相比去年同期大減21.4%。歸咎因柴油車輛召回軟體更新（先前作弊軟體通過排氣檢驗），加上賓士將在2039年達成全面零排放（Ambition 2039 計畫），以及歐洲新排放法規WLTP已在2019年9月1 日生效，力求減排溫室氣體所付出的高成本，開發電動車的巨額投資，龐大的支出對戴姆勒獲利造成壓縮。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image07.png style=width:80%><div class="has-text-grey is-size-7"></div></div></section><p>許多汽車製造商都面臨獲利下降問題，先期投入的研發費用以及電池成本是影響利潤的最大因素。隨著電池價格的下降，充電及續航技術問題解決，電動車的經濟會從紅色轉向綠色。當前的想法認為，車廠將繼續投入及生產電動車，主要是因為面對嚴格的燃料經濟和排放政策，電動車幾乎沒有替代選擇，並且將由車廠及OEM供應鏈同時吸收損失。</p><h3 id=電動車真的環保嗎>電動車真的環保嗎？</h3><p>聯合國國際資源專家小組2017年報告指出，若在燃煤火力發電占比超過7成的國家推行汽車全面電動化，反而會增加空污。然而台灣目前燃煤火力發電占比約4成，且政策傾向於持續調降，2025年目標將降至3成，因此全面電動化之後的碳排放與空污控制還是值得期待的。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image08.jpeg style=width:70%><div class="has-text-grey is-size-7">圖片來源：永盛車電</div></div></section><p>可是電動車並非只有電力來源的問題，電動車的永磁同步馬達（PMSM）內永磁磁鐵需要使用稀土元素，開採稀土會造成嚴重環境汙染。2018全球汽車銷售量約8,600萬輛，但電動車只占了其中170萬輛左右。這已經導致稀土元素價格上漲，若需求持續增加，稀土元素開採規模擴大，那麼接踵而來的污染問題便難以估量了。</p><p>鋰離子電池回收則是另外一個大問題，台灣目前廢棄電池大多送至境外處理。現今廢鋰離子電池回收技術分乾式處理（火法冶煉）與濕式處理（濕法冶金）兩大類，主要對正極板中鋰、鈷、鎳、錳等金屬元素的萃取提煉，而非以金屬氧化物回收再利用為考量。但就算先進歐盟國家，電池回收率也不到1成，剩餘9成的廢棄電池恐怕隨意堆置，若任意棄置掩埋，會導致土壤、水源的嚴重污染，對環境的破壞不可小覷。</p><h3 id=科技人發展電動車方向已改變>科技人發展電動車方向已改變</h3><p>儘管電動車（EV）增長前景光明，先前許多國際大廠大動作要跨足電動車領域，宣布要打造電動車的電子大廠卻開始打退堂鼓。以蘋果（Apple）來說，先前曾經傳出「泰坦計畫」（Project Titan），要在 2019 年推出自家電動車，但2019 年都過去了，卻無消無息，事實上蘋果在幾年前就改變電動車領域的發展方向，不是打造一輛完整的車，而是不斷在電動車領域申請專利，但是專利大多集中在資訊娛樂系統，以及自動駕駛軟體。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image09.jpeg style=width:80%><div class="has-text-grey is-size-7">蘋果在智慧車輛技術發展。（圖／翻攝自carwow）</div></div></section><p>Google 於 2016 年將自駕車部門獨立成為 Waymo，Waymo 也放棄自己打造自駕車，2019 年 Waymo 在亞利桑那州開始試營運自駕計程車，不過使用的是第三方車廠的車改造。核心及專利技術轉向自駕軟體以及大數據導航圖資應用。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image10.jpeg style=width:80%><div class="has-text-grey is-size-7">Google 在自動駕駛技術發展。（圖／翻攝自by Grendelkhan）</div></div></section><p>英國吸塵器大廠戴森（Dyson），原本對電動車也有雄圖大略，2015 年購併固態電池新創事業 Sakti3 後，原本有 20 億英鎊的「戴森計畫」，包括 2018 年在新加坡建廠，以及打造和對手不同的電動車。到 2019 年 10 月，戴森也打退堂鼓，表示儘管研發極盡努力，也打造出一款出色的電動車，但卻無法打造出商業可獲利的車款。電動車銷量雖在攀升，但製造成本仍高於人們願意為之支付的價格，雖已停止原計劃於2021年在新加坡投入整車生產，但投入資金中約有10億英鎊在開發新電池技術，這項投資仍在進行中。</p><section class=section><div class=has-text-centered><img src=https://news.autotronic.com.tw/images/posts/20200130/image11.png style=width:80%><div class="has-text-grey is-size-7">Dyson 電動車計畫。（圖／翻攝自webber）</div></div></section><h3 id=擁有電子專才卻不能在電動車上佔優勢>擁有電子專才卻不能在電動車上佔優勢</h3><p>蘋果與Google以及戴森的退卻，顯示一個基本問題，那就是即使電動車跳過最複雜的內燃機引擎（ICE）部份，打造汽車仍是相當高技術門檻，並非藉由電子或電機方面的專長就能打造電動車。要打造一輛能熬過日曬、雨淋、下雪，在路上經歷 15 年的車輛，加上許多電機電子所構成的各項主動與被動系統，眾多複雜且需要龐大工程技術與經驗的任務，汽車大廠數十年來精研於此，就算排除內燃機引擎部分，一般消費性電子業（科技人）仍非一朝一夕可超越。</p><section class="section is-medimu"><div class=has-text-right>永盛車電股份有限公司 總經理 柯盛泰</div></section></div></section><section class="section is-medium"><div class=columns><div class="column is-6"><p>發佈日期：2020/01/30 10:00</p><p>較新一篇：<a href=https://news.autotronic.com.tw/gsbyo3qfw7nv4hev/ class=has-text-info>2020/02/25 鴻海投資華創車電值得嗎？</a></p><p>較舊一篇：<a href=https://news.autotronic.com.tw/vxxgs1jcq4ftw8pr/ class=has-text-info>2019/12/26 台灣車電產業現況與發展策略</a></p></div><div class=column></div></div></section></div><div id=backtotop><a href=#></a></div><footer class="footer footer-dark"><div class=container><div class=columns><div class=column><div class=footer-column><div class=footer-header><h3>本站連結</h3></div><ul class=link-list><li><a href=https://news.autotronic.com.tw/branches/>營業據點</a></li></ul></div></div><div class=column><div class=footer-column><div class=footer-header><h3>精選文章</h3></div><ul class=link-list><li><a href=https://news.autotronic.com.tw/industry/>產業分析</a></li><li><a href=https://news.autotronic.com.tw/activity/>活動訊息</a></li><li><a href=https://news.autotronic.com.tw/avec/>電控概論</a></li></ul></div></div><div class=column><div class=footer-column><div class=footer-header><h3>友站連結</h3></div><ul class=link-list><li><a href=https://www.autotronic.com.tw/>永盛官網</a></li><li><a href=https://tech.autotronic.com.tw/>技術聯盟</a></li></ul></div></div><div class=column><div class=footer-column><div class=footer-header><h3>追蹤我們</h3><nav class="level is-mobile"><div class=level-left><a class=level-item href=https://www.youtube.com/channel/UCkYk5yjmgUsvmtFB5DgG6iQ><span class="icon is-large"><i class="fa fa-2x fa-youtube"></i></span></a>
+	<a class=level-item href=https://www.facebook.com/autotronic27843861><span class="icon is-large"><i class="fa fa-2x fa-facebook-f"></i></span></a></div></nav></div></div></div></div><div class="content is-small copyright has-text-centered">Copyright 2022 by Yong Sheng CO., LTD. All Rights Reserved. (0.0.1660621133)</div></div></footer><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js></script>
+	<script src=https://unpkg.com/feather-icons@4.29.0/dist/feather.min.js></script>
+	<script src=https://news.autotronic.com.tw/js/fresh.js></script>
+	<script src=https://news.autotronic.com.tw/js/jquery.panelslider.min.js></script>
+	<script src=https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js></script></body></html>`
 
-	// // emailTo := "To:" + strings.Join(tos, ",") + "\r\n"
-	// // subject := "Subject: " + "Test Email form Gmail API using OAuth" + "\n"
-	// // mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	// // msg := []byte(emailTo + subject + mime + "\n" + "emailBody")
-
-	// msg := &gmail.Message{
-	// 	// Raw: base64.URLEncoding.EncodeToString(msg),
-	// 	Payload: &gmail.MessagePart{
-	// 		Headers: []*gmail.MessagePartHeader{
-	// 			{Name: "To", Value: base64.URLEncoding.EncodeToString([]byte(to1.String()))},
-	// 			{Name: "To", Value: base64.URLEncoding.EncodeToString([]byte(to2.String()))},
-	// 			{Name: "Subject", Value: "testing mail user gmail.Message"},
-	// 			{Name: "MIME-version", Value: "1.0"},
-	// 			{Name: "Content-Type", Value: "text/plain; charset=\"UTF-8\""},
-	// 		},
-	// 		Body: &gmail.MessagePartBody{
-	// 			Data: base64.URLEncoding.EncodeToString([]byte("testing mail user gmail.Message\n")),
-	// 		},
-	// 	},
-	// }
-
-	// _, err = serv.Users.Messages.Send("me", msg).Do()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	if err = mail.Send(
+		SendToOption("huyungtang@gmail.com", "huyungtang"),
+		SubjectOption("這是一封測試信件（這是標題，應該是...吧）"),
+		BodyOption(body),
+		// AttachOption("/Users/huyungtang/Downloads/47-7382272_11111_notification.pdf"),
+	).Err(); err != nil {
+		t.Error(err)
+	}
 }
 
 // type defineds **************************************************************************************************************************

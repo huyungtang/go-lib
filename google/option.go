@@ -3,7 +3,8 @@ package google
 import (
 	"context"
 	"encoding/json"
-	"net/mail"
+	"net/textproto"
+	"sync"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -59,9 +60,10 @@ type Option struct {
 	EndTime      time.Time
 	Transparency string
 
-	MailTo  []*mail.Address
-	MailCc  []*mail.Address
-	MailBcc []*mail.Address
+	Header     textproto.MIMEHeader
+	Body       []byte
+	Attach     map[string][]byte
+	AttachOnce sync.Once
 }
 
 // ApplyOptions
