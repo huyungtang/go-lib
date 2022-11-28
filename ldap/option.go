@@ -58,6 +58,22 @@ func BindRequestOption(user, pswd string) Options {
 	}
 }
 
+// GroupFilterOption
+// ****************************************************************************************************************************************
+func GroupFilterOption(filter string) Options {
+	return func(o *Option) {
+		o.GroupFilter = filter
+	}
+}
+
+// UserFilterOption
+// ****************************************************************************************************************************************
+func UserFilterOption(filter string) Options {
+	return func(o *Option) {
+		o.UserFilter = filter
+	}
+}
+
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -66,10 +82,12 @@ func BindRequestOption(user, pswd string) Options {
 // ****************************************************************************************************************************************
 type Option struct {
 	*base.SimpleBindRequest
-	Alias  int
-	Attrs  []string
-	BaseDN string
-	Scope  int
+	Alias       int
+	Attrs       []string
+	BaseDN      string
+	Scope       int
+	UserFilter  string
+	GroupFilter string
 }
 
 // ApplyOptions

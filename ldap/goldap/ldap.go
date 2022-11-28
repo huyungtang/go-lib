@@ -13,6 +13,15 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
+const (
+	baseDNPattern string = `(,(dc=\w+))+$`
+)
+
+var (
+	userFilterOption  ldap.Options = ldap.UserFilterOption("(objectClass=person)")
+	groupFilterOption ldap.Options = ldap.UserFilterOption("(objectClass=posixGroup)")
+)
+
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -34,9 +43,17 @@ func Init(dsn string, opts ...ldap.Options) (client ldap.Client, err error) {
 	cfg := new(ldap.Option).
 		ApplyOptions(opts,
 			ldap.BindRequestOption(u.User.Username(), pswd),
+			userFilterOption,
+			groupFilterOption,
 		)
 	if _, err = conn.SimpleBind(cfg.SimpleBindRequest); err != nil {
 		return
+	}
+
+	if cfg.BaseDN == "" && cfg.Username != "" {
+		if s := strings.Find(cfg.Username, baseDNPattern); s != "" {
+			cfg.BaseDN = s[1:]
+		}
 	}
 
 	return &database{conn, cfg}, nil
@@ -76,7 +93,9 @@ func (o *database) GetUsers(users []string, opts ...ldap.Options) (rtn ldap.Resu
 		fs[i] = strings.Format(("(uid=%s)"), user)
 	}
 
-	return o.Search(strings.Format("(&(|%s)(objectClass=person))", strings.Join(fs, "")), opts...)
+	filter := strings.Format("(&(|%s)%s)", strings.Join(fs, ""), o.UserFilter)
+
+	return o.Search(filter, opts...)
 }
 
 // GetGroups
@@ -87,7 +106,9 @@ func (o *database) GetGroups(groups []string, opts ...ldap.Options) (rtn ldap.Re
 		fs[i] = strings.Format(("(cn=%s)"), group)
 	}
 
-	return o.Search(strings.Format("(&(|%s)(objectClass=posixGroup))", strings.Join(fs, "")), opts...)
+	filter := strings.Format("(&(|%s)%s)", strings.Join(fs, ""), o.GroupFilter)
+
+	return o.Search(filter, opts...)
 }
 
 // Search
