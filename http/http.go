@@ -2,7 +2,10 @@ package http
 
 import (
 	"errors"
+	base "net/http"
 	"net/url"
+
+	"github.com/huyungtang/go-lib/reflect"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -15,7 +18,7 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(hostURL string, opts ...Options) (client Client, err error) {
+func Init(hostURL string, opts ...Options) (client HttpClient, err error) {
 	var host *url.URL
 	if host, err = url.Parse(hostURL); err != nil {
 		return
@@ -29,20 +32,38 @@ func Init(hostURL string, opts ...Options) (client Client, err error) {
 		HostOption(host),
 	}, opts...)
 
-	return &context{
-		Option: new(Option).ApplyOptions(opts),
-	}, nil
+	ctx := &context{
+		Option: Option{},
+	}
+	ctx.ApplyOptions(opts)
+
+	return ctx, nil
 }
 
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Client
+// HttpClient
 // ****************************************************************************************************************************************
-type Client interface {
+type HttpClient interface {
 	Get(string, ...Options)
 	Post(string, ...Options)
+}
+
+// Get
+// ****************************************************************************************************************************************
+func (o *context) Get(path string, opts ...Options) {
+	ctx := reflect.Clone(o).(*context)
+	ctx.requestCore(base.MethodGet, path, opts)
+}
+
+// Post
+// ****************************************************************************************************************************************
+func (o *context) Post(path string, opts ...Options) {
+	ctx := reflect.Clone(o).(*context)
+	ctx.ApplyOptions(opts, urlencodedOption)
+	ctx.requestCore(base.MethodGet, path, opts)
 }
 
 // private functions **********************************************************************************************************************

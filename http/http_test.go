@@ -3,9 +3,7 @@ package http
 import (
 	"testing"
 
-	"github.com/huyungtang/go-lib/config"
-	"github.com/huyungtang/go-lib/config/viper"
-	"github.com/huyungtang/go-lib/file"
+	"github.com/huyungtang/go-lib/strings"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -19,57 +17,40 @@ import (
 // TestGet
 // ****************************************************************************************************************************************
 func TestGet(t *testing.T) {
-	c, err := viper.Init(
-		config.PathOption(file.PathWorking("_testing")),
-		config.EnvironmentOption("prod"),
-	)
-	if err != nil {
-		t.Error(err)
-	}
-
-	cfg := &struct {
-		Host string
-		Path string
-	}{}
-	if err = c.GetStruct(cfg, config.PathOption("HTTPTest")); err != nil {
-		t.Error(err)
-	}
-
-	ctx, err := Init(cfg.Host, HandlerOption(func(sc Session) {
-		t.Log("---------- session start ----------")
-		sc.Next()
-		t.Log("---------- session ended ----------")
+	done := 0
+	client, err := Init("https://news.autotronic.com.tw", HandlerOption(func(ctx Context) {
+		ctx.Next()
+		done++
 	}))
 	if err != nil {
+		t.Error(err)
+	}
+
+	client.Get("sitemap.xml", HandlerOption(func(ctx Context) {
+		if ctx.StatusCode() != 200 {
+			t.Fail()
+		}
+
+		if !strings.HasPrefix(ctx.String(), `<?xml version="1.0" encoding="utf-8" standalone="yes"?>`) {
+			t.Fail()
+		}
+		done++
+	}))
+
+	client.Get("gsbyo3qfw7nv4hev", HandlerOption(func(ctx Context) {
+		if ctx.StatusCode() != 200 {
+			t.Fail()
+		}
+
+		if !strings.HasPrefix(ctx.String(), `<!doctype html><html lang=en-us><head>`) {
+			t.Fail()
+		}
+		done++
+	}))
+
+	if done != 4 {
 		t.Fail()
 	}
-
-	ctx.Get(cfg.Path, HandlerOption(func(sc Session) {
-		t.Log("---------- handler start ----------")
-		if sc.StatusCode() != 200 {
-			t.Fail()
-		}
-		t.Log(sc.StatusCode(), sc.Status())
-		t.Log("---------- handler ended ----------")
-	}))
-
-	ctx.Get(cfg.Path, HandlerOption(func(sc Session) {
-		t.Log("---------- handler start ----------")
-		if sc.StatusCode() != 200 {
-			t.Fail()
-		}
-		t.Log(sc.StatusCode(), sc.Status())
-		t.Log("---------- handler ended ----------")
-	}))
-
-	ctx.Get(cfg.Path, HandlerOption(func(sc Session) {
-		t.Log("---------- handler start ----------")
-		if sc.StatusCode() != 200 {
-			t.Fail()
-		}
-		t.Log(sc.StatusCode(), sc.Status())
-		t.Log("---------- handler ended ----------")
-	}))
 }
 
 // type defineds **************************************************************************************************************************

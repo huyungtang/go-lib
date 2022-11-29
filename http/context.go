@@ -1,12 +1,11 @@
 package http
 
 import (
+	"encoding/json"
 	"io"
 	base "net/http"
 	"net/url"
 	"strings"
-
-	"github.com/huyungtang/go-lib/reflect"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -23,31 +22,83 @@ import (
 
 // context ********************************************************************************************************************************
 type context struct {
-	*Option
+	Option
 	*base.Response
 	body []byte
 	err  error
 }
 
-// Get
+// Context
 // ****************************************************************************************************************************************
-func (o *context) Get(path string, opts ...Options) {
-	ctx := reflect.Clone(o).(*context)
-	ctx.requestCore(base.MethodGet, path, opts)
+type Context interface {
+	Body() []byte
+	Err() error
+	Next()
+	ParseJson(interface{}) error
+	Status() string
+	StatusCode() int
+	String() string
 }
 
-// Post
+// Body
 // ****************************************************************************************************************************************
-func (o *context) Post(path string, opts ...Options) {
-	ctx := reflect.Clone(o).(*context)
-	ctx.ApplyOptions(opts, urlencodedOption)
-	ctx.requestCore(base.MethodGet, path, opts)
+func (o *context) Body() []byte {
+	return o.body
+}
+
+// Err
+// ****************************************************************************************************************************************
+func (o *context) Err() (err error) {
+	return o.err
+}
+
+// Next
+// ****************************************************************************************************************************************
+func (o *context) Next() {
+	o.Handler++
+	if o.Handler >= len(o.Handlers) || o.Handlers[o.Handler] == nil {
+		return
+	}
+
+	o.Handlers[o.Handler](o)
+}
+
+// Parse
+// ****************************************************************************************************************************************
+func (o *context) ParseJson(dto interface{}) (err error) {
+	return json.Unmarshal(o.body, dto)
+}
+
+// Status
+// ****************************************************************************************************************************************
+func (o *context) Status() (s string) {
+	if o.Response != nil {
+		s = o.Response.Status
+	}
+
+	return
+}
+
+// StatusCode
+// ****************************************************************************************************************************************
+func (o *context) StatusCode() (c int) {
+	if o.Response != nil {
+		c = o.Response.StatusCode
+	}
+
+	return
+}
+
+// String
+// ****************************************************************************************************************************************
+func (o *context) String() string {
+	return string(o.body)
 }
 
 // requestCore ****************************************************************************************************************************
 func (o *context) requestCore(method, path string, opts []Options) {
-	handler := HandlerOption(func(sc Session) {
-		if ctx, isOK := sc.(*context); isOK {
+	handler := HandlerOption(func(c Context) {
+		if ctx, isOK := c.(*context); isOK {
 			vals := &url.Values{}
 			for _, pars := range ctx.Params {
 				vals.Add(pars[0], pars[1])
@@ -89,17 +140,17 @@ func (o *context) requestCore(method, path string, opts []Options) {
 			o.Ckies = resp.Cookies()
 		}
 
-		sc.Next()
+		c.Next()
 	})
 
-	o.Option.ApplyOptions(opts, handler)
+	o.ApplyOptions(opts, handler)
 	o.Handler = -1
 	o.Next()
 }
 
 // ContextHandler
 // ****************************************************************************************************************************************
-type ContextHandler func(Session)
+type ContextHandler func(Context)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
