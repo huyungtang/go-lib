@@ -19,7 +19,7 @@ const (
 
 var (
 	userFilterOption  ldap.Options = ldap.UserFilterOption("(objectClass=person)")
-	groupFilterOption ldap.Options = ldap.UserFilterOption("(objectClass=posixGroup)")
+	groupFilterOption ldap.Options = ldap.GroupFilterOption("(objectClass=posixGroup)")
 )
 
 // public functions ***********************************************************************************************************************
