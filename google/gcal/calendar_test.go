@@ -47,6 +47,11 @@ func TestCalendar(t *testing.T) {
 	if res.Err() != nil {
 		t.Error(res.Err())
 	}
+
+	res = serv.DelEvent(res.EventId())
+	if res.Err() != nil {
+		t.Error(res.Err())
+	}
 }
 
 // type defineds **************************************************************************************************************************

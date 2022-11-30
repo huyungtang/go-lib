@@ -46,7 +46,10 @@ type service struct {
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
+	// AddEvent(summary, event_time, CalendarId, Description, Recurrency, Timezone, AllDay, EndTime, Busy)
 	AddEvent(string, time.Time, ...google.Options) google.EventResult
+	// DelEvent(eventId, CalendarId)
+	DelEvent(string, ...google.Options) google.EventResult
 }
 
 // AddEvent()
@@ -74,6 +77,18 @@ func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options)
 	res.Event, res.err = o.Events.Insert(opt.CalendarId, evt).Do()
 
 	return res
+}
+
+// DelEvent
+// ****************************************************************************************************************************************
+func (o *service) DelEvent(evtId string, opts ...google.Options) google.EventResult {
+	opt := (&google.Option{
+		CalendarId: o.CalendarId,
+	}).ApplyOptions(opts)
+
+	return &result{
+		err: o.Events.Delete(opt.CalendarId, evtId).Do(),
+	}
 }
 
 // private functions **********************************************************************************************************************

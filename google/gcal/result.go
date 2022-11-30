@@ -22,8 +22,12 @@ type result struct {
 
 // EventId
 // ****************************************************************************************************************************************
-func (o *result) EventId() string {
-	return o.Event.Id
+func (o *result) EventId() (id string) {
+	if o.Event != nil {
+		id = o.Event.Id
+	}
+
+	return
 }
 
 // Err
