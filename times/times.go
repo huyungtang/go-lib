@@ -38,9 +38,7 @@ func Now() Time {
 // Today
 // ****************************************************************************************************************************************
 func Today() Time {
-	t := base.Now()
-
-	return time(base.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, base.Local))
+	return time(base.Now().Truncate(base.Hour * 24))
 }
 
 // Unix
