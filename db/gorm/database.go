@@ -50,6 +50,10 @@ func Init(dsn string, opts ...db.Options) (sqlDB db.SqlDB, err error) {
 		return
 	}
 
+	if cfg.Debug {
+		conn = conn.Debug()
+	}
+
 	return &database{conn}, nil
 }
 
