@@ -18,6 +18,7 @@ type Client interface {
 	GetUser(string, ...Options) (Entity, error)
 	GetUsers([]string, ...Options) (Result, error)
 	GetGroups([]string, ...Options) (Result, error)
+	GetGroupUsers([]string, ...Options) (Result, error)
 	Search(string, ...Options) (Result, error)
 	Signin(string, string) error
 	Password(string, string, string) error

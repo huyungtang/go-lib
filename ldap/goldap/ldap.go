@@ -111,6 +111,19 @@ func (o *database) GetGroups(groups []string, opts ...ldap.Options) (rtn ldap.Re
 	return o.Search(filter, opts...)
 }
 
+// GetGroupUsers
+// ****************************************************************************************************************************************
+func (o *database) GetGroupUsers(groups []string, opts ...ldap.Options) (rtn ldap.Result, err error) {
+	fs := make([]string, len(groups))
+	for i, group := range groups {
+		fs[i] = strings.Format(("(memberOf=%s)"), group)
+	}
+
+	filter := strings.Format("(&(|%s)%s)", strings.Join(fs, ""), o.UserFilter)
+
+	return o.Search(filter, opts...)
+}
+
 // Search
 // ****************************************************************************************************************************************
 func (o *database) Search(filter string, opts ...ldap.Options) (rtn ldap.Result, err error) {
