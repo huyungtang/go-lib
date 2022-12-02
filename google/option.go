@@ -20,11 +20,11 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// ConfigOption
+// ClientSecretOption
 // ****************************************************************************************************************************************
-func ConfigOption(jsonKey, scope string) Options {
+func ClientSecretOption(jsonKey string, scopes []string) Options {
 	return func(o *Option) {
-		if config, err := google.ConfigFromJSON([]byte(jsonKey), scope); err == nil {
+		if config, err := google.ConfigFromJSON([]byte(jsonKey), scopes...); err == nil {
 			o.Config = config
 		}
 	}

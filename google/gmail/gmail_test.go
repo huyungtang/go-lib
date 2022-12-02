@@ -30,8 +30,8 @@ func TestSendMail(t *testing.T) {
 
 	var mail Service
 	if mail, err = Init(
-		GmailModifyScopeOption(c.GetString("Mail.Credential", "")),
-		google.OAuthTokenOption(c.GetString("Mail.Token", "")),
+		google.ClientSecretOption(c.GetString("Google.Credential", ""), c.GetStringSlice("Google.Scopes", []string{""})),
+		google.OAuthTokenOption(c.GetString("Google.Token", "")),
 	); err != nil {
 		t.Error(err)
 	}

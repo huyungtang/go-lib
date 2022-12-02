@@ -31,8 +31,8 @@ func TestCalendar(t *testing.T) {
 
 	var serv Service
 	if serv, err = Init(
-		CalendarScopeOption(c.GetString("Calendar.Credential", "")),
-		google.OAuthTokenOption(c.GetString("Calendar.Token", "")),
+		google.ClientSecretOption(c.GetString("Google.Credential", ""), c.GetStringSlice("Google.Scopes", []string{""})),
+		google.OAuthTokenOption(c.GetString("Google.Token", "")),
 	); err != nil {
 		t.Error(err)
 	}
