@@ -2,6 +2,7 @@ package gcal
 
 import (
 	"testing"
+	"time"
 
 	"github.com/huyungtang/go-lib/config"
 	"github.com/huyungtang/go-lib/config/viper"
@@ -36,23 +37,23 @@ func TestCalendar(t *testing.T) {
 		t.Error(err)
 	}
 
-	// res := serv.AddEvent(
-	// 	"test busy",
-	// 	EventStartOption(time.Now()),
-	// 	AllDayEventOption(),
-	// 	RecurrenceOtpion("RRULE:FREQ=MONTHLY;COUNT=3;INTERVAL=3", "RRULE:FREQ=YEARLY"),
-	// 	EventBusyOption(),
-	// )
-	// if res.Err() != nil {
-	// 	t.Error(res.Err())
-	// }
+	res := serv.AddEvent(
+		"test busy",
+		EventStartOption(time.Now()),
+		AllDayEventOption(),
+		RecurrenceOtpion("RRULE:FREQ=MONTHLY;COUNT=3;INTERVAL=3", "RRULE:FREQ=YEARLY"),
+		EventBusyOption(),
+	)
+	if res.Err() != nil {
+		t.Error(res.Err())
+	}
 
-	// res = serv.DelEvent(res.EventId())
-	// if res.Err() != nil {
-	// 	t.Error(res.Err())
-	// }
+	res = serv.DelEvent(res.EventId())
+	if res.Err() != nil {
+		t.Error(res.Err())
+	}
 
-	serv.ListEvent(CalendarIdOption("299r0kkminf4jlrfktq38obiqk@group.calendar.google.com"), MaxResultOption(10))
+	// serv.ListEvent(CalendarIdOption("299r0kkminf4jlrfktq38obiqk@group.calendar.google.com"), MaxResultOption(10))
 }
 
 // type defineds **************************************************************************************************************************

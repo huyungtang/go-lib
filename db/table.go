@@ -37,6 +37,8 @@ type Table interface {
 	Delete() error
 	Count() (int64, error)
 
+	Exec(string, ...interface{}) error
+
 	Begin() Transaction
 
 	ResetClauses()

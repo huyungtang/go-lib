@@ -3,8 +3,6 @@ package logger
 import (
 	"fmt"
 	"log"
-
-	"strings"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -23,31 +21,32 @@ func Fatal(err error) {
 
 // Log
 // ****************************************************************************************************************************************
-func Log(msg interface{}, args ...interface{}) {
-	if s, isOK := msg.(string); isOK && strings.Contains(s, "%") {
-		log.Printf(s, args...)
-	} else {
-		v := append([]interface{}{msg}, args...)
-		log.Print(v...)
-	}
+func Log(args ...interface{}) {
+	log.Print(args...)
+}
+
+// Logf
+// ****************************************************************************************************************************************
+func Logf(msg string, args ...interface{}) {
+	log.Printf(msg, args...)
 }
 
 // Print
 // ****************************************************************************************************************************************
-func Print(msg interface{}, args ...interface{}) {
-	if s, isOK := msg.(string); isOK && strings.Contains(s, "%") {
-		fmt.Printf(s, args...)
-	} else {
-		v := append([]interface{}{msg}, args...)
-		fmt.Print(v...)
-	}
+func Print(args ...interface{}) {
+	fmt.Print(args...)
+}
+
+// Printf
+// ****************************************************************************************************************************************
+func Printf(msg string, args ...interface{}) {
+	fmt.Printf(msg, args...)
 }
 
 // Println
 // ****************************************************************************************************************************************
-func Println(msg interface{}, args ...interface{}) {
-	Print(msg, args...)
-	fmt.Println("")
+func Println(args ...interface{}) {
+	fmt.Println(args...)
 }
 
 // type defineds **************************************************************************************************************************
