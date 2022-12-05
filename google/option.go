@@ -57,8 +57,11 @@ type Option struct {
 	Recurrency   []string
 	Duration     time.Duration
 	Timezone     string
+	StartTime    time.Time
 	EndTime      time.Time
 	Transparency string
+	MaxResult    int64
+	NextPage     string
 
 	Header     textproto.MIMEHeader
 	Body       []byte

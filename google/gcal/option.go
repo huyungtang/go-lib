@@ -54,6 +54,14 @@ func EventBusyOption() google.Options {
 	}
 }
 
+// ****************************************************************************************************************************************
+// ****************************************************************************************************************************************
+func EventStartOption(tm time.Time) google.Options {
+	return func(o *google.Option) {
+		o.StartTime = tm
+	}
+}
+
 // EventEndOption
 // ****************************************************************************************************************************************
 func EventEndOption(tm time.Time) google.Options {
@@ -62,11 +70,51 @@ func EventEndOption(tm time.Time) google.Options {
 	}
 }
 
+// FilterOption
+// ****************************************************************************************************************************************
+func FilterOption(q string) google.Options {
+	return func(o *google.Option) {
+		o.Description = q
+	}
+}
+
+// MaxResultOption
+// ****************************************************************************************************************************************
+func MaxResultOption(m int64) google.Options {
+	return func(o *google.Option) {
+		o.MaxResult = m
+	}
+}
+
+// NextPageTokenOption
+// ****************************************************************************************************************************************
+func NextPageTokenOption(tkn string) google.Options {
+	return func(o *google.Option) {
+		o.NextPage = tkn
+	}
+}
+
 // RecurrenceOtpion
 // ****************************************************************************************************************************************
 func RecurrenceOtpion(recs ...string) google.Options {
 	return func(o *google.Option) {
 		o.Recurrency = append(o.Recurrency, recs...)
+	}
+}
+
+// TimeMinOption
+// ****************************************************************************************************************************************
+func TimeMinOption(tm time.Time) google.Options {
+	return func(o *google.Option) {
+		o.StartTime = tm
+	}
+}
+
+// TimeMaxOption
+// ****************************************************************************************************************************************
+func TimeMaxOption(tm time.Time) google.Options {
+	return func(o *google.Option) {
+		o.EndTime = tm
 	}
 }
 

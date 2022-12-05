@@ -51,12 +51,12 @@ type service struct {
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
-	Send(...google.Options) google.MessageResult
+	Send(...google.Options) google.Message
 }
 
 // Send
 // ****************************************************************************************************************************************
-func (o *service) Send(opts ...google.Options) google.MessageResult {
+func (o *service) Send(opts ...google.Options) google.Message {
 	var buff bytes.Buffer
 	writer := multipart.NewWriter(&buff)
 	defer writer.Close()

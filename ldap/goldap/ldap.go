@@ -147,7 +147,7 @@ func (o *database) Search(filter string, opts ...ldap.Options) (rtn ldap.Result,
 		return
 	}
 
-	return &result{res}, nil
+	return &result{res, len(res.Entries)}, nil
 }
 
 // Signin

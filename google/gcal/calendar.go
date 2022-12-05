@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/huyungtang/go-lib/google"
+	"github.com/huyungtang/go-lib/times"
 	base "google.golang.org/api/calendar/v3"
 )
 
@@ -47,28 +48,30 @@ type service struct {
 // ****************************************************************************************************************************************
 type Service interface {
 	// AddEvent(summary, event_time, CalendarId, Description, Recurrency, Timezone, AllDay, EndTime, Busy)
-	AddEvent(string, time.Time, ...google.Options) google.EventResult
+	AddEvent(string, ...google.Options) google.Event
 	// DelEvent(eventId, CalendarId)
-	DelEvent(string, ...google.Options) google.EventResult
+	DelEvent(string, ...google.Options) google.Event
+	ListEvent(...google.Options) google.Events
 }
 
 // AddEvent()
 // ****************************************************************************************************************************************
-func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options) google.EventResult {
+func (o *service) AddEvent(summary string, opts ...google.Options) google.Event {
 	opt := &google.Option{
 		CalendarId:   o.CalendarId,
 		Duration:     o.Duration,
 		Transparency: "transparent",
+		StartTime:    time.Now(),
 	}
 	opt.ApplyOptions(opts,
-		EventEndOption(tm.Add(opt.Duration)),
+		EventEndOption(opt.StartTime.Add(opt.Duration)),
 	)
 
 	evt := &base.Event{
 		Summary:      summary,
 		Description:  opt.Description,
 		Recurrence:   opt.Recurrency,
-		Start:        getEventDateTime(tm, opt.Timezone, opt.AllDay),
+		Start:        getEventDateTime(opt.StartTime, opt.Timezone, opt.AllDay),
 		End:          getEventDateTime(opt.EndTime, opt.Timezone, opt.AllDay),
 		Transparency: opt.Transparency,
 	}
@@ -81,7 +84,7 @@ func (o *service) AddEvent(summary string, tm time.Time, opts ...google.Options)
 
 // DelEvent
 // ****************************************************************************************************************************************
-func (o *service) DelEvent(evtId string, opts ...google.Options) google.EventResult {
+func (o *service) DelEvent(evtId string, opts ...google.Options) google.Event {
 	opt := (&google.Option{
 		CalendarId: o.CalendarId,
 	}).ApplyOptions(opts)
@@ -89,6 +92,31 @@ func (o *service) DelEvent(evtId string, opts ...google.Options) google.EventRes
 	return &result{
 		err: o.Events.Delete(opt.CalendarId, evtId).Do(),
 	}
+}
+
+// ListEvent
+// ****************************************************************************************************************************************
+func (o *service) ListEvent(opts ...google.Options) google.Events {
+	opt := (&google.Option{
+		CalendarId: o.CalendarId,
+		MaxResult:  100,
+		StartTime:  times.Today().Add(0, -1).Time(),
+		EndTime:    times.Today().Add(0, 0, 1).Time(),
+	}).ApplyOptions(opts)
+
+	res := new(result)
+	if res.Events, res.err = o.Events.
+		List(opt.CalendarId).
+		Q(opt.Description).
+		MaxResults(opt.MaxResult).
+		TimeMin(getEventDateTime(opt.StartTime, o.Timezone, false).DateTime).
+		TimeMax(getEventDateTime(opt.EndTime, o.Timezone, false).DateTime).
+		PageToken(opt.NextPage).
+		Do(); res.err == nil {
+		res.evts = len(res.Events.Items)
+	}
+
+	return res
 }
 
 // private functions **********************************************************************************************************************

@@ -1,12 +1,10 @@
-package gcal
+package gdrive
 
 import (
-	"testing"
+	"context"
 
-	"github.com/huyungtang/go-lib/config"
-	"github.com/huyungtang/go-lib/config/viper"
-	"github.com/huyungtang/go-lib/file"
 	"github.com/huyungtang/go-lib/google"
+	base "google.golang.org/api/drive/v3"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -17,47 +15,34 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// TestCalendar
+// Init
 // ****************************************************************************************************************************************
-func TestCalendar(t *testing.T) {
-	c, err := viper.Init(
-		config.PathOption(file.PathWorking("./../_testing")),
-		config.EnvironmentOption("prod"),
-	)
-	if err != nil {
-		t.Error(err)
+func Init(opts ...google.Options) (serv Service, err error) {
+	cfg := new(google.Option).
+		ApplyOptions(opts)
+
+	var cal *base.Service
+	if cal, err = base.NewService(context.Background(), cfg.GetClientOption()); err != nil {
+		return
 	}
 
-	var serv Service
-	if serv, err = Init(
-		google.ClientSecretOption(c.GetString("Google.Credential", ""), c.GetStringSlice("Google.Scopes", []string{""})),
-		google.OAuthTokenOption(c.GetString("Google.Token", "")),
-	); err != nil {
-		t.Error(err)
-	}
-
-	// res := serv.AddEvent(
-	// 	"test busy",
-	// 	EventStartOption(time.Now()),
-	// 	AllDayEventOption(),
-	// 	RecurrenceOtpion("RRULE:FREQ=MONTHLY;COUNT=3;INTERVAL=3", "RRULE:FREQ=YEARLY"),
-	// 	EventBusyOption(),
-	// )
-	// if res.Err() != nil {
-	// 	t.Error(res.Err())
-	// }
-
-	// res = serv.DelEvent(res.EventId())
-	// if res.Err() != nil {
-	// 	t.Error(res.Err())
-	// }
-
-	serv.ListEvent(CalendarIdOption("299r0kkminf4jlrfktq38obiqk@group.calendar.google.com"), MaxResultOption(10))
+	return &service{cal, cfg}, nil
 }
 
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+// service ********************************************************************************************************************************
+type service struct {
+	*base.Service
+	*google.Option
+}
+
+// Service
+// ****************************************************************************************************************************************
+type Service interface {
+}
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
