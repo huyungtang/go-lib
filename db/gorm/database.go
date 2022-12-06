@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	reflect_ "reflect"
 
 	"github.com/huyungtang/go-lib/db"
 	"github.com/huyungtang/go-lib/reflect"
@@ -109,22 +110,40 @@ func (o *database) getTableName(ety interface{}) (name string) {
 // getPrimaryKey **************************************************************************************************************************
 func (o *database) getPrimaryKey(ety interface{}) (pk string) {
 	t := reflect.TypeOf(ety)
+	v := reflect.ValueOf(ety)
 	for i := 0; i < t.NumField(); i++ {
-		tags := reflect.GetTags(t.Field(i), "gorm")
-		if _, isMap := tags["embedded"]; isMap {
-			v := reflect.ValueOf(ety)
-			pk = o.getPrimaryKey(v.Field(i).Interface())
-		} else if _, isMap := tags["primaryKey"]; i == 0 || isMap {
-			if f, isOK := tags["column"]; isOK {
-				pk = f
-			} else {
-				pk = t.Field(i).Name
-			}
+		if _, isMap := v.Field(i).Interface().(Identity); isMap {
+			pk = "id"
+			break
+		}
 
-			if isMap {
+		tags := reflect.GetTags(t.Field(i), "gorm")
+		if _, isMap := tags["ignore"]; isMap {
+			continue
+		}
+
+		if _, isMap := tags["embedded"]; isMap {
+			continue
+		}
+
+		if _, isKey := tags["primaryKey"]; pk == "" || isKey {
+			pk = o.getFieldName(t.Field(i))
+
+			if isKey {
 				break
 			}
 		}
+	}
+
+	return
+}
+
+// getFieldName ***************************************************************************************************************************
+func (o *database) getFieldName(f reflect_.StructField) (nm string) {
+	var isMap bool
+	tags := reflect.GetTags(f, "gorm")
+	if nm, isMap = tags["column"]; !isMap {
+		nm = f.Name
 	}
 
 	return
