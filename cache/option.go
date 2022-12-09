@@ -11,6 +11,12 @@ var (
 
 	SkipOverrideOption Options = overrideOption("NX")
 	UpdateOnlyOption   Options = overrideOption("XX")
+
+	LPushOption Options = cmderOption("LPUSH")
+	RPushOption Options = cmderOption("RPUSH")
+
+	LPopOption Options = cmderOption("LPOP")
+	RPopOption Options = cmderOption("RPOP")
 )
 
 // public functions ***********************************************************************************************************************
@@ -43,6 +49,7 @@ type Option struct {
 	DefaFn   DefaultFn
 	Expire   int64
 	Override string
+	Cmder    string
 }
 
 // ApplyOptions
@@ -72,5 +79,12 @@ type DefaultFn func(interface{}) (Options, error)
 func overrideOption(over string) Options {
 	return func(co *Option) {
 		co.Override = over
+	}
+}
+
+// cmderOption ****************************************************************************************************************************
+func cmderOption(dir string) Options {
+	return func(o *Option) {
+		o.Cmder = dir
 	}
 }

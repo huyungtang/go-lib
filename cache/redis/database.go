@@ -55,7 +55,8 @@ func (o *database) Exists(key string) bool {
 // ****************************************************************************************************************************************
 func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err error) {
 	cfg := new(cache.Option).
-		ApplyOptions(opts,
+		ApplyOptions(
+			opts,
 			cache.KeepTTLOption,
 		)
 
@@ -93,18 +94,54 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 // Set
 // ****************************************************************************************************************************************
 func (o *database) Set(key string, val interface{}, opts ...cache.Options) (err error) {
-	cfg := new(cache.Option).ApplyOptions(opts)
-	args := base.SetArgs{
-		Mode: cfg.Override,
-	}
-	args.ExpireAt, args.TTL, args.KeepTTL = getExpire(cfg)
+	cfg := new(cache.Option).
+		ApplyOptions(
+			opts,
+			cache.StaticOption,
+		)
 
 	val, _ = json.Marshal(val)
-	if err = o.SetArgs(context.Background(), key, val, args).Err(); err == base.Nil {
+	if err = o.SetArgs(context.Background(), key, val, getArgs(cfg)).Err(); err == base.Nil {
 		return nil
 	}
 
 	return
+}
+
+// Push
+// ****************************************************************************************************************************************
+func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err error) {
+	cfg := new(cache.Option).
+		ApplyOptions(
+			opts,
+			cache.RPushOption,
+			cache.StaticOption,
+		)
+
+	ctx := context.Background()
+	if _, err = o.Pipelined(ctx, func(p base.Pipeliner) (e error) {
+		cmd := base.NewCmd(ctx, cfg.Cmder, key, val)
+		if e = p.Process(ctx, cmd); e != nil {
+			return
+		}
+		if e = p.Process(ctx, getExpireCmder(cfg, ctx, key)); e != nil {
+			return
+		}
+
+		return
+	}); err != nil {
+		return
+	}
+
+	return
+}
+
+// Del
+// ****************************************************************************************************************************************
+func (o *database) Del(keys ...string) (err error) {
+	cmd := o.Client.Del(context.Background(), keys...)
+
+	return cmd.Err()
 }
 
 // Close
@@ -120,6 +157,16 @@ func (o *database) Close() (err error) {
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+// getArgs ********************************************************************************************************************************
+func getArgs(cfg *cache.Option) (args base.SetArgs) {
+	args = base.SetArgs{
+		Mode: cfg.Override,
+	}
+	args.ExpireAt, args.TTL, args.KeepTTL = getExpire(cfg)
+
+	return
+}
 
 // getExpire ******************************************************************************************************************************
 func getExpire(opt *cache.Option) (exp time.Time, ttl time.Duration, keep bool) {
