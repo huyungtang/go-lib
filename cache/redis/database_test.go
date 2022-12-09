@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/huyungtang/go-lib/cache"
@@ -17,9 +18,9 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// TestRedis
+// TestGet
 // ****************************************************************************************************************************************
-func TestRedis(t *testing.T) {
+func TestGet(t *testing.T) {
 	c, err := viper.Init(
 		config.PathOption(file.PathWorking("../_testing")),
 		config.EnvironmentOption("prod"),
@@ -51,10 +52,42 @@ func TestRedis(t *testing.T) {
 	if str != "default value" {
 		t.Fail()
 	}
+}
 
-	if err = db.Set(key1, "new value", cache.KeepTTLOption); err != nil {
+// TestPop
+// ****************************************************************************************************************************************
+func TestPop(t *testing.T) {
+	c, err := viper.Init(
+		config.PathOption(file.PathWorking("../_testing")),
+		config.EnvironmentOption("prod"),
+	)
+	if err != nil {
 		t.Error(err)
 	}
+
+	var db cache.Database
+	if db, err = Init(c.GetString("Redis", "")); err != nil {
+		t.Error(err)
+	}
+	defer db.Close()
+
+	key := "testing.stringslice"
+	val := []rune{65, 66, 67, 68, 69, 70}
+	for _, v := range val {
+		if err = db.Push(key, string(v)); err != nil {
+			t.Error(err)
+		}
+	}
+
+	strs := make([]string, 0)
+	if err = db.Pop(key, &strs, cache.PopCountOption(uint64(len(val)))); err != nil {
+		t.Error(err)
+	}
+
+	if string(val) != strings.Join(strs, "") {
+		t.Fail()
+	}
+
 }
 
 // type defineds **************************************************************************************************************************

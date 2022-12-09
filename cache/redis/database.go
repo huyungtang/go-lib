@@ -136,6 +136,30 @@ func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err
 	return
 }
 
+// Pop
+// ****************************************************************************************************************************************
+func (o *database) Pop(key string, val interface{}, opts ...cache.Options) (err error) {
+	cfg := new(cache.Option).
+		ApplyOptions(
+			opts,
+			cache.LPopOption,
+			cache.PopCountOption(1),
+		)
+
+	var cmd *base.StringSliceCmd
+	if cfg.Cmder == "RPOP" {
+		cmd = o.RPopCount(context.Background(), key, int(cfg.Count))
+	} else {
+		cmd = o.LPopCount(context.Background(), key, int(cfg.Count))
+	}
+
+	if err = cmd.Err(); err != nil {
+		return
+	}
+
+	return cmd.ScanSlice(val)
+}
+
 // Del
 // ****************************************************************************************************************************************
 func (o *database) Del(keys ...string) (err error) {

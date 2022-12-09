@@ -30,8 +30,11 @@ type Database interface {
 	// Set(key, value, ExpireOption, *StaticOption)
 	Set(string, interface{}, ...Options) error
 
-	// Push(key, value, ExpireOption, *LPushOpiton, *StaticOption)
+	// Push(key, value, ExpireOption, *RPushOpiton, *StaticOption)
 	Push(string, interface{}, ...Options) error
+
+	// Pop(key, value, *PopCountOption(1), *LPopOpiton)
+	Pop(string, interface{}, ...Options) error
 
 	// Del(keys)
 	Del(...string) error
