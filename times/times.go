@@ -47,6 +47,12 @@ func Unix(second, nanoSecond int64) Time {
 	return tm(base.Unix(second, nanoSecond))
 }
 
+// UnixDay
+// ****************************************************************************************************************************************
+func UnixDay(day int64) Time {
+	return tm(base.Unix(0, day*int64(base.Hour)*24))
+}
+
 // Local
 // ****************************************************************************************************************************************
 func Local(t base.Time) Time {
