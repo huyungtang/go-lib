@@ -32,25 +32,25 @@ func Duration(h, m, s int64) (d base.Duration) {
 // Now
 // ****************************************************************************************************************************************
 func Now() Time {
-	return time(base.Now())
+	return tm(base.Now())
 }
 
 // Today
 // ****************************************************************************************************************************************
 func Today() Time {
-	return time(base.Now().Truncate(base.Hour * 24))
+	return tm(base.Now().Truncate(base.Hour * 24))
 }
 
 // Unix
 // ****************************************************************************************************************************************
 func Unix(second, nanoSecond int64) Time {
-	return time(base.Unix(second, nanoSecond))
+	return tm(base.Unix(second, nanoSecond))
 }
 
 // Local
 // ****************************************************************************************************************************************
 func Local(t base.Time) Time {
-	return time(base.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), base.Local))
+	return tm(base.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), base.Local))
 }
 
 // Parse
@@ -61,7 +61,7 @@ func Parse(layout, value string) (Time, error) {
 		return nil, e
 	}
 
-	return time(v), nil
+	return tm(v), nil
 }
 
 // type defineds **************************************************************************************************************************
@@ -82,12 +82,12 @@ type Time interface {
 	UnixNano() int64
 }
 
-// time ***********************************************************************************************************************************
-type time base.Time
+// tm *************************************************************************************************************************************
+type tm base.Time
 
 // Add
 // ****************************************************************************************************************************************
-func (o time) Add(ymdhms ...int64) Time {
+func (o tm) Add(ymdhms ...int64) Time {
 	y, m, d := 0, 0, 0
 	dur := base.Duration(0)
 	for k, v := range ymdhms {
@@ -107,55 +107,57 @@ func (o time) Add(ymdhms ...int64) Time {
 		}
 	}
 
-	return time(base.Time(o).AddDate(y, m, d).Add(dur))
+	return tm(base.Time(o).AddDate(y, m, d).Add(dur))
 }
 
 // Local
 // ****************************************************************************************************************************************
-func (o time) Local() Time {
+func (o tm) Local() Time {
 
 	return Local(base.Time(o))
 }
 
 // Time
 // ****************************************************************************************************************************************
-func (o time) Time() base.Time {
+func (o tm) Time() base.Time {
 	return base.Time(o)
 }
 
 // Format
 // ****************************************************************************************************************************************
-func (o time) Format(fmt string) string {
+func (o tm) Format(fmt string) string {
 	return base.Time(o).Format(fmt)
 }
 
 // UnixDay
 // ****************************************************************************************************************************************
-func (o time) UnixDay() int64 {
-	return base.Time(o).UnixNano() / (int64(base.Hour) * 24)
+func (o tm) UnixDay() int64 {
+	y, m, d := base.Time(o).Date()
+
+	return base.Date(y, m, d, 0, 0, 0, 0, base.UTC).UnixNano() / (int64(base.Hour) * 24)
 }
 
 // UnixSecond
 // ****************************************************************************************************************************************
-func (o time) UnixSecond() int64 {
+func (o tm) UnixSecond() int64 {
 	return base.Time(o).Unix()
 }
 
 // UnixMilli
 // ****************************************************************************************************************************************
-func (o time) UnixMilli() int64 {
+func (o tm) UnixMilli() int64 {
 	return base.Time(o).UnixMilli()
 }
 
 // UnixMicro
 // ****************************************************************************************************************************************
-func (o time) UnixMicro() int64 {
+func (o tm) UnixMicro() int64 {
 	return base.Time(o).UnixMicro()
 }
 
 // UnixNano
 // ****************************************************************************************************************************************
-func (o time) UnixNano() int64 {
+func (o tm) UnixNano() int64 {
 	return base.Time(o).UnixNano()
 }
 
