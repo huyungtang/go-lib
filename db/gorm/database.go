@@ -3,7 +3,6 @@ package gorm
 import (
 	"context"
 	"database/sql"
-	"errors"
 	reflect_ "reflect"
 
 	"github.com/huyungtang/go-lib/db"
@@ -36,7 +35,7 @@ func Init(dsn string, opts ...db.Options) (sqlDB db.SqlDB, err error) {
 	case "postgres://":
 		dial = postgres.Open(dsn[len(d):])
 	default:
-		return nil, errors.New("cannot identify the database driver")
+		return nil, errInvalidDriver
 	}
 
 	cfg := new(db.Option).

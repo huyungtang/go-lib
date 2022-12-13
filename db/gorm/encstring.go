@@ -2,7 +2,6 @@ package gorm
 
 import (
 	"database/sql/driver"
-	"errors"
 
 	"github.com/huyungtang/go-lib/encrypt"
 	"github.com/huyungtang/go-lib/strings"
@@ -63,7 +62,7 @@ func (o EncStr) String() string {
 func decryptString(val interface{}) (s string, err error) {
 	bs, isOK := val.([]byte)
 	if !isOK {
-		return "", errors.New("value is not a valid data type")
+		return "", errInvalidData
 	}
 
 	if len(bs) == 0 {
