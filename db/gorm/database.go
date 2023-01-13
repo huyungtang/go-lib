@@ -111,17 +111,17 @@ func (o *database) getPrimaryKey(ety interface{}) (pk string) {
 	t := reflect.TypeOf(ety)
 	v := reflect.ValueOf(ety)
 	for i := 0; i < t.NumField(); i++ {
-		if _, isMap := v.Field(i).Interface().(Identity); isMap {
+		if _, isMatched := v.Field(i).Interface().(Identity); isMatched {
 			pk = "id"
 			break
 		}
 
 		tags := reflect.GetTags(t.Field(i), "gorm")
-		if _, isMap := tags["ignore"]; isMap {
+		if _, isMatched := tags["ignore"]; isMatched {
 			continue
 		}
 
-		if _, isMap := tags["embedded"]; isMap {
+		if _, isMatched := tags["embedded"]; isMatched {
 			continue
 		}
 
@@ -139,9 +139,9 @@ func (o *database) getPrimaryKey(ety interface{}) (pk string) {
 
 // getFieldName ***************************************************************************************************************************
 func (o *database) getFieldName(f reflect_.StructField) (nm string) {
-	var isMap bool
+	var isMatched bool
 	tags := reflect.GetTags(f, "gorm")
-	if nm, isMap = tags["column"]; !isMap {
+	if nm, isMatched = tags["column"]; !isMatched {
 		nm = f.Name
 	}
 
