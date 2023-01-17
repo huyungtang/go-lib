@@ -11,6 +11,7 @@ require (
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/spf13/viper v1.13.0
+	github.com/tdewolff/minify v2.3.6+incompatible
 	go.mongodb.org/mongo-driver v1.10.3
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
@@ -62,6 +63,8 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
+	github.com/tdewolff/parse v2.3.4+incompatible // indirect
+	github.com/tdewolff/test v1.0.7 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
