@@ -1,8 +1,7 @@
-package template
+package slack
 
 import (
-	"html/template"
-	"io"
+	base "github.com/slack-go/slack"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -13,23 +12,19 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// ParseGlobOption
+// MsgHeaderOption
 // ****************************************************************************************************************************************
-func ParseGlobOption(pattern string) Options {
-	return func(p *tmpl) (err error) {
-		p.Template, err = template.ParseGlob(pattern)
-
-		return
+func MsgHeaderOption(text string) MsgOption {
+	return func(mo *msgOption) {
+		mo.blocks = append(mo.blocks, base.NewHeaderBlock(&base.TextBlockObject{Type: "plain_text", Text: text}))
 	}
 }
 
-// WriterOption
+// MsgMarkdownOption
 // ****************************************************************************************************************************************
-func WriterOption(w io.Writer) Options {
-	return func(p *tmpl) (err error) {
-		p.buf = w
-
-		return
+func MsgMarkdownOption(text string) MsgOption {
+	return func(mo *msgOption) {
+		mo.blocks = append(mo.blocks, base.NewSectionBlock(&base.TextBlockObject{Type: "mrkdwn", Text: text}, nil, nil))
 	}
 }
 
@@ -37,9 +32,14 @@ func WriterOption(w io.Writer) Options {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Options
+// msgOption ******************************************************************************************************************************
+type msgOption struct {
+	blocks []base.Block
+}
+
+// MsgOption
 // ****************************************************************************************************************************************
-type Options func(*tmpl) error
+type MsgOption func(*msgOption)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

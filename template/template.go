@@ -22,15 +22,17 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(opts ...Options) Template {
+func Init(opts ...Options) (tmp Template, err error) {
 	p := &tmpl{
 		buf: os.Stdout,
 	}
 	for _, opt := range opts {
-		opt(p)
+		if err = opt(p); err != nil {
+			return
+		}
 	}
 
-	return p
+	return p, nil
 }
 
 // type defineds **************************************************************************************************************************
@@ -40,47 +42,38 @@ func Init(opts ...Options) Template {
 // tmpl ***********************************************************************************************************************************
 type tmpl struct {
 	*template.Template
-	err      error
 	buf      io.Writer
 	mini     *minify.M
 	miniOnce sync.Once
 }
 
 // minifier *******************************************************************************************************************************
-func (o *tmpl) minifier(reader io.Reader) {
+func (o *tmpl) minifier(reader io.Reader) (err error) {
 	o.miniOnce.Do(func() {
 		o.mini = minify.New()
 		o.mini.AddFunc("text/css", css.Minify)
 		o.mini.AddFunc("text/html", html.Minify)
 	})
 
-	o.err = o.mini.Minify("text/html", o.buf, reader)
+	return o.mini.Minify("text/html", o.buf, reader)
 }
 
 // Template
 // ****************************************************************************************************************************************
 type Template interface {
 	// Execute(html_name, dto)
-	Execute(string, interface{})
-
-	Err() error
+	Execute(string, interface{}) error
 }
 
 // Execute
 // ****************************************************************************************************************************************
-func (o *tmpl) Execute(name string, dto interface{}) {
+func (o *tmpl) Execute(name string, dto interface{}) (err error) {
 	var buf bytes.Buffer
-	if o.err = o.Template.ExecuteTemplate(&buf, name, dto); o.err != nil {
+	if err = o.Template.ExecuteTemplate(&buf, name, dto); err != nil {
 		return
 	}
 
-	o.minifier(&buf)
-}
-
-// Err
-// ****************************************************************************************************************************************
-func (o *tmpl) Err() (err error) {
-	return o.err
+	return o.minifier(&buf)
 }
 
 // private functions **********************************************************************************************************************
