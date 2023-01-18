@@ -12,19 +12,52 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// MsgHeaderOption
+// NewAttachment
 // ****************************************************************************************************************************************
-func MsgHeaderOption(text string) MsgOption {
+func NewAttachment(opts ...AttachOption) MsgOption {
+	attach := base.Attachment{}
+	for _, opt := range opts {
+		opt(&attach)
+	}
+
 	return func(mo *msgOption) {
-		mo.blocks = append(mo.blocks, base.NewHeaderBlock(&base.TextBlockObject{Type: "plain_text", Text: text}))
+		mo.attaches = append(mo.attaches, attach)
 	}
 }
 
-// MsgMarkdownOption
+// AttachTitleOption
 // ****************************************************************************************************************************************
-func MsgMarkdownOption(text string) MsgOption {
-	return func(mo *msgOption) {
-		mo.blocks = append(mo.blocks, base.NewSectionBlock(&base.TextBlockObject{Type: "mrkdwn", Text: text}, nil, nil))
+func AttachTitleOption(text string) AttachOption {
+	return func(a *base.Attachment) {
+		a.Title = text
+	}
+}
+
+// AttachTextOption
+// ****************************************************************************************************************************************
+func AttachTextOption(text string) AttachOption {
+	return func(a *base.Attachment) {
+		a.Text = text
+	}
+}
+
+// AttachColorOption
+// ****************************************************************************************************************************************
+func AttachColorOption(color string) AttachOption {
+	return func(a *base.Attachment) {
+		a.Color = color
+	}
+}
+
+// AttachFieldOption
+// ****************************************************************************************************************************************
+func AttachFieldOption(title, value string, short bool) AttachOption {
+	return func(a *base.Attachment) {
+		a.Fields = append(a.Fields, base.AttachmentField{
+			Title: title,
+			Value: value,
+			Short: short,
+		})
 	}
 }
 
@@ -32,15 +65,9 @@ func MsgMarkdownOption(text string) MsgOption {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// msgOption ******************************************************************************************************************************
-type msgOption struct {
-	blocks   []base.Block
-	attaches []base.Attachment
-}
-
-// MsgOption
+// AttachOption
 // ****************************************************************************************************************************************
-type MsgOption func(*msgOption)
+type AttachOption func(*base.Attachment)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

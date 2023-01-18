@@ -39,6 +39,7 @@ type client struct {
 // Client
 // ****************************************************************************************************************************************
 type Client interface {
+	// PostMessage(channel, opts)
 	PostMessage(string, ...MsgOption) error
 }
 
@@ -52,7 +53,14 @@ func (o *client) PostMessage(channel string, opts ...MsgOption) (err error) {
 	for _, opt := range opts {
 		opt(msg)
 	}
-	args = append(args, base.MsgOptionBlocks(msg.blocks...))
+
+	if len(msg.blocks) > 0 {
+		args = append(args, base.MsgOptionBlocks(msg.blocks...))
+	}
+
+	if len(msg.attaches) > 0 {
+		args = append(args, base.MsgOptionAttachments(msg.attaches...))
+	}
 
 	_, _, err = o.client.PostMessage(channel, args...)
 
