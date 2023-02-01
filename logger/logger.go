@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -29,6 +30,17 @@ func Log(args ...interface{}) {
 // ****************************************************************************************************************************************
 func Logf(msg string, args ...interface{}) {
 	log.Printf(msg, args...)
+}
+
+// Json
+// ****************************************************************************************************************************************
+func Json(dto interface{}) {
+	bs, err := json.Marshal(dto)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(bs))
 }
 
 // Print
