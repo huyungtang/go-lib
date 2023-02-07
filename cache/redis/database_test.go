@@ -1,13 +1,13 @@
 package redis
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/huyungtang/go-lib/cache"
 	"github.com/huyungtang/go-lib/config"
 	"github.com/huyungtang/go-lib/config/viper"
 	"github.com/huyungtang/go-lib/file"
+	"github.com/huyungtang/go-lib/strings"
 )
 
 // constants & variables ******************************************************************************************************************

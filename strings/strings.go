@@ -46,6 +46,12 @@ func Join(strs []string, sep string) string {
 	return base.Join(strs, sep)
 }
 
+// LastIndex
+// ****************************************************************************************************************************************
+func LastIndex(s, ss string) int {
+	return base.LastIndex(s, ss)
+}
+
 // OmitEmpty
 // ****************************************************************************************************************************************
 func OmitEmpty(strs []string) []string {
@@ -102,6 +108,12 @@ func Reverse(str string) string {
 	}
 
 	return string(r)
+}
+
+// Split
+// ****************************************************************************************************************************************
+func Split(s, sep string) []string {
+	return base.Split(s, sep)
 }
 
 // ToLower
