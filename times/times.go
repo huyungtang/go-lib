@@ -81,6 +81,7 @@ type Time interface {
 	Local() Time
 	Time() base.Time
 	Format(string) string
+	Period() uint64
 	UnixDay() int64
 	UnixSecond() int64
 	UnixMilli() int64
@@ -133,6 +134,12 @@ func (o tm) Time() base.Time {
 // ****************************************************************************************************************************************
 func (o tm) Format(fmt string) string {
 	return base.Time(o).Format(fmt)
+}
+
+// Period
+// ****************************************************************************************************************************************
+func (o tm) Period() uint64 {
+	return uint64(o.Time().Year()*100 + int(o.Time().Month()))
 }
 
 // UnixDay
