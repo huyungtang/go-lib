@@ -13,11 +13,21 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
+// FuncsOption
+// ****************************************************************************************************************************************
+func FuncsOption(funcs template.FuncMap) Options {
+	return func(p *tmpl) (err error) {
+		p.Template = template.Must(p.init().Template.Funcs(funcs), err)
+
+		return
+	}
+}
+
 // ParseGlobOption
 // ****************************************************************************************************************************************
 func ParseGlobOption(pattern string) Options {
 	return func(p *tmpl) (err error) {
-		p.Template, err = template.ParseGlob(pattern)
+		p.Template, err = p.init().Template.ParseGlob(pattern)
 
 		return
 	}
