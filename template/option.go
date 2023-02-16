@@ -17,7 +17,7 @@ import (
 // ****************************************************************************************************************************************
 func FuncsOption(funcs template.FuncMap) Options {
 	return func(p *tmpl) (err error) {
-		p.Template = template.Must(p.init().Template.Funcs(funcs), err)
+		p.Template = p.init().Template.Funcs(funcs)
 
 		return
 	}

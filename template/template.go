@@ -71,13 +71,13 @@ func (o *tmpl) minifier(reader io.Reader) (err error) {
 // Template
 // ****************************************************************************************************************************************
 type Template interface {
-	// Execute(html_name, dto)
-	Execute(string, interface{}) error
+	// ExecuteTemplate(html_name, dto)
+	ExecuteTemplate(string, interface{}) error
 }
 
-// Execute
+// ExecuteTemplate
 // ****************************************************************************************************************************************
-func (o *tmpl) Execute(name string, dto interface{}) (err error) {
+func (o *tmpl) ExecuteTemplate(name string, dto interface{}) (err error) {
 	var buf bytes.Buffer
 	if err = o.Template.ExecuteTemplate(&buf, name, dto); err != nil {
 		return
