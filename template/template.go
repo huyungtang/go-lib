@@ -2,7 +2,7 @@ package template
 
 import (
 	"bytes"
-	"html/template"
+	base "html/template"
 	"io"
 	"os"
 	"sync"
@@ -22,64 +22,73 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(opts ...Options) (tmp Template, err error) {
-	p := &tmpl{
-		buf: os.Stdout,
+func Init(opts ...Options) (p Template, err error) {
+	tpl := &template{
+		mini: minify.New(),
+		out:  os.Stdout,
 	}
+	tpl.mini.AddFunc("text/css", css.Minify)
+	tpl.mini.AddFunc("text/html", html.Minify)
+
 	for _, opt := range opts {
-		if err = opt(p); err != nil {
+		if err = opt(tpl); err != nil {
 			return
 		}
 	}
 
-	return p, nil
+	return tpl, nil
 }
 
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// tmpl ***********************************************************************************************************************************
-type tmpl struct {
-	*template.Template
-	tempOnce sync.Once
-	buf      io.Writer
+// template *******************************************************************************************************************************
+type template struct {
+	*base.Template
+	tmplOnce sync.Once
 	mini     *minify.M
 	miniOnce sync.Once
-}
-
-// init ***********************************************************************************************************************************
-func (o *tmpl) init() *tmpl {
-	o.tempOnce.Do(func() {
-		o.Template = template.New("")
-	})
-
-	return o
+	out      io.Writer
 }
 
 // minifier *******************************************************************************************************************************
-func (o *tmpl) minifier(reader io.Reader) (err error) {
+func (o *template) minifier(reader io.Reader) (err error) {
 	o.miniOnce.Do(func() {
 		o.mini = minify.New()
 		o.mini.AddFunc("text/css", css.Minify)
 		o.mini.AddFunc("text/html", html.Minify)
 	})
 
-	return o.mini.Minify("text/html", o.buf, reader)
+	return o.mini.Minify("text/html", o.out, reader)
 }
 
 // Template
 // ****************************************************************************************************************************************
 type Template interface {
-	// ExecuteTemplate(html_name, dto)
+	// Execute(dto)
+	Execute(interface{}) error
+
+	// ExecuteTemplate(template, dto)
 	ExecuteTemplate(string, interface{}) error
+}
+
+// Execute
+// ****************************************************************************************************************************************
+func (o *template) Execute(data interface{}) (err error) {
+	var buf bytes.Buffer
+	if err = o.Template.Execute(&buf, data); err != nil {
+		return
+	}
+
+	return o.minifier(&buf)
 }
 
 // ExecuteTemplate
 // ****************************************************************************************************************************************
-func (o *tmpl) ExecuteTemplate(name string, dto interface{}) (err error) {
+func (o *template) ExecuteTemplate(name string, data interface{}) (err error) {
 	var buf bytes.Buffer
-	if err = o.Template.ExecuteTemplate(&buf, name, dto); err != nil {
+	if err = o.Template.ExecuteTemplate(&buf, name, data); err != nil {
 		return
 	}
 

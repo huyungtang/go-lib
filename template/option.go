@@ -1,7 +1,7 @@
 package template
 
 import (
-	"html/template"
+	base "html/template"
 	"io"
 )
 
@@ -13,11 +13,52 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
+// OutputOption
+// ****************************************************************************************************************************************
+func OutputOption(w io.Writer) Options {
+	return func(t *template) (err error) {
+		t.out = w
+
+		return
+	}
+}
+
 // FuncsOption
 // ****************************************************************************************************************************************
-func FuncsOption(funcs template.FuncMap) Options {
-	return func(p *tmpl) (err error) {
-		p.Template = p.init().Template.Funcs(funcs)
+func FuncsOption(funcs base.FuncMap) Options {
+	return func(t *template) (err error) {
+		t.tmplOnce.Do(func() {
+			t.Template, err = base.New("empty").Parse("must use ExecuteTemplate")
+		})
+
+		if err != nil {
+			return
+		}
+
+		t.Template = t.Template.Funcs(funcs)
+
+		return
+	}
+}
+
+// ParseFiles
+// ****************************************************************************************************************************************
+func ParseFiles(filename ...string) Options {
+	return func(t *template) (err error) {
+		done := false
+		t.tmplOnce.Do(func() {
+			defer func() {
+				done = true
+			}()
+
+			t.Template, err = base.ParseFiles(filename...)
+		})
+
+		if done || err != nil {
+			return
+		}
+
+		t.Template, err = t.Template.ParseFiles(filename...)
 
 		return
 	}
@@ -26,18 +67,21 @@ func FuncsOption(funcs template.FuncMap) Options {
 // ParseGlobOption
 // ****************************************************************************************************************************************
 func ParseGlobOption(pattern string) Options {
-	return func(p *tmpl) (err error) {
-		p.Template, err = p.init().Template.ParseGlob(pattern)
+	return func(t *template) (err error) {
+		done := false
+		t.tmplOnce.Do(func() {
+			defer func() {
+				done = true
+			}()
 
-		return
-	}
-}
+			t.Template, err = base.ParseGlob(pattern)
+		})
 
-// WriterOption
-// ****************************************************************************************************************************************
-func WriterOption(w io.Writer) Options {
-	return func(p *tmpl) (err error) {
-		p.buf = w
+		if done || err != nil {
+			return
+		}
+
+		t.Template, err = t.Template.ParseGlob(pattern)
 
 		return
 	}
@@ -49,7 +93,7 @@ func WriterOption(w io.Writer) Options {
 
 // Options
 // ****************************************************************************************************************************************
-type Options func(*tmpl) error
+type Options func(*template) error
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
