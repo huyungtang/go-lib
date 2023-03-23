@@ -40,6 +40,7 @@ func TestCalendar(t *testing.T) {
 	res := serv.AddEvent(
 		"test busy",
 		EventStartOption(time.Now()),
+		EventEndOption(time.Now()),
 		AllDayEventOption(),
 		RecurrenceOtpion("RRULE:FREQ=MONTHLY;COUNT=3;INTERVAL=3", "RRULE:FREQ=YEARLY"),
 		EventBusyOption(),
