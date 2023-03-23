@@ -38,14 +38,6 @@ func DescriptionOption(desc string) google.Options {
 	}
 }
 
-// EventDurationOption
-// ****************************************************************************************************************************************
-func EventDurationOption(dur time.Duration) google.Options {
-	return func(o *google.Option) {
-		o.Duration = dur
-	}
-}
-
 // EventBusyOption
 // ****************************************************************************************************************************************
 func EventBusyOption() google.Options {

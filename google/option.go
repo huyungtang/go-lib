@@ -55,7 +55,6 @@ type Option struct {
 	CalendarId   string
 	Description  string
 	Recurrency   []string
-	Duration     time.Duration
 	Timezone     string
 	StartTime    time.Time
 	EndTime      time.Time

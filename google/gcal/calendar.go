@@ -23,7 +23,6 @@ func Init(opts ...google.Options) (serv Service, err error) {
 	cfg := new(google.Option).
 		ApplyOptions(opts,
 			CalendarIdOption("primary"),
-			EventDurationOption(time.Hour),
 		)
 
 	var cal *base.Service
@@ -59,13 +58,10 @@ type Service interface {
 func (o *service) AddEvent(summary string, opts ...google.Options) google.Event {
 	opt := &google.Option{
 		CalendarId:   o.CalendarId,
-		Duration:     o.Duration,
 		Transparency: "transparent",
 		StartTime:    time.Now(),
 	}
-	opt.ApplyOptions(opts,
-		EventEndOption(opt.StartTime.Add(opt.Duration)),
-	)
+	opt.ApplyOptions(opts)
 
 	evt := &base.Event{
 		Summary:      summary,
