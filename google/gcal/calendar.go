@@ -96,8 +96,8 @@ func (o *service) ListEvent(opts ...google.Options) google.Events {
 	opt := (&google.Option{
 		CalendarId: o.CalendarId,
 		MaxResult:  100,
-		StartTime:  times.Today().Add(0, -1).Time(),
-		EndTime:    times.Today().Add(0, 0, 1).Time(),
+		StartTime:  times.Add(times.Today(), 0, -1),
+		EndTime:    times.Add(times.Today(), 0, 0, 1),
 	}).ApplyOptions(opts)
 
 	res := new(result)

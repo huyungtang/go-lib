@@ -56,7 +56,7 @@ func (o *entity) DN() string {
 // IsValid
 // ****************************************************************************************************************************************
 func (o *entity) IsValid() bool {
-	if exp, err := o.AttrInt(ldap.ShadowExpire); err == nil && (exp == -1 || exp >= times.Today().UnixDay()) {
+	if exp, err := o.AttrInt(ldap.ShadowExpire); err == nil && (exp == -1 || exp >= times.UnixDay(times.Today())) {
 		return true
 	}
 

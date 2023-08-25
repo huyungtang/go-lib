@@ -19,7 +19,7 @@ func TestParse(t *testing.T) {
 	tm, err := Parse(DateFmt, dt)
 	if err != nil {
 		t.Error(err)
-	} else if tm.Local().UnixMilli() != 1136185445000 {
+	} else if AsLocal(tm).UnixMilli() != 1136185445000 {
 		t.Fail()
 	}
 }
@@ -27,12 +27,12 @@ func TestParse(t *testing.T) {
 // TestUnixDay
 // ****************************************************************************************************************************************
 func TestUnixDay(t *testing.T) {
-	v, e := Parse(RCF3339, "1970-01-31T23:59:59+08:00")
+	v, e := Parse(RCF3339, "1970-01-31T00:00:00+08:00")
 	if e != nil {
 		t.Error(e)
 	}
 
-	if v.UnixDay() != 30 {
+	if UnixDay(v) != 30 {
 		t.Fail()
 	}
 }

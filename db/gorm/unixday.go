@@ -23,13 +23,13 @@ type UnixDay int64
 // UnixMilli
 // ****************************************************************************************************************************************
 func (o UnixDay) UnixMilli() int64 {
-	return times.UnixDay(int64(o)).UnixMilli()
+	return times.FromUnixDay(int64(o)).UnixMilli()
 }
 
 // SetMilli
 // ****************************************************************************************************************************************
 func (o *UnixDay) SetMilli(ms int64) {
-	*o = UnixDay(times.Unix(ms/1000, 0).UnixDay())
+	*o = UnixDay(times.UnixDay(times.FromUnix(ms/1000, 0)))
 }
 
 // private functions **********************************************************************************************************************

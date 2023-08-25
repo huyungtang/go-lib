@@ -194,9 +194,8 @@ func getArgs(cfg *cache.Option) (args base.SetArgs) {
 
 // getExpire ******************************************************************************************************************************
 func getExpire(opt *cache.Option) (exp time.Time, ttl time.Duration, keep bool) {
-	now := times.Now()
-	if opt.Expire > now.UnixSecond() {
-		exp = times.Unix(opt.Expire, 0).Time()
+	if opt.Expire > times.UnixSecond(times.Now()) {
+		exp = times.FromUnix(opt.Expire, 0)
 	} else if opt.Expire > cache.KeepTTL {
 		ttl = times.Duration(0, 0, opt.Expire)
 	} else if opt.Expire == cache.KeepTTL {
@@ -208,8 +207,7 @@ func getExpire(opt *cache.Option) (exp time.Time, ttl time.Duration, keep bool) 
 
 // getExpireCmder *************************************************************************************************************************
 func getExpireCmder(opt *cache.Option, ctx context.Context, key string) (cmd base.Cmder) {
-	now := times.Now()
-	if opt.Expire > now.UnixSecond() {
+	if opt.Expire > times.UnixSecond(times.Now()) {
 		cmd = base.NewCmd(ctx, "EXPIREAT", key, opt.Expire)
 	} else if opt.Expire > 0 {
 		cmd = base.NewCmd(ctx, "EXPIRE", key, opt.Expire)
