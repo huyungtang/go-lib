@@ -18,6 +18,7 @@ const (
 	headerSendTos string = "To"
 	headerSendCcs string = "Cc"
 	headerSendBcc string = "Bcc"
+	headerFrom    string = "From"
 	headerReplyTo string = "Reply-To"
 )
 
@@ -73,6 +74,14 @@ func SendCcOption(addr, name string) google.Options {
 func SendBccOption(addr, name string) google.Options {
 	return func(o *google.Option) {
 		o.Header.Add(headerSendBcc, (&mail.Address{Name: name, Address: addr}).String())
+	}
+}
+
+// FromOption
+// ****************************************************************************************************************************************
+func FromOption(addr, name string) google.Options {
+	return func(o *google.Option) {
+		o.Header.Add(headerFrom, (&mail.Address{Name: name, Address: addr}).String())
 	}
 }
 
