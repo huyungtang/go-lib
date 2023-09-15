@@ -142,9 +142,9 @@ func (o *table) Get(ety interface{}) (err error) {
 
 		p.SetCount(cnt)
 		o.DB = o.DB.
-			Offset(p.GetPage() * p.GetSize()).
-			Limit(p.GetSize())
-		tar = p.GetData()
+			Offset(p.GetPageIndex() * p.GetPagedSize()).
+			Limit(p.GetPagedSize())
+		tar = p.GetDataDTO()
 	}
 
 	return o.DB.Find(tar).Error

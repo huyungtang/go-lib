@@ -127,9 +127,9 @@ func (o *collection) Get(ety interface{}) (err error) {
 		}
 		p.SetCount(cnt)
 
-		o.Offset(p.GetPage() * p.GetSize()).
-			Limit(p.GetSize())
-		tar = p.GetData()
+		o.Offset(p.GetPageIndex() * p.GetPagedSize()).
+			Limit(p.GetPagedSize())
+		tar = p.GetDataDTO()
 	}
 
 	if cur, err = o.Collection.Aggregate(context.Background(), o.aggregates()); err != nil {

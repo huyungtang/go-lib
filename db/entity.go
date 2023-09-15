@@ -21,9 +21,9 @@ type Identity interface {
 // Paged
 // ****************************************************************************************************************************************
 type Paged interface {
-	GetPage() int
-	GetSize() int
-	GetData() interface{}
+	GetPageIndex() int
+	GetPagedSize() int
+	GetDataDTO() interface{}
 	SetCount(int64)
 }
 
