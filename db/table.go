@@ -17,6 +17,8 @@ package db
 type Table interface {
 	Query
 
+	LockForUpdate() Table
+
 	Select(interface{}, ...interface{}) Table
 	Omit(...string) Table
 

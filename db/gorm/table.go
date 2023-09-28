@@ -43,6 +43,16 @@ func (o *table) GetPagedList(ety interface{}) (err error) {
 	return o.Get(ety)
 }
 
+// LockForUpdate
+// ****************************************************************************************************************************************
+func (o *table) LockForUpdate() db.Table {
+	o.DB = o.DB.Clauses(clause.Locking{
+		Strength: "UPDATE",
+	})
+
+	return o
+}
+
 // Select
 // ****************************************************************************************************************************************
 func (o *table) Select(qry interface{}, cols ...interface{}) db.Table {
