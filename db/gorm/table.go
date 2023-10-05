@@ -77,6 +77,16 @@ func (o *table) Join(qry string, args ...interface{}) db.Table {
 	return o
 }
 
+// Available
+// ****************************************************************************************************************************************
+func (o *table) Available() db.Table {
+	if _, isOK := o.entity.(db.Deleted); isOK {
+		o.DB = o.DB.Where("deleted_at = 0")
+	}
+
+	return o
+}
+
 // Where
 // ****************************************************************************************************************************************
 func (o *table) Where(qry interface{}, args ...interface{}) db.Table {

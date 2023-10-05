@@ -24,6 +24,7 @@ type Table interface {
 
 	Join(string, ...interface{}) Table
 
+	Available() Table
 	Where(interface{}, ...interface{}) Table
 	Having(interface{}, ...interface{}) Table
 
