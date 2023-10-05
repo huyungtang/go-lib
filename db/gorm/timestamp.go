@@ -19,7 +19,7 @@ import (
 // Created
 // ****************************************************************************************************************************************
 type Created struct {
-	CreatedAt int64 `gorm:"column:created_at;autoUpdateTime:false"`
+	CreatedAt int64 `gorm:"column:created_at;autoUpdateTime:false" json:",omitempty"`
 }
 
 // Create
@@ -31,7 +31,7 @@ func (o *Created) Create() {
 // Updated
 // ****************************************************************************************************************************************
 type Updated struct {
-	UpdatedAt int64 `gorm:"column:updated_at;autoUpdateTime:false"`
+	UpdatedAt int64 `gorm:"column:updated_at;autoUpdateTime:false" json:",omitempty"`
 }
 
 // Update
@@ -43,7 +43,7 @@ func (o *Updated) Update() {
 // Deleted
 // ****************************************************************************************************************************************
 type Deleted struct {
-	DeletedAt int64 `gorm:"column:deleted_at;autoUpdateTime:false"`
+	DeletedAt int64 `gorm:"column:deleted_at;autoUpdateTime:false" json:",omitempty"`
 }
 
 // Delete
