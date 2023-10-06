@@ -23,6 +23,7 @@ type Table interface {
 	Omit(...string) Table
 
 	Join(string, ...interface{}) Table
+	Preload(string, ...interface{}) Table
 
 	Available() Table
 	Where(interface{}, ...interface{}) Table

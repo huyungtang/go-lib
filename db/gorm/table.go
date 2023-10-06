@@ -77,6 +77,14 @@ func (o *table) Join(qry string, args ...interface{}) db.Table {
 	return o
 }
 
+// Preload
+// ****************************************************************************************************************************************
+func (o *table) Preload(qry string, args ...interface{}) db.Table {
+	o.DB = o.DB.Preload(qry, args...)
+
+	return o
+}
+
 // Available
 // ****************************************************************************************************************************************
 func (o *table) Available() db.Table {
