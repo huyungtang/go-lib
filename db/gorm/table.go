@@ -204,7 +204,10 @@ func (o *table) Delete() (err error) {
 // Count
 // ****************************************************************************************************************************************
 func (o *table) Count() (cnt int64, err error) {
+	var p map[string][]interface{}
+	p, o.DB.Statement.Preloads = o.DB.Statement.Preloads, make(map[string][]interface{})
 	err = o.DB.Count(&cnt).Error
+	o.DB.Statement.Preloads = p
 
 	return
 }
@@ -243,6 +246,54 @@ func (o *table) Commit() (err error) {
 // ****************************************************************************************************************************************
 func (o *table) ResetClauses() {
 	o.DB.Statement.Clauses = make(map[string]clause.Clause)
+}
+
+// CreateColumns
+// ****************************************************************************************************************************************
+func (o *table) CreateColumns() (cols []string) {
+	tp := reflect.TypeOf(o.entity)
+	cols = make([]string, 0, tp.NumField())
+	for i := 0; i < tp.NumField(); i++ {
+		tg := reflect.GetTags(tp.Field(i), "gorm")
+
+		col, isOK := tg["column"]
+		if !isOK {
+			continue
+		}
+
+		per, isOK := tg["<-"]
+		if isOK && per == "update" {
+			continue
+		}
+
+		cols = append(cols, col)
+	}
+
+	return
+}
+
+// UpdateColumns
+// ****************************************************************************************************************************************
+func (o *table) UpdateColumns() (cols []string) {
+	tp := reflect.TypeOf(o.entity)
+	cols = make([]string, 0, tp.NumField())
+	for i := 0; i < tp.NumField(); i++ {
+		tg := reflect.GetTags(tp.Field(i), "gorm")
+
+		col, isOK := tg["column"]
+		if !isOK {
+			continue
+		}
+
+		per, isOK := tg["<-"]
+		if isOK && per == "create" {
+			continue
+		}
+
+		cols = append(cols, col)
+	}
+
+	return
 }
 
 // private functions **********************************************************************************************************************

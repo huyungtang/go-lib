@@ -46,6 +46,9 @@ type Table interface {
 	Begin() Transaction
 
 	ResetClauses()
+
+	CreateColumns() []string
+	UpdateColumns() []string
 }
 
 // Transaction
