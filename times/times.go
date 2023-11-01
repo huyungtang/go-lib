@@ -53,6 +53,15 @@ func AsLocal(t base.Time) base.Time {
 	return base.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), base.Local)
 }
 
+// Date
+// ****************************************************************************************************************************************
+func Date(ymdhms ...int) base.Time {
+	defa := []int{0, 0, 0, 0, 0, 0, 0}
+	copy(defa, ymdhms)
+
+	return base.Date(defa[0], base.Month(defa[1]), defa[2], defa[3], defa[4], defa[5], defa[6], base.Local)
+}
+
 // Duration
 // ****************************************************************************************************************************************
 func Duration(h, m, s int64) (d base.Duration) {
@@ -88,6 +97,7 @@ func IsOver(stm, etm base.Time, dur base.Duration) bool {
 // Now
 // ****************************************************************************************************************************************
 func Now() base.Time {
+
 	return base.Now()
 }
 
