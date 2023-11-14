@@ -44,6 +44,7 @@ type context struct {
 // ****************************************************************************************************************************************
 type Context interface {
 	Value(interface{}) interface{}
+	WithValue(interface{}, interface{})
 	Next() error
 	SetInfo(string)
 	SetWarn(string)
@@ -55,6 +56,12 @@ type Context interface {
 // ****************************************************************************************************************************************
 func (o *context) Value(key interface{}) interface{} {
 	return o.context.Value(key)
+}
+
+// WithValue
+// ****************************************************************************************************************************************
+func (o *context) WithValue(key, val interface{}) {
+	o.context = base.WithValue(o.context, key, val)
 }
 
 // Next
