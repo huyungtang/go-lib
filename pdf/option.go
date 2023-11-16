@@ -12,14 +12,17 @@ import (
 // ****************************************************************************************************************************************
 
 const (
-	Top      position = 1 << 1
-	Middle   position = 1 << 2
-	Baseline position = 1 << 3
-	Left     position = 1 << 4
-	Center   position = 1 << 5
-	Right    position = 1 << 6
-	Bottom   position = 1 << 7
+	Top position = 1 << iota
+	Middle
+	Baseline
+	Left
+	Center
+	Right
+	Bottom
+	All position = Top | Left | Right | Bottom
+)
 
+const (
 	PageSizeA4 pageSize = "A4"
 	PageSizeA5 pageSize = "A5"
 
@@ -82,7 +85,15 @@ func FontOption(name string, font []byte) Option {
 		if o.fonts == nil {
 			o.fonts = make(map[string][]byte)
 		}
-		o.fonts[name] = font
+		o.fonts[strings.ToLower(name)] = font
+	}
+}
+
+// FontStyleOpiton
+// ****************************************************************************************************************************************
+func FontStyleOpiton(name string) Option {
+	return func(o *option) {
+		o.font = name
 	}
 }
 
@@ -144,6 +155,22 @@ func WidthOption(wd float64) Option {
 	}
 }
 
+// HeightOption
+// ****************************************************************************************************************************************
+func HeightOption(ht float64) Option {
+	return func(o *option) {
+		o.height = ht
+	}
+}
+
+// WrapOption
+// ****************************************************************************************************************************************
+func WrapOption(wrap bool) Option {
+	return func(o *option) {
+		o.wrap = wrap
+	}
+}
+
 // type defineds **************************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -164,6 +191,8 @@ type option struct {
 	marginLeft  float64
 	marginRight float64
 	width       float64
+	height      float64
+	wrap        bool
 }
 
 // getAlign *******************************************************************************************************************************
@@ -230,7 +259,11 @@ func (o *option) getFontSize() float64 {
 
 // getLineHeight **************************************************************************************************************************
 func (o *option) getLineHeight() float64 {
-	return (o.fontSize * o.fontRem / 2)
+	if o.height != 0 {
+		return o.fontSize * o.height * 0.6
+	}
+
+	return o.fontSize * o.fontRem * 0.6
 }
 
 // getTextColor ***************************************************************************************************************************

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"github.com/huyungtang/go-lib/strings"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -80,6 +82,27 @@ func PathHome(dirs ...string) string {
 	home, _ := os.UserHomeDir()
 
 	return Path(home, dirs...)
+}
+
+// PathSavename
+// ****************************************************************************************************************************************
+func PathSavename(root string, ln, layer int) string {
+	dl := layer * 2
+	if dl > ln {
+		dl = (ln - (ln % 2)) / 2
+	}
+
+	fn, dn := []rune(strings.ToUpper(strings.Random(ln))), make([]rune, dl)
+	copy(dn, fn)
+
+	dir := make([]string, layer)
+	for i := 0; i < dl; i += 2 {
+		dir = append(dir, string(dn[i:i+2]))
+	}
+	root = Path(root, dir...)
+	MakeDir(root)
+
+	return filepath.Join(root, string(fn))
 }
 
 // PathTemp

@@ -49,6 +49,12 @@ func HasSuffix(str, suf string) bool {
 	return base.HasSuffix(str, suf)
 }
 
+// Index
+// ****************************************************************************************************************************************
+func Index(s string, sp string) int {
+	return base.Index(s, sp)
+}
+
 // Join
 // ****************************************************************************************************************************************
 func Join(strs []string, sep string) string {
@@ -58,6 +64,7 @@ func Join(strs []string, sep string) string {
 // LastIndex
 // ****************************************************************************************************************************************
 func LastIndex(s, ss string) int {
+
 	return base.LastIndex(s, ss)
 }
 
