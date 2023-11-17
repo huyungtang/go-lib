@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/go-pdf/fpdf"
+	"github.com/huyungtang/go-lib/strings"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -107,7 +108,7 @@ func (o *context) Text(txt string, args ...Option) PDF {
 	o.Fpdf.SetFont(opt.font, "", opt.getFontSize())
 
 	if opt.wrap {
-		o.Fpdf.MultiCell(w, opt.getLineHeight(), txt, opt.getBorder(), opt.getAlign(), false)
+		o.Fpdf.MultiCell(w, opt.getLineHeight(), strings.Fixed(txt, int(w)), opt.getBorder(), opt.getAlign(), false)
 	} else {
 		o.Fpdf.CellFormat(w, opt.getLineHeight(), txt, opt.getBorder(), ln, opt.getAlign(), false, 0, "")
 	}

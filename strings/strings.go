@@ -37,6 +37,30 @@ func Find(str, pattern string) string {
 	return regexp.MustCompile(pattern).FindString(str)
 }
 
+// Fixed
+// ****************************************************************************************************************************************
+func Fixed(str string, ml int) string {
+	out := make([]rune, 0, len([]rune(str)))
+	cl := 0
+	for _, j := range str {
+		if j == 10 {
+			cl = 0
+		} else {
+			bs := []byte(string(j))
+			if l := len(bs); cl+l > ml {
+				out = append(out, 10)
+				cl = l
+			} else {
+				cl += l
+			}
+		}
+
+		out = append(out, j)
+	}
+
+	return string(out)
+}
+
 // HasPrefix
 // ****************************************************************************************************************************************
 func HasPrefix(str, pre string) bool {
