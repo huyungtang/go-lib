@@ -2,10 +2,8 @@ package pdf
 
 import (
 	"io"
-	"math"
 
 	"github.com/go-pdf/fpdf"
-	"github.com/huyungtang/go-lib/slices"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -109,28 +107,7 @@ func (o *context) Text(txt string, args ...Option) PDF {
 	o.Fpdf.SetFont(opt.font, "", opt.getFontSize())
 
 	if opt.wrap {
-		_, uu := o.Fpdf.GetFontSize()
-		ml := int(math.Round(w * .96 / uu))
-		rs := []rune(txt)
-		rr := make([]rune, 0)
-		for l := len(rs); l > 0; {
-			x, isMatched := slices.IndexOf(l, func(i int) bool { return rs[i] == 10 })
-			if !isMatched {
-				x = l
-			}
-			if x > ml {
-				x = ml
-			}
-			rr = append(rr, rs[0:x]...)
-			rr = append(rr, 10)
-			if isMatched {
-				x++
-			}
-			rs = rs[x:]
-			l = len(rs)
-		}
-
-		o.Fpdf.MultiCell(w, opt.getLineHeight(), string(rr), opt.getBorder(), opt.getAlign(), false)
+		o.Fpdf.MultiCell(w, opt.getLineHeight(), txt, opt.getBorder(), opt.getAlign(), false)
 	} else {
 		o.Fpdf.CellFormat(w, opt.getLineHeight(), txt, opt.getBorder(), ln, opt.getAlign(), false, 0, "")
 	}

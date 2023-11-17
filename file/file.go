@@ -92,7 +92,7 @@ func PathSavename(root string, ln, layer int) string {
 		dl = (ln - (ln % 2)) / 2
 	}
 
-	fn, dn := []rune(strings.ToUpper(strings.Random(ln))), make([]rune, dl)
+	fn, dn := []rune(strings.ToLower(strings.Random(ln))), make([]rune, dl)
 	copy(dn, fn)
 
 	dir := make([]string, layer)
