@@ -2,6 +2,7 @@ package pdf
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/go-pdf/fpdf"
@@ -80,12 +81,14 @@ func ColorOption(rgb string) Option {
 
 // FontOption
 // ****************************************************************************************************************************************
-func FontOption(name string, font []byte) Option {
+func FontOption(name string, font string) Option {
 	return func(o *option) {
-		if o.fonts == nil {
-			o.fonts = make(map[string][]byte)
+		if bs, err := ioutil.ReadFile(font); err == nil {
+			if o.fonts == nil {
+				o.fonts = make(map[string][]byte)
+			}
+			o.fonts[strings.ToLower(name)] = bs
 		}
-		o.fonts[strings.ToLower(name)] = font
 	}
 }
 
