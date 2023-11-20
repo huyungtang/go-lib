@@ -105,6 +105,20 @@ func PathSavename(root string, ln, layer int) string {
 	return filepath.Join(root, string(fn))
 }
 
+// GetSavename
+// ****************************************************************************************************************************************
+func GetSavename(root, fn string, layer int) string {
+	dn := make([]rune, layer*2)
+	copy(dn, []rune(fn))
+	dir := make([]string, layer)
+	for i := 0; i < (layer * 2); i += 2 {
+		dir = append(dir, string(dn[i:i+2]))
+	}
+	root = Path(root, dir...)
+
+	return filepath.Join(root, fn)
+}
+
 // PathTemp
 // ****************************************************************************************************************************************
 func PathTemp(dirs ...string) string {
