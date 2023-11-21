@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/huyungtang/go-lib/strings"
 )
 
@@ -76,6 +77,12 @@ func PathCurrent(dirs ...string) string {
 	return Path(filepath.Dir(os.Args[0]), dirs...)
 }
 
+// GetFilename
+// ****************************************************************************************************************************************
+func GetFilename(path string) string {
+	return filepath.Base(path)
+}
+
 // PathHome
 // ****************************************************************************************************************************************
 func PathHome(dirs ...string) string {
@@ -86,13 +93,13 @@ func PathHome(dirs ...string) string {
 
 // PathSavename
 // ****************************************************************************************************************************************
-func PathSavename(root string, ln, layer int) string {
-	dl := layer * 2
-	if dl > ln {
-		dl = (ln - (ln % 2)) / 2
+func PathSavename(root string, layer int) string {
+	if layer > 5 {
+		layer = 5
 	}
+	dl := layer * 2
 
-	fn, dn := []rune(strings.ToLower(strings.Random(ln))), make([]rune, dl)
+	fn, dn := []rune(strings.ToLower(strings.Replace(uuid.New().String(), "-", ""))), make([]rune, dl)
 	copy(dn, fn)
 
 	dir := make([]string, layer)
@@ -108,6 +115,9 @@ func PathSavename(root string, ln, layer int) string {
 // GetSavename
 // ****************************************************************************************************************************************
 func GetSavename(root, fn string, layer int) string {
+	if layer > 5 {
+		layer = 5
+	}
 	dn := make([]rune, layer*2)
 	copy(dn, []rune(fn))
 	dir := make([]string, layer)
@@ -122,7 +132,6 @@ func GetSavename(root, fn string, layer int) string {
 // PathTemp
 // ****************************************************************************************************************************************
 func PathTemp(dirs ...string) string {
-
 	return Path(os.TempDir(), dirs...)
 }
 
