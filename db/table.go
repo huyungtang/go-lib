@@ -49,6 +49,7 @@ type Table interface {
 
 	CreateColumns() []string
 	UpdateColumns() []string
+	RowsAffected() int64
 }
 
 // Transaction
