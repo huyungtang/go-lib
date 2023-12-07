@@ -125,7 +125,7 @@ func GetSavename(root, fn string, layer int) string {
 	for i := 0; i < (layer * 2); i += 2 {
 		dir = append(dir, string(dn[i:i+2]))
 	}
-	root = Path(root, dir...)
+	root = Path(strings.Format("%s/", root), dir...)
 
 	return filepath.Join(root, fn)
 }
