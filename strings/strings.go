@@ -24,7 +24,7 @@ import (
 func Code128A(s string) string {
 	bs := make([]rune, 1, len(s)+3)
 	bs[0] = 203
-	ck := 103
+	ck := 0
 	for i, j := range s {
 		if j >= 32 {
 			ck += int(j-32) * (i + 1)
