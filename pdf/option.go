@@ -71,11 +71,19 @@ func BorderOption(border position) Option {
 	}
 }
 
-// ColorOption
+// TextColorOption
 // ****************************************************************************************************************************************
-func ColorOption(rgb string) Option {
+func TextColorOption(rgb string) Option {
 	return func(o *option) {
-		o.color = rgb
+		o.textColor = rgb
+	}
+}
+
+// BorderColorOption
+// ****************************************************************************************************************************************
+func BorderColorOption(rgb string) Option {
+	return func(o *option) {
+		o.borderColor = rgb
 	}
 }
 
@@ -184,7 +192,8 @@ type option struct {
 	fonts       map[string][]byte
 	fontSize    float64
 	fontRem     float64
-	color       string
+	textColor   string
+	borderColor string
 	align       position
 	border      position
 	pageSize    string
@@ -271,7 +280,14 @@ func (o *option) getLineHeight() float64 {
 
 // getTextColor ***************************************************************************************************************************
 func (o *option) getTextColor() (r, g, b int) {
-	fmt.Sscanf(strings.ToUpper(o.color), "#%2X%2X%2X", &r, &g, &b)
+	fmt.Sscanf(strings.ToUpper(o.textColor), "#%2X%2X%2X", &r, &g, &b)
+
+	return
+}
+
+// getBorderColor *************************************************************************************************************************
+func (o *option) getBorderColor() (r, g, b int) {
+	fmt.Sscanf(strings.ToUpper(o.borderColor), "#%2X%2X%2X", &r, &g, &b)
 
 	return
 }

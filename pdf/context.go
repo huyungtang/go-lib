@@ -19,7 +19,8 @@ import (
 // ****************************************************************************************************************************************
 func Init(args ...Option) PDF {
 	opt, opts := getOptions([]Option{
-		ColorOption("#383838"),
+		TextColorOption("#383838"),
+		BorderColorOption("#383838"),
 		FontSizeOption(6.5),
 		FontRemOption(1),
 		FontStyleOpiton("default"),
@@ -65,7 +66,7 @@ type PDF interface {
 	Output(io.Writer) error
 	Text(string, ...Option) PDF
 	GetXY() []float64
-	SetXY(float64, float64)
+	SetXY(float64, float64) PDF
 	Close()
 }
 
@@ -97,7 +98,7 @@ func (o *context) Text(txt string, args ...Option) PDF {
 
 	ln := 0
 	w, mw := opt.getCellWidth(o.Fpdf)
-	if w+o.Fpdf.GetX() > mw {
+	if w+o.Fpdf.GetX() > mw+1 {
 		o.NewLine(args...)
 	} else if w+o.Fpdf.GetX() == mw {
 		ln = 1
@@ -106,6 +107,9 @@ func (o *context) Text(txt string, args ...Option) PDF {
 	r, g, b := opt.getTextColor()
 	o.Fpdf.SetTextColor(r, g, b)
 	o.Fpdf.SetFont(opt.font, "", opt.getFontSize())
+
+	r, g, b = opt.getBorderColor()
+	o.Fpdf.SetDrawColor(r, g, b)
 
 	if opt.wrap {
 		o.Fpdf.MultiCell(w, opt.getLineHeight(), strings.Fixed(txt, int(w)), opt.getBorder(), opt.getAlign(), false)
@@ -125,8 +129,10 @@ func (o *context) GetXY() []float64 {
 
 // SetXY
 // ****************************************************************************************************************************************
-func (o *context) SetXY(x, y float64) {
+func (o *context) SetXY(x, y float64) PDF {
 	o.Fpdf.SetXY(x, y)
+
+	return o
 }
 
 // Close
