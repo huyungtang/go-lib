@@ -102,11 +102,12 @@ func PathSavename(root string, layer int) string {
 	fn, dn := []rune(strings.ToLower(strings.Replace(uuid.New().String(), "-", ""))), make([]rune, dl)
 	copy(dn, fn)
 
-	dir := make([]string, layer)
+	dir := make([]string, 0, layer)
 	for i := 0; i < dl; i += 2 {
 		dir = append(dir, string(dn[i:i+2]))
 	}
-	root = Path(root, dir...)
+
+	root = Path(strings.Format("%s/", root), dir...)
 	MakeDir(root)
 
 	return filepath.Join(root, string(fn))
