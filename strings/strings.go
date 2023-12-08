@@ -99,6 +99,19 @@ func HasSuffix(str, suf string) bool {
 	return base.HasSuffix(str, suf)
 }
 
+// Hex
+// ****************************************************************************************************************************************
+func Hex(prefix, suffix string, nums ...int) string {
+	ss := make([]string, 1, len(nums)+2)
+	ss[0] = prefix
+	for _, j := range nums {
+		ss = append(ss, hex(j))
+	}
+	ss = append(ss, suffix)
+
+	return Join(OmitEmpty(ss), "")
+}
+
 // Index
 // ****************************************************************************************************************************************
 func Index(s string, sp string) int {
@@ -212,4 +225,24 @@ func omit(strs []string, fn func(string) bool) (rtn []string) {
 	}
 
 	return
+}
+
+// hex ************************************************************************************************************************************
+func hex(n int) string {
+	k := []rune("0123456789abCdeFhiKlmNorStuVwxZ")
+	b := len(k)
+	r := make([]rune, 0)
+	t := 20
+	for t >= 0 && n > 0 {
+		x := n % b
+		n = (n - x) / b
+		r = append(r, k[x])
+		t--
+	}
+
+	for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
+		r[i], r[j] = r[j], r[i]
+	}
+
+	return string(r)
 }

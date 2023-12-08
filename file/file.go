@@ -93,13 +93,15 @@ func PathHome(dirs ...string) string {
 
 // PathSavename
 // ****************************************************************************************************************************************
-func PathSavename(root string, layer int) string {
+func PathSavename(root, filename string, layer int) string {
 	if layer > 5 {
 		layer = 5
 	}
 	dl := layer * 2
 
-	fn, dn := []rune(strings.ToLower(strings.Replace(uuid.New().String(), "-", ""))), make([]rune, dl)
+	filename = strings.Format("%s%s", filename, strings.Replace(uuid.New().String(), "-", ""))[0:32]
+
+	fn, dn := []rune(strings.ToLower(filename)), make([]rune, dl)
 	copy(dn, fn)
 
 	dir := make([]string, 0, layer)
