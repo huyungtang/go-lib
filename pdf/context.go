@@ -112,7 +112,7 @@ func (o *context) Text(txt string, args ...Option) PDF {
 	o.Fpdf.SetDrawColor(r, g, b)
 
 	if opt.wrap {
-		o.Fpdf.MultiCell(w, opt.getLineHeight(), strings.Fixed(txt, int(w)), opt.getBorder(), opt.getAlign(), false)
+		o.Fpdf.MultiCell(w, opt.getLineHeight(), strings.Fixed(txt, int(w*.82)), opt.getBorder(), opt.getAlign(), false)
 	} else {
 		o.Fpdf.CellFormat(w, opt.getLineHeight(), txt, opt.getBorder(), ln, opt.getAlign(), false, 0, "")
 	}
