@@ -101,7 +101,7 @@ func HasSuffix(str, suf string) bool {
 
 // Hex
 // ****************************************************************************************************************************************
-func Hex(prefix, suffix string, nums ...int) string {
+func Hex(prefix, suffix string, nums ...int64) string {
 	ss := make([]string, 1, len(nums)+2)
 	ss[0] = prefix
 	for _, j := range nums {
@@ -228,9 +228,9 @@ func omit(strs []string, fn func(string) bool) (rtn []string) {
 }
 
 // hex ************************************************************************************************************************************
-func hex(n int) string {
+func hex(n int64) string {
 	k := []rune("0123456789abCdeFhiKlmNorStuVwxZ")
-	b := len(k)
+	b := int64(len(k))
 	r := make([]rune, 0)
 	t := 20
 	for t >= 0 && n > 0 {
