@@ -28,6 +28,7 @@ func Init(args ...Option) PDF {
 		OrientationOption(Portrait),
 		UnitOption(Millimeter),
 		PageMarginOpiton(10, 10, 10),
+		AutoPageBreak(true, 10),
 		WidthOption(1),
 	}, args...)
 
@@ -75,6 +76,7 @@ type PDF interface {
 func (o *context) AddPage(args ...Option) {
 	opt, _ := getOptions(o.options, args...)
 	o.Fpdf.SetMargins(opt.marginLeft, opt.marginTop, opt.marginRight)
+	o.Fpdf.SetAutoPageBreak(opt.autoPaged, opt.marginBottom)
 	o.Fpdf.AddPageFormat(opt.orientation, pageSizes[opt.pageSize][opt.unit])
 }
 
@@ -112,7 +114,24 @@ func (o *context) Text(txt string, args ...Option) PDF {
 	o.Fpdf.SetDrawColor(r, g, b)
 
 	if opt.wrap {
-		o.Fpdf.MultiCell(w, opt.getLineHeight(), strings.Fixed(txt, int(w*.82)), opt.getBorder(), opt.getAlign(), false)
+		strs := make([]string, 0)
+		rs := make([]rune, 0)
+		for _, j := range txt {
+			if j == 10 {
+				strs = append(strs, string(rs))
+				rs = make([]rune, 0)
+				continue
+			}
+
+			if rs = append(rs, j); o.Fpdf.GetStringWidth(string(rs)) >= w-6 {
+				strs = append(strs, string(rs))
+				rs = make([]rune, 0)
+			}
+		}
+		if len(rs) > 0 {
+			strs = append(strs, string(rs))
+		}
+		o.Fpdf.MultiCell(w, opt.getLineHeight(), strings.Join(strs, "\n"), opt.getBorder(), opt.getAlign(), false)
 	} else {
 		o.Fpdf.CellFormat(w, opt.getLineHeight(), txt, opt.getBorder(), ln, opt.getAlign(), false, 0, "")
 	}

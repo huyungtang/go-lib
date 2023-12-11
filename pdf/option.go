@@ -55,6 +55,15 @@ var (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
+// AutoPageBreak
+// ****************************************************************************************************************************************
+func AutoPageBreak(auto bool, bottom float64) Option {
+	return func(o *option) {
+		o.autoPaged = auto
+		o.marginBottom = bottom
+	}
+}
+
 // AlignOption
 // ****************************************************************************************************************************************
 func AlignOption(pos position) Option {
@@ -188,23 +197,25 @@ func WrapOption(wrap bool) Option {
 
 // option *********************************************************************************************************************************
 type option struct {
-	font        string
-	fonts       map[string][]byte
-	fontSize    float64
-	fontRem     float64
-	textColor   string
-	borderColor string
-	align       position
-	border      position
-	pageSize    string
-	orientation string
-	unit        string
-	marginTop   float64
-	marginLeft  float64
-	marginRight float64
-	width       float64
-	height      float64
-	wrap        bool
+	font         string
+	fonts        map[string][]byte
+	fontSize     float64
+	fontRem      float64
+	textColor    string
+	borderColor  string
+	align        position
+	border       position
+	pageSize     string
+	orientation  string
+	unit         string
+	marginTop    float64
+	marginLeft   float64
+	marginRight  float64
+	autoPaged    bool
+	marginBottom float64
+	width        float64
+	height       float64
+	wrap         bool
 }
 
 // getAlign *******************************************************************************************************************************
