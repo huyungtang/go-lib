@@ -92,6 +92,17 @@ func (o *database) Close() (err error) {
 	return conn.Close()
 }
 
+// Ping
+// ****************************************************************************************************************************************
+func (o *database) Ping() (err error) {
+	var db *sql.DB
+	if db, err = o.DB.DB(); err != nil {
+		return
+	}
+
+	return db.Ping()
+}
+
 // getTableName ***************************************************************************************************************************
 func (o *database) getTableName(ety interface{}) (name string) {
 	if t, isOK := ety.(db.TableName); isOK {

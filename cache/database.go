@@ -39,6 +39,8 @@ type Database interface {
 	// Del(keys)
 	Del(...string) error
 
+	Ping() error
+
 	Close() error
 }
 

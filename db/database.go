@@ -17,6 +17,7 @@ package db
 type SqlDB interface {
 	Table(interface{}) Table
 	Close() error
+	Ping() error
 }
 
 // NoSqlDB

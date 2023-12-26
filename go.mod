@@ -10,6 +10,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.4
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
+	github.com/google/uuid v1.3.0
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.13.0
@@ -38,7 +39,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
