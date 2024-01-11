@@ -15,6 +15,9 @@ const (
 
 	SetSkipOverride int64 = 1
 	SetExistOnly    int64 = 2
+
+	DirectionLeft  int64 = 1
+	DirectionRight int64 = 2
 )
 
 // public functions ***********************************************************************************************************************
@@ -35,6 +38,18 @@ func DefaultOption(fn defaultFn) Options {
 	return func(o *Option) {
 		o.DefaFn = fn
 	}
+}
+
+// DirectionLeftOption
+// ****************************************************************************************************************************************
+func DirectionLeftOption() Options {
+	return directionOption(DirectionLeft)
+}
+
+// DirectionRightOption
+// ****************************************************************************************************************************************
+func DirectionRightOption() Options {
+	return directionOption(DirectionRight)
 }
 
 // ExpireOption
@@ -97,10 +112,11 @@ func ApplyOptions(defa []Options, opts ...Options) *Option {
 
 // Option *********************************************************************************************************************************
 type Option struct {
-	DefaFn  defaultFn
-	Expire  int64
-	Update  int64
-	IsDebug bool
+	DefaFn    defaultFn
+	Expire    int64
+	Update    int64
+	Direction int64
+	IsDebug   bool
 }
 
 // Options
@@ -125,5 +141,12 @@ func expireOption(exp int64) Options {
 func updateOpton(upd int64) Options {
 	return func(o *Option) {
 		o.Update = upd
+	}
+}
+
+// directionOption ************************************************************************************************************************
+func directionOption(dir int64) Options {
+	return func(o *Option) {
+		o.Direction = dir
 	}
 }

@@ -23,6 +23,11 @@ const (
 	cmderGet     string = "GET"
 	cmderPersist string = "PERSIST"
 	cmderSet     string = "SET"
+	cmderLPush   string = "LPUSH"
+	cmderRPush   string = "RPUSH"
+	cmderLLen    string = "LLEN"
+	cmderLPop    string = "LPOP"
+	cmderRPop    string = "RPOP"
 )
 
 // public functions ***********************************************************************************************************************
@@ -42,9 +47,9 @@ func Init(dsn string, opts ...cache.Options) (db cache.Database, err error) {
 		return
 	}
 
-	instance := &database{client}
-	cfg := cache.ApplyOptions([]cache.Options{}, opts...)
-	if cfg.IsDebug {
+	instance := &database{Client: client}
+	instance.Option = cache.ApplyOptions([]cache.Options{}, opts...)
+	if instance.IsDebug {
 		client.AddHook(instance)
 	}
 
@@ -58,12 +63,13 @@ func Init(dsn string, opts ...cache.Options) (db cache.Database, err error) {
 // database *******************************************************************************************************************************
 type database struct {
 	*base.Client
+	*cache.Option
 }
 
 // Delete
 // ****************************************************************************************************************************************
-func (o *database) Delete(key string) (err error) {
-	cmd := o.Client.Del(context.Background(), key)
+func (o *database) Delete(key ...string) (err error) {
+	cmd := o.Client.Del(context.Background(), key...)
 
 	return cmd.Err()
 }
@@ -84,7 +90,7 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 		cmd := base.NewStringCmd(context.Background(), cmderGet, key)
 		p.Process(context.Background(), cmd)
 		if _, e = p.Exec(context.Background()); e == nil {
-			if e = json.Unmarshal([]byte(cmd.Val()), val); e != nil {
+			if e = parseValue(val, cmd); e != nil {
 				return
 			}
 
@@ -102,8 +108,8 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 			cfg = cache.ApplyOptions(os)
 			p.Process(context.Background(), setCore(key, val, cfg))
 
-			if cmd := expireCore(key, cfg); cmd != nil {
-				p.Process(context.Background(), cmd)
+			if cmder := expireCore(key, cfg); cmder != nil {
+				p.Process(context.Background(), cmder)
 			}
 		}
 
@@ -113,6 +119,81 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 	if err == base.Nil {
 		return nil
 	}
+
+	return
+}
+
+// GetSlice
+// ****************************************************************************************************************************************
+func (o *database) GetSlice(key string, val interface{}, opts ...cache.Options) (err error) {
+	cfg := cache.ApplyOptions([]cache.Options{cache.KeepTTLOption(), cache.DirectionLeftOption()}, opts...)
+	var cmdSlice *base.SliceCmd
+	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
+		cmd := base.NewIntCmd(context.Background(), cmderLLen, key)
+		p.Process(context.Background(), cmd)
+		if _, err = p.Exec(context.Background()); err == nil && cmd.Val() > 0 {
+			args := make([]interface{}, 3)
+			copy(args[1:3], []interface{}{key, cmd.Val()})
+			switch cfg.Direction {
+			case cache.DirectionLeft:
+				args[0] = cmderLPop
+			case cache.DirectionRight:
+				args[0] = cmderRPop
+			}
+
+			cmdSlice = base.NewSliceCmd(context.Background(), args...)
+			p.Process(context.Background(), cmdSlice)
+
+			if cmdExp := expireCore(key, cfg); cmdExp != nil {
+				p.Process(context.Background(), cmdExp)
+			}
+		}
+
+		return
+	})
+
+	if err != nil {
+		return
+	}
+
+	switch vs := val.(type) {
+	case *[]string:
+		*vs = make([]string, len(cmdSlice.Val()))
+		for i, v := range cmdSlice.Val() {
+			(*vs)[i] = v.(string)
+		}
+	case *[]int64:
+		*vs = make([]int64, len(cmdSlice.Val()))
+		for i, v := range cmdSlice.Val() {
+			(*vs)[i] = v.(int64)
+		}
+	}
+
+	return
+}
+
+// Push
+// ****************************************************************************************************************************************
+func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err error) {
+	cfg := cache.ApplyOptions([]cache.Options{cache.DirectionRightOption()}, opts...)
+	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
+		args := make([]interface{}, 3)
+		copy(args[1:3], []interface{}{key, valueOf(val)})
+		switch cfg.Direction {
+		case cache.DirectionLeft:
+			args[0] = cmderLPush
+		case cache.DirectionRight:
+			args[0] = cmderRPush
+		}
+
+		p.Process(context.Background(), base.NewStatusCmd(context.Background(), args...))
+
+		if cmd := expireCore(key, cfg); cmd != nil {
+			p.Process(context.Background(), cmd)
+		}
+
+		return
+	})
 
 	return
 }
@@ -213,7 +294,27 @@ func valueOf(v interface{}) interface{} {
 		b, _ := json.Marshal(v)
 
 		return string(b)
+	} else if reflect.IsPointer(v) {
+		return reflect.ValueOf(v).Interface()
 	}
 
 	return v
+}
+
+// parseValue *****************************************************************************************************************************
+func parseValue(val interface{}, cmd *base.StringCmd) (err error) {
+	switch t := val.(type) {
+	case *string:
+		*t = cmd.Val()
+	case *int:
+		*t, err = cmd.Int()
+	case *int64:
+		*t, err = cmd.Int64()
+	case *uint64:
+		*t, err = cmd.Uint64()
+	default:
+		err = json.Unmarshal([]byte(cmd.Val()), val)
+	}
+
+	return
 }

@@ -15,16 +15,40 @@ package cache
 // Database
 // ****************************************************************************************************************************************
 type Database interface {
-	// Delete(cachedKey)
-	Delete(string) error
+	/*
+		Delete(cachedKeys)
+	*/
+	Delete(...string) error
 
-	// Exists(cachedKey)
+	/*
+		Exists(cachedKey)
+	*/
 	Exists(string) (bool, error)
 
-	// Get(cachedKey, value, []{default, expired})
+	/*
+		Get(cachedKey, value, Options)
+
+		Options: *KeepTTLOption(), DefaultOption(), ExpireOption()
+	*/
 	Get(string, interface{}, ...Options) error
 
-	// Set(cachedKey, value, []{override, expired})
+	/*
+		GetSlice(cachedKey, slice_value)
+	*/
+	GetSlice(string, interface{}, ...Options) error
+
+	/*
+		Push(cachedKey, value, Options)
+
+		Options: *DirectionRightOption(), ExpireOption()
+	*/
+	Push(string, interface{}, ...Options) error
+
+	/*
+		Set(cachedKey, value, Options)
+
+		Options: *StaticOption(), SkipOverrideOption(), UpdateOnlyOption(), ExpireOption()
+	*/
 	Set(string, interface{}, ...Options) error
 
 	Close() error
