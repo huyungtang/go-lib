@@ -31,7 +31,7 @@ func GetTags(field base.StructField, tag string) map[string]string {
 	case tags == "-":
 		m["ignore"] = ""
 	case isOk:
-		reg := regexp.MustCompile(`([a-zA-Z<>-]+)([=:]([^;$]+))?`)
+		reg := regexp.MustCompile(`([a-zA-Z0-9<>-]+)([=:]([^;$]+))?`)
 		ms := reg.FindAllStringSubmatch(tags, -1)
 		for i := 0; i < len(ms); i++ {
 			m[ms[i][1]] = ms[i][3]

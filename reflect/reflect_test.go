@@ -1,9 +1,7 @@
-package excel
+package reflect
 
 import (
 	"testing"
-
-	"github.com/xuri/excelize/v2"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -14,38 +12,23 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// TestExcel
+// TestGetTags
 // ****************************************************************************************************************************************
-func TestExcel(t *testing.T) {
-	f := excelize.NewFile()
-	defer f.Close()
+func TestGetTags(t *testing.T) {
+	kk := &struct {
+		FieldA string `excel:"999;"`
+		FieldB string `excel:"name:abc123;"`
+		FieldC string `excel:"-"`
+	}{}
 
-	if _, err := f.NewSheet("Sheet2"); err != nil {
-		t.Error(err)
+	vv := TypeOf(kk)
+	for i := 0; i < vv.NumField(); i++ {
+		tags := GetTags(vv.Field(i), "excel")
+		if tag, isMatch := tags["name"]; isMatch {
+			t.Log(tag)
+		}
 	}
-	if _, err := f.NewSheet("Sheet3"); err != nil {
-		t.Error(err)
-	}
 
-	sn := f.GetSheetName(0)
-	t.Log(sn)
-
-	t.Log(excelize.CoordinatesToCellName(100, 100))
-
-	f.SetActiveSheet(2)
-	f.SetCellValue("Sheet2", "C3", "abc1234")
-	// f.SetCellValue(sn, "A1", "A1")
-	// f.SetCellValue(sn, "A2", "A2")
-	// f.SetCellValue(sn, "A3", "A3")
-	// f.SetCellInt(sn, "A4", 1234)
-	// if err := f.SetCellHyperLink(sn, "A6", "https://www.google.com.tw/", "External"); err != nil {
-	// 	t.Error(err)
-	// }
-	// f.SetCellValue(sn, "A6", "google")
-
-	if err := f.SaveAs("/Users/huyungtang/Downloads/excel.xlsx"); err != nil {
-		t.Error(err)
-	}
 }
 
 // type defineds **************************************************************************************************************************
