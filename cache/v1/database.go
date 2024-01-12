@@ -38,6 +38,13 @@ type Database interface {
 	GetSlice(string, interface{}, ...Options) error
 
 	/*
+		Increase(cachedKey, value)
+
+		value: int64 or float64
+	*/
+	Increase(string, interface{}, ...Options) error
+
+	/*
 		Push(cachedKey, value, Options)
 
 		Options: *DirectionRightOption(), ExpireOption()

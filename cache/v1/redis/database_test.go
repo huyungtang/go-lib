@@ -1,7 +1,9 @@
 package redis
 
 import (
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/huyungtang/go-lib/cache/v1"
 )
@@ -17,6 +19,44 @@ const (
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+// TestIncrease
+// ****************************************************************************************************************************************
+func TestIncrease(t *testing.T) {
+	db, err := Init(dsn)
+	if err != nil {
+		t.Error()
+	}
+
+	defer func() {
+		if err = db.Close(); err != nil {
+			t.Error()
+		}
+	}()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			time.Sleep(200 * time.Millisecond)
+			defer wg.Done()
+			var val int64
+			if err = db.Increase("testing_increase_int", &val, cache.IncreaseByOption(5), cache.ExpireOption(60)); err != nil {
+				t.Error(err)
+			}
+			t.Log("val  -> ", val)
+
+			var val1 float64
+			if err = db.Increase("testing_increase_float64", &val1, cache.IncreaseByFloatOption(1.3), cache.ExpireOption(60)); err != nil {
+				t.Error(err)
+			}
+			t.Log("val1 -> ", val1)
+		}()
+	}
+
+	wg.Wait()
+
+}
 
 // TestExists
 // ****************************************************************************************************************************************

@@ -70,6 +70,22 @@ func ExpiredOption() Options {
 	return expireOption(ExpirationExpired)
 }
 
+// IncreaseByOption
+// ****************************************************************************************************************************************
+func IncreaseByOption(step int64) Options {
+	return func(o *Option) {
+		o.IncrInt = step
+	}
+}
+
+// IncreaseByFloatOption
+// ****************************************************************************************************************************************
+func IncreaseByFloatOption(step float64) Options {
+	return func(o *Option) {
+		o.IncrFloat = step
+	}
+}
+
 // KeepTTLOption
 // ****************************************************************************************************************************************
 func KeepTTLOption() Options {
@@ -116,6 +132,8 @@ type Option struct {
 	Expire    int64
 	Update    int64
 	Direction int64
+	IncrInt   int64
+	IncrFloat float64
 	IsDebug   bool
 }
 
