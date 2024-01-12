@@ -89,35 +89,23 @@ func (o *database) Exists(key string) (exs bool, err error) {
 func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.KeepTTLOption()}, opts...)
 	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
-		cmd := base.NewStringCmd(context.Background(), cmderGet, key)
-		if e = p.Process(context.Background(), cmd); e != nil {
-			return
-		}
-
-		if _, e = p.Exec(context.Background()); e == nil {
-			if e = parseValue(val, cmd); e != nil {
+		var cmds []base.Cmder
+		p.Process(context.Background(), base.NewStringCmd(context.Background(), cmderGet, key))
+		if cmds, e = p.Exec(context.Background()); e == nil {
+			if e = parseValue(val, cmds[0].(*base.StringCmd)); e != nil {
 				return
 			}
-
-			if c := expireCore(key, cfg); c != nil {
-				e = p.Process(context.Background(), c)
-			}
-
-			return
 		} else if e == base.Nil && cfg.DefaFn != nil {
 			var os []cache.Options
 			if os, e = cfg.DefaFn(val); e != nil {
 				return
 			}
 
-			cfg = cache.ApplyOptions(os)
-			if e = p.Process(context.Background(), setCore(key, val, cfg)); e != nil {
-				return
-			}
+			p.Process(context.Background(), setCore(key, val, cache.ApplyOptions(os)))
+		}
 
-			if cmder := expireCore(key, cfg); cmder != nil {
-				e = p.Process(context.Background(), cmder)
-			}
+		if expCmd := expireCore(key, cfg); expCmd != nil {
+			p.Process(context.Background(), expCmd)
 		}
 
 		return
@@ -134,50 +122,46 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 // ****************************************************************************************************************************************
 func (o *database) GetSlice(key string, val interface{}, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.KeepTTLOption(), cache.DirectionLeftOption()}, opts...)
-	var cmdSlice *base.SliceCmd
-	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
-		cmd := base.NewIntCmd(context.Background(), cmderLLen, key)
-		if e = p.Process(context.Background(), cmd); e != nil {
-			return
-		}
-
-		if _, err = p.Exec(context.Background()); err == nil && cmd.Val() > 0 {
+	var cmds []base.Cmder
+	if cmds, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
+		p.Process(context.Background(), base.NewIntCmd(context.Background(), cmderLLen, key))
+		if cmds, err = p.Exec(context.Background()); err == nil && cmds[0].(*base.IntCmd).Val() > 0 {
 			args := make([]interface{}, 3)
-			copy(args[1:3], []interface{}{key, cmd.Val()})
 			switch cfg.Direction {
 			case cache.DirectionLeft:
 				args[0] = cmderLPop
 			case cache.DirectionRight:
 				args[0] = cmderRPop
 			}
+			copy(args[1:3], []interface{}{key, cmds[0].(*base.IntCmd).Val()})
 
-			cmdSlice = base.NewSliceCmd(context.Background(), args...)
-			if e = p.Process(context.Background(), cmdSlice); e != nil {
-				return
-			}
+			p.Process(context.Background(), base.NewSliceCmd(context.Background(), args...))
 
 			if cmdExp := expireCore(key, cfg); cmdExp != nil {
-				e = p.Process(context.Background(), cmdExp)
+				p.Process(context.Background(), cmdExp)
 			}
 		}
 
 		return
-	})
-
-	if err != nil {
+	}); err != nil {
 		return
 	}
 
-	switch vs := val.(type) {
-	case *[]string:
-		*vs = make([]string, len(cmdSlice.Val()))
-		for i, v := range cmdSlice.Val() {
-			(*vs)[i] = v.(string)
-		}
-	case *[]int64:
-		*vs = make([]int64, len(cmdSlice.Val()))
-		for i, v := range cmdSlice.Val() {
-			(*vs)[i] = v.(int64)
+	if len(cmds) > 0 {
+		result := cmds[0].(*base.SliceCmd)
+		if l := len(result.Val()); l > 0 {
+			switch vs := val.(type) {
+			case *[]string:
+				*vs = make([]string, l)
+				for i, v := range result.Val() {
+					(*vs)[i] = v.(string)
+				}
+			case *[]int64:
+				*vs = make([]int64, l)
+				for i, v := range result.Val() {
+					(*vs)[i] = v.(int64)
+				}
+			}
 		}
 	}
 
@@ -202,16 +186,32 @@ func (o *database) Increase(key string, val interface{}, opts ...cache.Options) 
 		return
 	}
 
-	var result *base.Cmd
-	if _, err = o.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
-		if isInt64 {
-			result = base.NewCmd(context.Background(), cmderIncr, key, cfg.IncrInt)
-		} else {
-			result = base.NewCmd(context.Background(), cmderIncrF, key, cfg.IncrFloat)
+	var cmds []base.Cmder
+	if cmds, err = o.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
+		p.Process(context.Background(), base.NewIntCmd(context.Background(), cmderExists, key))
+		if cmds, e = p.Exec(context.Background()); e != nil {
+			return
+		} else if cmds[0].(*base.IntCmd).Val() == 0 && cfg.DefaFn != nil {
+			var os []cache.Options
+			if os, e = cfg.DefaFn(val); e != nil {
+				return
+			}
+
+			cf := cache.ApplyOptions(os)
+			p.Process(context.Background(), setCore(key, val, cf))
+			if cmd := expireCore(key, cf); cmd != nil {
+				p.Process(context.Background(), cmd)
+			}
+
+			if _, e = p.Exec(context.Background()); e != nil {
+				return
+			}
 		}
 
-		if e = p.Process(context.Background(), result); e != nil {
-			return
+		if isInt64 {
+			p.Process(context.Background(), base.NewCmd(context.Background(), cmderIncr, key, cfg.IncrInt))
+		} else {
+			p.Process(context.Background(), base.NewCmd(context.Background(), cmderIncrF, key, cfg.IncrFloat))
 		}
 
 		if cmd := expireCore(key, cfg); cmd != nil {
@@ -223,12 +223,14 @@ func (o *database) Increase(key string, val interface{}, opts ...cache.Options) 
 		return
 	}
 
-	if isInt64 {
-		v, _ := val.(*int64)
-		*v, _ = result.Int64()
-	} else {
-		v, _ := val.(*float64)
-		*v, _ = result.Float64()
+	if len(cmds) > 0 {
+		if isInt64 {
+			v, _ := val.(*int64)
+			*v, _ = cmds[0].(*base.Cmd).Int64()
+		} else {
+			v, _ := val.(*float64)
+			*v, _ = cmds[0].(*base.Cmd).Float64()
+		}
 	}
 
 	return
@@ -240,20 +242,18 @@ func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err
 	cfg := cache.ApplyOptions([]cache.Options{cache.DirectionRightOption()}, opts...)
 	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
 		args := make([]interface{}, 3)
-		copy(args[1:3], []interface{}{key, valueOf(val)})
 		switch cfg.Direction {
 		case cache.DirectionLeft:
 			args[0] = cmderLPush
 		case cache.DirectionRight:
 			args[0] = cmderRPush
 		}
+		copy(args[1:3], []interface{}{key, valueOf(val)})
 
-		if e = p.Process(context.Background(), base.NewStatusCmd(context.Background(), args...)); e != nil {
-			return
-		}
+		p.Process(context.Background(), base.NewStatusCmd(context.Background(), args...))
 
 		if cmd := expireCore(key, cfg); cmd != nil {
-			e = p.Process(context.Background(), cmd)
+			p.Process(context.Background(), cmd)
 		}
 
 		return
@@ -266,19 +266,15 @@ func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err
 // ****************************************************************************************************************************************
 func (o *database) Set(key string, val interface{}, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.StaticOption()}, opts...)
-	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
-		if e = p.Process(context.Background(), setCore(key, val, cfg)); e != nil {
-			return
-		}
+	if _, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
+		p.Process(context.Background(), setCore(key, val, cfg))
 
 		if cmd := expireCore(key, cfg); cmd != nil {
-			e = p.Process(context.Background(), cmd)
+			p.Process(context.Background(), cmd)
 		}
 
 		return
-	})
-
-	if err == base.Nil {
+	}); err == base.Nil {
 		return nil
 	}
 
