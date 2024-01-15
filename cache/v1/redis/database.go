@@ -102,6 +102,8 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 			}
 
 			p.Process(context.Background(), setCore(key, val, cache.ApplyOptions(os)))
+
+			cfg = cache.ApplyOptions(os)
 		}
 
 		if expCmd := expireCore(key, cfg); expCmd != nil {
