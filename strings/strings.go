@@ -3,6 +3,7 @@ package strings
 import (
 	"fmt"
 	"math/rand"
+	"net/url"
 	"regexp"
 	base "strings"
 	"time"
@@ -205,6 +206,12 @@ func ToLower(str string) string {
 // ****************************************************************************************************************************************
 func ToUpper(str string) string {
 	return base.ToUpper(str)
+}
+
+// URLEscape
+// ****************************************************************************************************************************************
+func URLEscape(str string) string {
+	return url.QueryEscape(str)
 }
 
 // type defineds **************************************************************************************************************************
