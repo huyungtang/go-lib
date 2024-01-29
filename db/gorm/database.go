@@ -122,6 +122,10 @@ func (o *database) getPrimaryKey(ety interface{}) (pk string) {
 	t := reflect.TypeOf(ety)
 	v := reflect.ValueOf(ety)
 	for i := 0; i < t.NumField(); i++ {
+		if !t.Field(i).IsExported() {
+			continue
+		}
+
 		if _, isMatched := v.Field(i).Interface().(IdEntity); isMatched {
 			pk = "id"
 			break
