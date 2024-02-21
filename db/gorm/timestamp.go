@@ -19,7 +19,7 @@ import (
 // Created
 // ****************************************************************************************************************************************
 type Created struct {
-	CreatedAt int64 `gorm:"column:created_at;autoUpdateTime:false" json:",omitempty"`
+	CreatedAt int64 `gorm:"column:created_at;autoUpdateTime:false;<-:create" json:",omitempty"`
 }
 
 // Create

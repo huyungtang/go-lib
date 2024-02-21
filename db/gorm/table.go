@@ -149,10 +149,10 @@ func (o *table) Create(ety interface{}) (err error) {
 	if reflect.IsSlice(ety) {
 		vals := reflect.ValueOf(ety)
 		for i := 0; i < vals.Len(); i++ {
-			beforeCreate(vals.Index(i).Interface())
+			o.beforeCreate(vals.Index(i).Interface())
 		}
 	} else {
-		beforeCreate(ety)
+		o.beforeCreate(ety)
 	}
 
 	return o.DB.Create(ety).Error
@@ -251,49 +251,15 @@ func (o *table) ResetClauses() {
 // CreateColumns
 // ****************************************************************************************************************************************
 func (o *table) CreateColumns() (cols []string) {
-	tp := reflect.TypeOf(o.entity)
-	cols = make([]string, 0, tp.NumField())
-	for i := 0; i < tp.NumField(); i++ {
-		tg := reflect.GetTags(tp.Field(i), "gorm")
 
-		col, isOK := tg["column"]
-		if !isOK {
-			continue
-		}
-
-		per, isOK := tg["<-"]
-		if isOK && per == "update" {
-			continue
-		}
-
-		cols = append(cols, col)
-	}
-
-	return
+	return o.getColumns(o.entity, "update")
 }
 
 // UpdateColumns
 // ****************************************************************************************************************************************
 func (o *table) UpdateColumns() (cols []string) {
-	tp := reflect.TypeOf(o.entity)
-	cols = make([]string, 0, tp.NumField())
-	for i := 0; i < tp.NumField(); i++ {
-		tg := reflect.GetTags(tp.Field(i), "gorm")
 
-		col, isOK := tg["column"]
-		if !isOK {
-			continue
-		}
-
-		per, isOK := tg["<-"]
-		if isOK && per == "create" {
-			continue
-		}
-
-		cols = append(cols, col)
-	}
-
-	return
+	return o.getColumns(o.entity, "create")
 }
 
 // RowsAffected
@@ -302,16 +268,52 @@ func (o *table) RowsAffected() int64 {
 	return o.DB.RowsAffected
 }
 
-// private functions **********************************************************************************************************************
-// ****************************************************************************************************************************************
-// ****************************************************************************************************************************************
-
 // beforeCreate ***************************************************************************************************************************
-func beforeCreate(ety interface{}) {
+func (o *table) beforeCreate(ety interface{}) {
 	if e, isOK := ety.(db.Created); isOK {
 		e.Create()
 	}
+
 	if e, isOK := ety.(db.Updated); isOK {
 		e.Update()
 	}
 }
+
+// getColumns *****************************************************************************************************************************
+func (o *table) getColumns(entity interface{}, exp string) (cols []string) {
+	tp := reflect.TypeOf(entity)
+	val := reflect.ValueOf(entity)
+	cols = make([]string, 0)
+	for i := 0; i < tp.NumField(); i++ {
+		tg := reflect.GetTags(tp.Field(i), "gorm")
+
+		_, isPrimary := tg["primaryKey"]
+		if isPrimary {
+			continue
+		}
+
+		_, isEmbed := tg["embedded"]
+		if isEmbed {
+			cols = append(cols, o.getColumns(val.Field(i).Interface(), exp)...)
+			continue
+		}
+
+		col, isOK := tg["column"]
+		if !isOK {
+			continue
+		}
+
+		per, isOK := tg["<-"]
+		if isOK && per == exp {
+			continue
+		}
+
+		cols = append(cols, col)
+	}
+
+	return
+}
+
+// private functions **********************************************************************************************************************
+// ****************************************************************************************************************************************
+// ****************************************************************************************************************************************
