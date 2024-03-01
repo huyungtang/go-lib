@@ -3,6 +3,7 @@ package gorm
 import (
 	"github.com/huyungtang/go-lib/db"
 	"github.com/huyungtang/go-lib/reflect"
+	"github.com/huyungtang/go-lib/slices"
 	"github.com/huyungtang/go-lib/strings"
 	base "gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -282,36 +283,38 @@ func (o *table) beforeCreate(ety interface{}) {
 // getColumns *****************************************************************************************************************************
 func (o *table) getColumns(entity interface{}, exp string) (cols []string) {
 	tp := reflect.TypeOf(entity)
-	val := reflect.ValueOf(entity)
-	cols = make([]string, 0)
+	cs := slices.New()
 	for i := 0; i < tp.NumField(); i++ {
-		tg := reflect.GetTags(tp.Field(i), "gorm")
+		tags := reflect.GetTags(tp.Field(i), "gorm")
+		_, isIgnore := tags["ignore"]
+		_, isEmbed := tags["embedded"]
+		_, isPrimary := tags["primaryKey"]
+		col, isCol := tags["column"]
+		_, isRead := tags["->"]
+		write, isWrite := tags["<-"]
 
-		_, isPrimary := tg["primaryKey"]
-		if isPrimary {
+		if isIgnore ||
+			isPrimary ||
+			(isRead && !isWrite) ||
+			(!isCol && !isEmbed) ||
+			(isWrite && write == exp) {
 			continue
 		}
 
-		_, isEmbed := tg["embedded"]
 		if isEmbed {
-			cols = append(cols, o.getColumns(val.Field(i).Interface(), exp)...)
+			d := reflect.New(tp.Field(i).Type)
+			ss := o.getColumns(d.Interface(), exp)
+			for _, s := range ss {
+				cs.Append(s)
+			}
+
 			continue
 		}
 
-		col, isOK := tg["column"]
-		if !isOK {
-			continue
-		}
-
-		per, isOK := tg["<-"]
-		if isOK && per == exp {
-			continue
-		}
-
-		cols = append(cols, col)
+		cs.Append(col)
 	}
 
-	return
+	return cs.GetStrings()
 }
 
 // private functions **********************************************************************************************************************
