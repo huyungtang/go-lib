@@ -192,14 +192,15 @@ func (o *table) Update(ety interface{}) (err error) {
 
 // Delete
 // ****************************************************************************************************************************************
-func (o *table) Delete() (err error) {
-	if e, isOK := o.entity.(db.Deleted); isOK {
+func (o *table) Delete(ety interface{}) (err error) {
+	if e, isOK := ety.(db.Deleted); isOK {
 		e.Delete()
+		o.DB.Statement.Selects = append(o.DB.Statement.Selects, "deleted_at")
 
-		return o.DB.Select("deleted_at").Updates(e).Error
+		return o.DB.Updates(e).Error
 	}
 
-	return o.DB.Delete(o.entity).Error
+	return o.DB.Delete(ety).Error
 }
 
 // Count

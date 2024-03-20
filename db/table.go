@@ -38,7 +38,7 @@ type Table interface {
 	Create(interface{}) error
 	Get(interface{}) error
 	Update(interface{}) error
-	Delete() error
+	Delete(interface{}) error
 	Count() (int64, error)
 
 	Exec(string, ...interface{}) error
