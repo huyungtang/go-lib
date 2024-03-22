@@ -66,7 +66,7 @@ type PDF interface {
 	NewLine(...Option)
 	Output(io.Writer) error
 	Text(string, ...Option) PDF
-	GetXY() []float64
+	GetXY() (float64, float64)
 	SetXY(float64, float64) PDF
 	Close()
 }
@@ -141,9 +141,9 @@ func (o *context) Text(txt string, args ...Option) PDF {
 
 // GetXY
 // ****************************************************************************************************************************************
-func (o *context) GetXY() []float64 {
-	x, y := o.Fpdf.GetXY()
-	return []float64{x, y}
+func (o *context) GetXY() (x, y float64) {
+	x, y = o.Fpdf.GetXY()
+	return
 }
 
 // SetXY

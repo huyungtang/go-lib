@@ -12,9 +12,11 @@ require (
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/google/uuid v1.3.0
 	github.com/rabbitmq/amqp091-go v1.5.0
+	github.com/signintech/gopdf v0.22.2
 	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.13.0
 	github.com/tdewolff/minify v2.3.6+incompatible
+	github.com/xuri/excelize/v2 v2.8.0
 	go.mongodb.org/mongo-driver v1.10.3
 	golang.org/x/crypto v0.12.0
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
@@ -61,6 +63,7 @@ require (
 	github.com/montanaflynn/stats v0.6.6 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
+	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
@@ -75,7 +78,6 @@ require (
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	github.com/xuri/efp v0.0.0-20230802181842-ad255f2331ca // indirect
-	github.com/xuri/excelize/v2 v2.8.0 // indirect
 	github.com/xuri/nfp v0.0.0-20230819163627-dc951e3ffe1a // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.opencensus.io v0.24.0 // indirect
