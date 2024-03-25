@@ -12,7 +12,6 @@ require (
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/google/uuid v1.3.0
 	github.com/rabbitmq/amqp091-go v1.5.0
-	github.com/signintech/gopdf v0.22.2
 	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.13.0
 	github.com/tdewolff/minify v2.3.6+incompatible
@@ -63,7 +62,6 @@ require (
 	github.com/montanaflynn/stats v0.6.6 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
-	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
