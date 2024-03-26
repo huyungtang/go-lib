@@ -11,6 +11,7 @@ require (
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/google/uuid v1.3.0
+	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.13.0

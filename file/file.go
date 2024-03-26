@@ -2,8 +2,10 @@ package file
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/google/uuid"
 	"github.com/huyungtang/go-lib/strings"
@@ -31,13 +33,40 @@ const (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Dir
+// list files
 // ****************************************************************************************************************************************
-func Dir(path string) string {
+func ListFiles(root, pattern string) (pathes []string, err error) {
+	var reg *regexp.Regexp
+	if pattern != "" {
+		reg = regexp.MustCompile(pattern)
+	}
+
+	out := make([]string, 0)
+	if err = filepath.WalkDir(root, func(path string, _ fs.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+
+		if reg == nil || reg.MatchString(path) {
+			out = append(out, path)
+		}
+
+		return nil
+	}); err != nil {
+		return
+	}
+
+	return out, nil
+}
+
+// get path without last element (with "/") of path
+// ****************************************************************************************************************************************
+func GetDir(path string) string {
 	return filepath.Dir(path)
 }
 
-// IsExist
+// check directory or file is exists or not
+//	returns `NotExist (1)`, `IsFile (2)` or `IsDir (3)`
 // ****************************************************************************************************************************************
 func IsExist(path string) statusEnum {
 	f, e := os.Stat(path)
@@ -50,7 +79,7 @@ func IsExist(path string) statusEnum {
 	return IsFile
 }
 
-// MakeDir
+// create directory with parents is necessary
 // ****************************************************************************************************************************************
 func MakeDir(path string) (err error) {
 	switch IsExist(path) {
