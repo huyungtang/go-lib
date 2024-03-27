@@ -20,6 +20,9 @@ const (
 	Right    string = "R"
 	Top      string = "T"
 
+	BorderTRB  string = "TRB"
+	BorderLRB  string = "LRB"
+	BorderRB   string = "RB"
 	BorderFull border = "1"
 
 	AlignTL align = "TL"
@@ -67,9 +70,9 @@ func BorderColor(rgb string) Option {
 	}
 }
 
-// TextColor
+// FontColorOption
 // ****************************************************************************************************************************************
-func TextColor(rgb string) Option {
+func FontColorOption(rgb string) Option {
 	return func(o *option) {
 		var r, g, b int
 		fmt.Sscanf(strings.ToUpper(rgb), "#%2X%2X%2X", &r, &g, &b)
@@ -149,6 +152,21 @@ func LandscapeOption() Option {
 func PageMarginsOption(left, top, right float64) Option {
 	return func(o *option) {
 		o.pageLeft, o.pageTop, o.pageRight = left, top, right
+	}
+}
+
+// set auto page break
+//	`auto`	default true
+//	`bottom`	2cm when 0
+// ****************************************************************************************************************************************
+func PageBreakOption(auto bool, bottom float64) Option {
+	return func(o *option) {
+		o.pageBreak = auto
+		if bottom == 0 {
+			o.pageBottom = 20
+		} else {
+			o.pageBottom = bottom
+		}
 	}
 }
 
@@ -236,6 +254,8 @@ type option struct {
 	pageLeft     float64
 	pageTop      float64
 	pageRight    float64
+	pageBottom   float64
+	pageBreak    bool
 	pageSize     pagesize
 	position     position
 	template     int

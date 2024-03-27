@@ -67,7 +67,7 @@ func (o *context) AddCell(txt string, opts ...Option) PDF {
 	o.Fpdf.SetTextColor(cfg.textColor[0], cfg.textColor[1], cfg.textColor[2])
 
 	cfg.cellWidth = o.getCellWidth(cfg.cellWidth)
-	strs := o.getCellText(txt, cfg.cellWidth)
+	strs := o.getCellText(txt, cfg.cellWidth, cfg.cellMargin)
 	cfg.cellHeight = o.getCellHeight(cfg.cellHeight, len(strs), cfg)
 
 	if l := len(strs); l == 1 {
@@ -122,9 +122,10 @@ func (o *context) Close() (err error) {
 // ****************************************************************************************************************************************
 
 // getCellText ****************************************************************************************************************************
-func (o *context) getCellText(txt string, wd float64) (strs []string) {
+func (o *context) getCellText(txt string, wd, mg float64) (strs []string) {
 	strs = make([]string, 0)
 	tstr := make([]rune, 0)
+	wd = wd - (mg * 2)
 	for _, s := range txt {
 		switch s {
 		case 13:

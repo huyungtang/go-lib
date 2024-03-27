@@ -30,11 +30,12 @@ func Init(opts ...Option) (p PDF, err error) {
 			PageMarginsOption(10, 10, 10),
 			PortraitOption(),
 			PageSizeA4Option(),
+			PageBreakOption(true, 20),
 			TemplateOption(-1),
 			PositionOption(PositionNewLine),
 			UnitMM(),
 			BorderColor("#1f1f1f"),
-			TextColor("#1f1f1f"),
+			FontColorOption("#1f1f1f"),
 		}, opts...),
 	}
 
@@ -44,6 +45,7 @@ func Init(opts ...Option) (p PDF, err error) {
 	out.Fpdf.SetMargins(cfg.pageLeft, cfg.pageTop, cfg.pageRight)
 	out.Fpdf.SetDrawColor(cfg.borderColor[0], cfg.borderColor[1], cfg.borderColor[2])
 	out.Fpdf.SetTextColor(cfg.textColor[0], cfg.textColor[1], cfg.textColor[2])
+	out.Fpdf.SetAutoPageBreak(cfg.pageBreak, cfg.pageBottom)
 
 	if cfg.ttfPath != "" {
 		var fs []string
