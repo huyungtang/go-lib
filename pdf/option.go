@@ -2,7 +2,6 @@ package pdf
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 
 	"github.com/go-pdf/fpdf"
@@ -13,107 +12,114 @@ import (
 // ****************************************************************************************************************************************
 
 const (
-	Top position = 1 << iota
-	Middle
-	Baseline
-	Left
-	Center
-	Right
-	Bottom
-	All position = Top | Left | Right | Bottom
-)
+	Baseline string = "A"
+	Bottom   string = "B"
+	Center   string = "C"
+	Left     string = "L"
+	Middle   string = "M"
+	Right    string = "R"
+	Top      string = "T"
 
-const (
-	PageSizeA4 pageSize = "A4"
-	PageSizeA5 pageSize = "A5"
+	BorderTRB  string = "TRB"
+	BorderLRB  string = "LRB"
+	BorderRB   string = "RB"
+	BorderFull border = "1"
 
-	Landscape orientation = "L"
-	Portrait  orientation = "P"
+	AlignTL align = "TL"
+	AlignTC align = "TC"
+	AlignTR align = "TR"
+	AlignML align = "ML"
+	AlignMC align = "MC"
+	AlignMR align = "MR"
+	AlignBL align = "BL"
+	AlignBC align = "BC"
+	AlignBR align = "BR"
 
-	Centimeter unit = "cm"
-	Inch       unit = "in"
-	Millimeter unit = "mm"
-	Point      unit = "pt"
-)
-
-var (
-	pageSizes map[string]map[string]fpdf.SizeType = map[string]map[string]fpdf.SizeType{
-		PageSizeA4: {
-			Centimeter: {Wd: 21.0, Ht: 29.7},
-			Inch:       {Wd: 8.27, Ht: 11.69},
-			Millimeter: {Wd: 210, Ht: 297},
-		},
-		PageSizeA5: {
-			Centimeter: {Wd: 14.8, Ht: 21.0},
-			Inch:       {Wd: 5.83, Ht: 8.27},
-			Millimeter: {Wd: 148, Ht: 210},
-		},
-	}
+	PositionTail    position = 0
+	PositionNewLine position = 1
+	PositionBottom  position = 2
 )
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// AutoPageBreak
-// ****************************************************************************************************************************************
-func AutoPageBreak(auto bool, bottom float64) Option {
-	return func(o *option) {
-		o.autoPaged = auto
-		o.marginBottom = bottom
-	}
-}
-
 // AlignOption
 // ****************************************************************************************************************************************
-func AlignOption(pos position) Option {
+func AlignOption(align align) Option {
 	return func(o *option) {
-		o.align = pos
+		o.cellAlign = align
 	}
 }
 
 // BorderOption
 // ****************************************************************************************************************************************
-func BorderOption(border position) Option {
+func BorderOption(border border) Option {
 	return func(o *option) {
-		o.border = border
+		o.cellBorder = border
 	}
 }
 
-// TextColorOption
+// BorderColor
 // ****************************************************************************************************************************************
-func TextColorOption(rgb string) Option {
+func BorderColor(rgb string) Option {
 	return func(o *option) {
-		o.textColor = rgb
+		var r, g, b int
+		fmt.Sscanf(strings.ToUpper(rgb), "#%2X%2X%2X", &r, &g, &b)
+		o.borderColor = []int{r, g, b}
 	}
 }
 
-// BorderColorOption
+// FontColorOption
 // ****************************************************************************************************************************************
-func BorderColorOption(rgb string) Option {
+func FontColorOption(rgb string) Option {
 	return func(o *option) {
-		o.borderColor = rgb
+		var r, g, b int
+		fmt.Sscanf(strings.ToUpper(rgb), "#%2X%2X%2X", &r, &g, &b)
+		o.textColor = []int{r, g, b}
 	}
 }
 
-// FontOption
+// cell left & right margins
+//	`margin`	default 2
 // ****************************************************************************************************************************************
-func FontOption(name string, font string) Option {
+func CellMaringOption(margin float64) Option {
 	return func(o *option) {
-		if bs, err := ioutil.ReadFile(font); err == nil {
-			if o.fonts == nil {
-				o.fonts = make(map[string][]byte)
-			}
-			o.fonts[strings.ToLower(name)] = bs
-		}
+		o.cellMargin = margin
 	}
 }
 
-// FontStyleOpiton
+// set cell width
+//	`wd`	<=1 percentage of page available width
 // ****************************************************************************************************************************************
-func FontStyleOpiton(name string) Option {
+func CellWidthOption(wd float64) Option {
 	return func(o *option) {
-		o.font = name
+		o.cellWidth = wd
+	}
+}
+
+// set cell height
+//	`ht`	0 auto height
+// ****************************************************************************************************************************************
+func CellHeightOption(ht float64) Option {
+	return func(o *option) {
+		o.cellHeight = ht
+	}
+}
+
+// FontFamilyOption
+// ****************************************************************************************************************************************
+func FontFamilyOption(fam string) Option {
+	return func(o *option) {
+		o.fontFamily = fam
+	}
+}
+
+// FontPathOption
+// ****************************************************************************************************************************************
+func FontPathOption(path string) Option {
+	return func(o *option) {
+		o.ttfPath = path
 	}
 }
 
@@ -125,69 +131,92 @@ func FontSizeOption(size float64) Option {
 	}
 }
 
-// FontRemOption
+// PortraitOption
 // ****************************************************************************************************************************************
-func FontRemOption(rem float64) Option {
+func PortraitOption() Option {
 	return func(o *option) {
-		o.fontRem = rem
+		o.orientation = "Portrait"
 	}
 }
 
-// OrientationOption
+// LandscapeOption
 // ****************************************************************************************************************************************
-func OrientationOption(orient orientation) Option {
+func LandscapeOption() Option {
 	return func(o *option) {
-		o.orientation = orient
+		o.orientation = "Landscape"
 	}
 }
 
-// PageMarginOpiton
+// PageMarginsOption
 // ****************************************************************************************************************************************
-func PageMarginOpiton(top, left, right float64) Option {
+func PageMarginsOption(left, top, right float64) Option {
 	return func(o *option) {
-		o.marginTop = top
-		o.marginLeft = left
-		o.marginRight = right
+		o.pageLeft, o.pageTop, o.pageRight = left, top, right
+	}
+}
+
+// set auto page break
+//	`auto`	default true
+//	`bottom`	2cm when 0
+// ****************************************************************************************************************************************
+func PageBreakOption(auto bool, bottom float64) Option {
+	return func(o *option) {
+		o.pageBreak = auto
+		if bottom == 0 {
+			o.pageBottom = 20
+		} else {
+			o.pageBottom = bottom
+		}
 	}
 }
 
 // PageSizeOption
 // ****************************************************************************************************************************************
-func PageSizeOption(size pageSize) Option {
+func PageSizeOption(ps pagesize) Option {
 	return func(o *option) {
-		o.pageSize = size
+		o.pageSize = ps
 	}
 }
 
-// UnitOption
+// PageSizeA4Option
 // ****************************************************************************************************************************************
-func UnitOption(unit unit) Option {
+func PageSizeA4Option() Option {
 	return func(o *option) {
-		o.unit = unit
+		o.pageSize = pagesize{name: "A4", size: fpdf.SizeType{Wd: 210, Ht: 297}}
 	}
 }
 
-// WidthOption
+// define the point after cell
+//	`ln`	PositionTail, NewLine or Buttom
 // ****************************************************************************************************************************************
-func WidthOption(wd float64) Option {
+func PositionOption(ln position) Option {
 	return func(o *option) {
-		o.width = wd
+		o.position = ln
 	}
 }
 
-// HeightOption
+// use page of template file as page template
+//	`page`	page idnex start with 0
 // ****************************************************************************************************************************************
-func HeightOption(ht float64) Option {
+func TemplateOption(page int) Option {
 	return func(o *option) {
-		o.height = ht
+		o.template = page
 	}
 }
 
-// WrapOption
+// TemplateFileOption
 // ****************************************************************************************************************************************
-func WrapOption(wrap bool) Option {
+func TemplateFileOption(path string) Option {
 	return func(o *option) {
-		o.wrap = wrap
+		o.templateFile = path
+	}
+}
+
+// UnitMM
+// ****************************************************************************************************************************************
+func UnitMM() Option {
+	return func(o *option) {
+		o.unit = "mm"
 	}
 }
 
@@ -195,125 +224,45 @@ func WrapOption(wrap bool) Option {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// option *********************************************************************************************************************************
-type option struct {
-	font         string
-	fonts        map[string][]byte
-	fontSize     float64
-	fontRem      float64
-	textColor    string
-	borderColor  string
-	align        position
-	border       position
-	pageSize     string
-	orientation  string
-	unit         string
-	marginTop    float64
-	marginLeft   float64
-	marginRight  float64
-	autoPaged    bool
-	marginBottom float64
-	width        float64
-	height       float64
-	wrap         bool
-}
+// align **********************************************************************************************************************************
+type align = string
 
-// getAlign *******************************************************************************************************************************
-func (o *option) getAlign() string {
-	bs := make([]string, 0, 4)
-	if o.align&Left == Left {
-		bs = append(bs, "L")
-	}
-	if o.align&Center == Center {
-		bs = append(bs, "C")
-	}
-	if o.align&Right == Right {
-		bs = append(bs, "R")
-	}
-	if o.align&Top == Top {
-		bs = append(bs, "T")
-	}
-	if o.align&Middle == Middle {
-		bs = append(bs, "M")
-	}
-	if o.align&Bottom == Bottom {
-		bs = append(bs, "B")
-	}
-	if o.align&Baseline == Baseline {
-		bs = append(bs, "A")
-	}
-
-	return strings.Join(bs, "")
-}
-
-// getBorder ******************************************************************************************************************************
-func (o *option) getBorder() string {
-	bs := make([]string, 0, 4)
-	if o.border&Top == Top {
-		bs = append(bs, "T")
-	}
-	if o.border&Left == Left {
-		bs = append(bs, "L")
-	}
-	if o.border&Right == Right {
-		bs = append(bs, "R")
-	}
-	if o.border&Bottom == Bottom {
-		bs = append(bs, "B")
-	}
-
-	return strings.Join(bs, "")
-}
-
-// getCellWidth ***************************************************************************************************************************
-func (o *option) getCellWidth(pdf *fpdf.Fpdf) (float64, float64) {
-	wd, _ := pdf.GetPageSize()
-	ml, _, mr, _ := pdf.GetMargins()
-
-	fw := (wd - ml - mr)
-
-	return fw * o.width, wd - mr
-}
-
-// getFontSize ****************************************************************************************************************************
-func (o *option) getFontSize() float64 {
-	return o.fontSize * o.fontRem
-}
-
-// getLineHeight **************************************************************************************************************************
-func (o *option) getLineHeight() float64 {
-	if o.height != 0 {
-		return o.fontSize * o.height * 0.6
-	}
-
-	return o.fontSize * o.fontRem * 0.6
-}
-
-// getTextColor ***************************************************************************************************************************
-func (o *option) getTextColor() (r, g, b int) {
-	fmt.Sscanf(strings.ToUpper(o.textColor), "#%2X%2X%2X", &r, &g, &b)
-
-	return
-}
-
-// getBorderColor *************************************************************************************************************************
-func (o *option) getBorderColor() (r, g, b int) {
-	fmt.Sscanf(strings.ToUpper(o.borderColor), "#%2X%2X%2X", &r, &g, &b)
-
-	return
-}
+// border *********************************************************************************************************************************
+type border = string
 
 // position *******************************************************************************************************************************
 type position = int
 
-// pageSize *******************************************************************************************************************************
-type pageSize = string
+// pagesize *******************************************************************************************************************************
+type pagesize struct {
+	name string
+	size fpdf.SizeType
+}
 
-// orientation ****************************************************************************************************************************
-type orientation = string
-
-// unit ***********************************************************************************************************************************
-type unit = string
+// option *********************************************************************************************************************************
+type option struct {
+	cellAlign    align
+	cellBorder   border
+	cellMargin   float64
+	cellWidth    float64
+	cellHeight   float64
+	borderColor  []int
+	textColor    []int
+	fontFamily   string
+	fontSize     float64
+	orientation  string
+	pageLeft     float64
+	pageTop      float64
+	pageRight    float64
+	pageBottom   float64
+	pageBreak    bool
+	pageSize     pagesize
+	position     position
+	template     int
+	templateFile string
+	ttfPath      string
+	unit         string
+}
 
 // Option
 // ****************************************************************************************************************************************
@@ -323,16 +272,12 @@ type Option func(*option)
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// getOptions *****************************************************************************************************************************
-func getOptions(defa []Option, args ...Option) (*option, []Option) {
-	opts := make([]Option, len(defa), len(defa)+len(args))
-	copy(opts, defa)
-	opts = append(opts, args...)
-
-	opt := new(option)
-	for _, optFn := range opts {
-		optFn(opt)
+// applyOption ****************************************************************************************************************************
+func applyOption(opts ...Option) (opt *option) {
+	opt = new(option)
+	for _, o := range opts {
+		o(opt)
 	}
 
-	return opt, opts
+	return
 }
