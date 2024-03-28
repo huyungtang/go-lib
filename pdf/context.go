@@ -50,7 +50,7 @@ func (o *context) AddBarcode128(txt string, opts ...Option) PDF {
 		CellWidthOption(50),
 		CellHeightOption(4),
 		CellMaringOption(0),
-		AlignOption(AlignMR),
+		AlignOption(AlignMC),
 		PositionOption(PositionBottom),
 	)
 	txt = strings.Code128A(txt)
@@ -65,6 +65,7 @@ func (o *context) AddCell(txt string, opts ...Option) PDF {
 	o.Fpdf.SetFont(cfg.fontFamily, "", cfg.fontSize)
 	o.Fpdf.SetDrawColor(cfg.borderColor[0], cfg.borderColor[1], cfg.borderColor[2])
 	o.Fpdf.SetTextColor(cfg.textColor[0], cfg.textColor[1], cfg.textColor[2])
+	o.Fpdf.SetCellMargin(cfg.cellMargin)
 
 	cfg.cellWidth = o.getCellWidth(cfg.cellWidth)
 	strs := o.getCellText(txt, cfg.cellWidth, cfg.cellMargin)
