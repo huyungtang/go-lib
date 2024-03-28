@@ -1,222 +1,196 @@
 package pdf
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/go-pdf/fpdf"
+	"github.com/huyungtang/go-lib/file"
+	"github.com/huyungtang/go-lib/strings"
+	"github.com/phpdave11/gofpdi"
 )
 
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-const (
-	Baseline string = "A"
-	Bottom   string = "B"
-	Center   string = "C"
-	Left     string = "L"
-	Middle   string = "M"
-	Right    string = "R"
-	Top      string = "T"
-
-	BorderTRB  string = "TRB"
-	BorderLRB  string = "LRB"
-	BorderRB   string = "RB"
-	BorderFull border = "1"
-
-	AlignTL align = "TL"
-	AlignTC align = "TC"
-	AlignTR align = "TR"
-	AlignML align = "ML"
-	AlignMC align = "MC"
-	AlignMR align = "MR"
-	AlignBL align = "BL"
-	AlignBC align = "BC"
-	AlignBR align = "BR"
-
-	PositionTail    position = 0
-	PositionNewLine position = 1
-	PositionBottom  position = 2
-)
-
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// AlignOption
-// ****************************************************************************************************************************************
-func AlignOption(align align) Option {
-	return func(o *option) {
-		o.cellAlign = align
-	}
-}
-
-// BorderOption
-// ****************************************************************************************************************************************
-func BorderOption(border border) Option {
-	return func(o *option) {
-		o.cellBorder = border
-	}
-}
-
-// BorderColor
-// ****************************************************************************************************************************************
-func BorderColor(rgb string) Option {
-	return func(o *option) {
-		var r, g, b int
-		fmt.Sscanf(strings.ToUpper(rgb), "#%2X%2X%2X", &r, &g, &b)
-		o.borderColor = []int{r, g, b}
-	}
-}
-
-// FontColorOption
-// ****************************************************************************************************************************************
-func FontColorOption(rgb string) Option {
-	return func(o *option) {
-		var r, g, b int
-		fmt.Sscanf(strings.ToUpper(rgb), "#%2X%2X%2X", &r, &g, &b)
-		o.textColor = []int{r, g, b}
-	}
-}
-
-// cell left & right margins
-//	`margin`	default 2
-// ****************************************************************************************************************************************
-func CellMaringOption(margin float64) Option {
-	return func(o *option) {
-		o.cellMargin = margin
-	}
-}
-
-// set cell width
-//	`wd`	<=1 percentage of page available width
-// ****************************************************************************************************************************************
-func CellWidthOption(wd float64) Option {
-	return func(o *option) {
-		o.cellWidth = wd
-	}
-}
-
-// set cell height
-//	`ht`	0 auto height
-// ****************************************************************************************************************************************
-func CellHeightOption(ht float64) Option {
-	return func(o *option) {
-		o.cellHeight = ht
-	}
-}
-
-// FontFamilyOption
-// ****************************************************************************************************************************************
-func FontFamilyOption(fam string) Option {
-	return func(o *option) {
-		o.fontFamily = fam
-	}
-}
-
 // FontPathOption
 // ****************************************************************************************************************************************
-func FontPathOption(path string) Option {
-	return func(o *option) {
-		o.ttfPath = path
-	}
-}
-
-// FontSizeOption
-// ****************************************************************************************************************************************
-func FontSizeOption(size float64) Option {
-	return func(o *option) {
-		o.fontSize = size
-	}
-}
-
-// PortraitOption
-// ****************************************************************************************************************************************
-func PortraitOption() Option {
-	return func(o *option) {
-		o.orientation = "Portrait"
-	}
-}
-
-// LandscapeOption
-// ****************************************************************************************************************************************
-func LandscapeOption() Option {
-	return func(o *option) {
-		o.orientation = "Landscape"
-	}
-}
-
-// PageMarginsOption
-// ****************************************************************************************************************************************
-func PageMarginsOption(left, top, right float64) Option {
-	return func(o *option) {
-		o.pageLeft, o.pageTop, o.pageRight = left, top, right
-	}
-}
-
-// set auto page break
-//	`auto`	default true
-//	`bottom`	2cm when 0
-// ****************************************************************************************************************************************
-func PageBreakOption(auto bool, bottom float64) Option {
-	return func(o *option) {
-		o.pageBreak = auto
-		if bottom == 0 {
-			o.pageBottom = 20
-		} else {
-			o.pageBottom = bottom
+func FontPathOption(path string) PageOption {
+	return func(ctx *context) {
+		if fs, err := file.ListFiles(path, `\.ttf$`); err == nil {
+			for _, f := range fs {
+				fn := file.GetFilename(f)
+				ctx.fpdf.AddUTF8Font(fn[0:strings.LastIndex(fn, ".")], "", f)
+			}
 		}
 	}
 }
 
-// PageSizeOption
+// set page margins and auto page-break
+//	`auto`	auto page-break
 // ****************************************************************************************************************************************
-func PageSizeOption(ps pagesize) Option {
-	return func(o *option) {
-		o.pageSize = ps
+func PageMarginsOption(left, top, right, bottom float64, auto bool) PageOption {
+	return func(ctx *context) {
+		ctx.fpdf.SetMargins(left, top, right)
+		ctx.fpdf.SetAutoPageBreak(auto, bottom)
 	}
 }
 
 // PageSizeA4Option
 // ****************************************************************************************************************************************
-func PageSizeA4Option() Option {
-	return func(o *option) {
-		o.pageSize = pagesize{name: "A4", size: fpdf.SizeType{Wd: 210, Ht: 297}}
+func PageSizeA4Option(landscape bool) PageOption {
+	return pageSizeOption(fpdf.SizeType{Wd: 210, Ht: 297}, landscape)
+}
+
+// PageSizeA5Option
+// ****************************************************************************************************************************************
+func PageSizeA5Option(landscape bool) PageOption {
+	return pageSizeOption(fpdf.SizeType{Wd: 148, Ht: 210}, landscape)
+}
+
+// TemplateOption
+// ****************************************************************************************************************************************
+func TemplateOption(page int) PageOption {
+	return func(ctx *context) {
+		if page > -1 && ctx.pageIndex != ctx.fpdf.PageNo() && ctx.importer != nil && page < ctx.importer.GetNumPages() {
+			w, h := ctx.fpdf.GetPageSize()
+			tn, sX, sY, tX, tY := ctx.importer.UseTemplate(page, 0, 0, w, h)
+			ctx.fpdf.UseImportedTemplate(tn, sX, sY, tX, tY)
+		}
 	}
 }
 
-// define the point after cell
-//	`ln`	PositionTail, NewLine or Buttom
+// TemplatesOption
 // ****************************************************************************************************************************************
-func PositionOption(ln position) Option {
-	return func(o *option) {
-		o.position = ln
+func TemplatesOption(path string) PageOption {
+	return func(ctx *context) {
+		if ctx.importer == nil {
+			ctx.importer = gofpdi.NewImporter()
+			ctx.importer.SetSourceFile(path)
+			for i := 1; i <= ctx.importer.GetNumPages(); i++ {
+				ctx.importer.ImportPage(i, "/MediaBox")
+			}
+
+			ctx.fpdf.ImportTemplates(ctx.importer.PutFormXobjectsUnordered())
+			ctx.fpdf.ImportObjects(ctx.importer.GetImportedObjectsUnordered())
+			ctx.fpdf.ImportObjPos(ctx.importer.GetImportedObjHashPos())
+		}
 	}
 }
 
-// use page of template file as page template
-//	`page`	page idnex start with 0
 // ****************************************************************************************************************************************
-func TemplateOption(page int) Option {
-	return func(o *option) {
-		o.template = page
+// ****************************************************************************************************************************************
+
+// BorderColorOption
+// ****************************************************************************************************************************************
+func BorderColorOption(rgb string) CellOption {
+	return func(ctx *context) {
+		if r, g, b, err := rgbColor(rgb); err == nil {
+			ctx.fpdf.SetDrawColor(r, g, b)
+		}
 	}
 }
 
-// TemplateFileOption
+// CellAlignOption
 // ****************************************************************************************************************************************
-func TemplateFileOption(path string) Option {
-	return func(o *option) {
-		o.templateFile = path
+func CellAlignOption(align align) CellOption {
+	return func(ctx *context) {
+		ctx.cellAlign = align
 	}
 }
 
-// UnitMM
+// CellBorderOption
 // ****************************************************************************************************************************************
-func UnitMM() Option {
-	return func(o *option) {
-		o.unit = "mm"
+func CellBorderOption(border border) CellOption {
+	return func(ctx *context) {
+		ctx.cellBorder = border
+	}
+}
+
+// CellMarginsOption
+// ****************************************************************************************************************************************
+func CellMarginsOption(m float64) CellOption {
+	return func(ctx *context) {
+		ctx.fpdf.SetCellMargin(m)
+	}
+}
+
+// CellHeightOption
+// ****************************************************************************************************************************************
+func CellHeightOption(ht float64) CellOption {
+	return func(ctx *context) {
+		ctx.cellHeight = ht
+	}
+}
+
+// CellWidthOption
+// ****************************************************************************************************************************************
+func CellWidthOption(wd float64) CellOption {
+	return func(ctx *context) {
+		ctx.cellWidth = wd
+
+		if ctx.cellWidth <= 1 {
+			w, _, _ := ctx.fpdf.PageSize(ctx.fpdf.PageNo())
+			l, _, r, _ := ctx.fpdf.GetMargins()
+
+			ctx.cellWidth = (w - l - r) * wd
+		}
+	}
+}
+
+// FontFamilyOption
+// ****************************************************************************************************************************************
+func FontFamilyOption(style string) CellOption {
+	return func(ctx *context) {
+		ctx.fontFamily = style
+		ctx.fpdf.SetFont(ctx.fontFamily, "", ctx.fontSize)
+	}
+}
+
+// FontSizeOption
+// ****************************************************************************************************************************************
+func FontSizeOption(size float64) CellOption {
+	return func(ctx *context) {
+		ctx.fontSize = size
+		ctx.fpdf.SetFont(ctx.fontFamily, "", ctx.fontSize)
+	}
+}
+
+// LocationOption
+// ****************************************************************************************************************************************
+func LocationOption(x, y float64) CellOption {
+	return func(ctx *context) {
+		ctx.fpdf.SetXY(x, y)
+	}
+}
+
+// PositionTailOption
+// ****************************************************************************************************************************************
+func PositionTailOption() CellOption {
+	return positionOption(0)
+}
+
+// PositionNewLineOption
+// ****************************************************************************************************************************************
+func PositionNewLineOption() CellOption {
+	return positionOption(1)
+}
+
+// PositionBottomOption
+// ****************************************************************************************************************************************
+func PositionBottomOption() CellOption {
+	return positionOption(2)
+}
+
+// TextColorOption
+// ****************************************************************************************************************************************
+func TextColorOption(rgb string) CellOption {
+	return func(ctx *context) {
+		if r, g, b, err := rgbColor(rgb); err == nil {
+			ctx.fpdf.SetTextColor(r, g, b)
+		}
 	}
 }
 
@@ -224,60 +198,41 @@ func UnitMM() Option {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// align **********************************************************************************************************************************
-type align = string
+// CellOption
+// ****************************************************************************************************************************************
+type CellOption = option
 
-// border *********************************************************************************************************************************
-type border = string
-
-// position *******************************************************************************************************************************
-type position = int
-
-// pagesize *******************************************************************************************************************************
-type pagesize struct {
-	name string
-	size fpdf.SizeType
-}
+// PageOption
+// ****************************************************************************************************************************************
+type PageOption = option
 
 // option *********************************************************************************************************************************
-type option struct {
-	cellAlign    align
-	cellBorder   border
-	cellMargin   float64
-	cellWidth    float64
-	cellHeight   float64
-	borderColor  []int
-	textColor    []int
-	fontFamily   string
-	fontSize     float64
-	orientation  string
-	pageLeft     float64
-	pageTop      float64
-	pageRight    float64
-	pageBottom   float64
-	pageBreak    bool
-	pageSize     pagesize
-	position     position
-	template     int
-	templateFile string
-	ttfPath      string
-	unit         string
-}
-
-// Option
-// ****************************************************************************************************************************************
-type Option func(*option)
+type option func(*context)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// applyOption ****************************************************************************************************************************
-func applyOption(opts ...Option) (opt *option) {
-	opt = new(option)
-	for _, o := range opts {
-		o(opt)
+// pageSizeOption *************************************************************************************************************************
+func pageSizeOption(size fpdf.SizeType, landscape bool) option {
+	return func(ctx *context) {
+		if landscape {
+			size.Wd, size.Ht = size.Ht, size.Wd
+		}
+		ctx.fpdf.AddPageFormat("P", size)
 	}
+}
+
+// positionOption *************************************************************************************************************************
+func positionOption(pos int) CellOption {
+	return func(ctx *context) {
+		ctx.position = pos
+	}
+}
+
+// rgbColor *******************************************************************************************************************************
+func rgbColor(rgb string) (r, g, b int, err error) {
+	err = strings.Parse(strings.ToUpper(rgb), "#%2X%2X%2X", &r, &g, &b)
 
 	return
 }

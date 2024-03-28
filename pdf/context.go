@@ -1,6 +1,8 @@
 package pdf
 
 import (
+	"io"
+
 	"github.com/go-pdf/fpdf"
 	"github.com/huyungtang/go-lib/strings"
 	"github.com/phpdave11/gofpdi"
@@ -9,6 +11,31 @@ import (
 // constants & variables ******************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
+
+const (
+	Baseline string = "A"
+	Bottom   string = "B"
+	Center   string = "C"
+	Left     string = "L"
+	Middle   string = "M"
+	Right    string = "R"
+	Top      string = "T"
+
+	BorderTRB  border = "TRB"
+	BorderLRB  border = "LRB"
+	BorderRB   border = "RB"
+	BorderFull border = "1"
+
+	AlignTL align = "TL"
+	AlignTC align = "TC"
+	AlignTR align = "TR"
+	AlignML align = "ML"
+	AlignMC align = "MC"
+	AlignMR align = "MR"
+	AlignBL align = "BL"
+	AlignBC align = "BC"
+	AlignBR align = "BR"
+)
 
 // public functions ***********************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -20,23 +47,25 @@ import (
 
 // context ********************************************************************************************************************************
 type context struct {
-	*fpdf.Fpdf
-	*gofpdi.Importer
-
-	opts []Option
+	fpdf                     *fpdf.Fpdf
+	importer                 *gofpdi.Importer
+	cellOptions, pageOptions []option
+	pageIndex                int
+	cellWidth, cellHeight    float64
+	cellBorder, cellAlign    border
+	position                 int
+	fontFamily               string
+	fontSize                 float64
 }
 
 // AddPage
 // ****************************************************************************************************************************************
-func (o *context) AddPage(opts ...Option) PDF {
-	cfg := applyOption(append(o.opts, opts...)...)
-	o.Fpdf.SetMargins(cfg.pageLeft, cfg.pageTop, cfg.pageRight)
-	o.Fpdf.AddPageFormat(cfg.orientation, cfg.pageSize.size)
-
-	if cfg.template > -1 && o.Importer != nil && cfg.template < o.Importer.GetNumPages() {
-		w, h := o.Fpdf.GetPageSize()
-		tn, sX, sY, tX, tY := o.Importer.UseTemplate(0, 0, 0, w, h)
-		o.Fpdf.UseImportedTemplate(tn, sX, sY, tX, tY)
+func (o *context) AddPage(opts ...option) PDF {
+	o.pageIndex = o.fpdf.PageNo()
+	o.applyOptions(o.pageOptions, opts...)
+	if o.pageIndex == o.fpdf.PageNo() {
+		o.fpdf.AddPage()
+		o.applyOptions(o.pageOptions, opts...)
 	}
 
 	return o
@@ -44,77 +73,77 @@ func (o *context) AddPage(opts ...Option) PDF {
 
 // AddBarcode128
 // ****************************************************************************************************************************************
-func (o *context) AddBarcode128(txt string, opts ...Option) PDF {
-	opts = append(opts,
+func (o *context) AddBarcode128(text string, opts ...option) PDF {
+	text = strings.Code128A(text)
+
+	cpts := append(opts,
 		FontSizeOption(20),
 		CellWidthOption(50),
 		CellHeightOption(4),
-		CellMaringOption(0),
-		AlignOption(AlignMC),
-		PositionOption(PositionBottom),
-	)
-	txt = strings.Code128A(txt)
+		CellMarginsOption(0),
+		CellAlignOption(AlignMC),
+		PositionBottomOption())
+	x, y := o.AddCell(text, cpts...).GetXY()
 
-	return o.AddCell(txt, opts...).AddCell(txt, opts...)
+	cpts = append(cpts, LocationOption(x, y), PositionNewLineOption())
+
+	return o.AddCell(text, cpts...)
 }
 
 // AddCell
 // ****************************************************************************************************************************************
-func (o *context) AddCell(txt string, opts ...Option) PDF {
-	cfg := applyOption(append(o.opts, opts...)...)
-	o.Fpdf.SetFont(cfg.fontFamily, "", cfg.fontSize)
-	o.Fpdf.SetDrawColor(cfg.borderColor[0], cfg.borderColor[1], cfg.borderColor[2])
-	o.Fpdf.SetTextColor(cfg.textColor[0], cfg.textColor[1], cfg.textColor[2])
-	o.Fpdf.SetCellMargin(cfg.cellMargin)
+func (o *context) AddCell(text string, opts ...option) PDF {
+	o.applyOptions(o.cellOptions, opts...)
 
-	cfg.cellWidth = o.getCellWidth(cfg.cellWidth)
-	strs := o.getCellText(txt, cfg.cellWidth, cfg.cellMargin)
-	cfg.cellHeight = o.getCellHeight(cfg.cellHeight, len(strs), cfg)
+	strs := o.getCellText(text)
+
+	ht, mg := o.cellHeight, o.fpdf.GetCellMargin()
+	if ht == 0 {
+		_, ht = o.fpdf.GetFontSize()
+	}
 
 	if l := len(strs); l == 1 {
-		o.Fpdf.CellFormat(cfg.cellWidth, cfg.cellHeight, strs[0], cfg.cellBorder, cfg.position, cfg.cellAlign, false, 0, "")
+		o.fpdf.CellFormat(o.cellWidth, ht+(mg*2), strs[0], o.cellBorder, o.position, o.cellAlign, false, 0, "")
 	} else if l > 1 {
 		cx, cy := o.GetXY()
-		o.Fpdf.MultiCell(cfg.cellWidth, cfg.cellHeight, strings.Join(strs, "\n"), cfg.cellBorder, cfg.cellAlign, false)
+		o.fpdf.MultiCell(o.cellWidth, ht+(mg*2), strings.Join(strs, "\n"), o.cellBorder, o.cellAlign, false)
 
-		nx, ny := o.GetXY()
-		switch cfg.position {
+		_, ny := o.GetXY()
+		switch o.position {
 		case 0:
-			o.Fpdf.SetXY(nx, cy)
+			o.fpdf.SetXY(cx+o.cellWidth, cy)
 		case 2:
-			o.Fpdf.SetXY(cx, ny)
+			o.fpdf.SetXY(cx, ny)
 		}
 	}
 
 	return o
 }
 
-// GetXY()
 // ****************************************************************************************************************************************
-func (o *context) GetXY() (x, y float64) {
-	if o.Fpdf != nil {
-		x, y = o.Fpdf.GetXY()
-	}
+// ****************************************************************************************************************************************
 
-	return
+// GetXY
+// ****************************************************************************************************************************************
+func (o *context) GetXY() (x float64, y float64) {
+
+	return o.fpdf.GetXY()
 }
 
-// SetXY
 // ****************************************************************************************************************************************
-func (o *context) SetXY(x, y float64) PDF {
-	if o.Fpdf != nil {
-		o.Fpdf.SetXY(x, y)
-	}
+// ****************************************************************************************************************************************
 
-	return o
+// Output
+// ****************************************************************************************************************************************
+func (o *context) Output(w io.Writer) (err error) {
+
+	return o.fpdf.Output(w)
 }
 
 // Close
 // ****************************************************************************************************************************************
 func (o *context) Close() (err error) {
-	if o.Fpdf != nil {
-		o.Fpdf.Close()
-	}
+	o.fpdf.Close()
 
 	return
 }
@@ -122,12 +151,25 @@ func (o *context) Close() (err error) {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
+// applyOptions ***************************************************************************************************************************
+func (o *context) applyOptions(defa []option, opts ...option) {
+	for _, opt := range defa {
+		opt(o)
+	}
+
+	for _, opt := range opts {
+		opt(o)
+	}
+}
+
 // getCellText ****************************************************************************************************************************
-func (o *context) getCellText(txt string, wd, mg float64) (strs []string) {
+func (o *context) getCellText(text string) (strs []string) {
+	wd, mg := o.cellWidth, o.fpdf.GetCellMargin()
+
 	strs = make([]string, 0)
 	tstr := make([]rune, 0)
 	wd = wd - (mg * 2)
-	for _, s := range txt {
+	for _, s := range text {
 		switch s {
 		case 13:
 		case 10:
@@ -135,7 +177,7 @@ func (o *context) getCellText(txt string, wd, mg float64) (strs []string) {
 			tstr = make([]rune, 0)
 		default:
 			tstr = append(tstr, s)
-			if o.Fpdf.GetStringWidth(string(tstr)) > wd {
+			if o.fpdf.GetStringWidth(string(tstr)) > wd {
 				strs = append(strs, string(tstr[0:len(tstr)-1]))
 				tstr = tstr[len(tstr)-1:]
 			}
@@ -146,30 +188,14 @@ func (o *context) getCellText(txt string, wd, mg float64) (strs []string) {
 	return
 }
 
-// getCellWidth ***************************************************************************************************************************
-func (o *context) getCellWidth(wd float64) float64 {
-	if wd <= 1 {
-		w, _, _ := o.Fpdf.PageSize(o.Fpdf.PageNo())
-		l, _, r, _ := o.Fpdf.GetMargins()
-		return (w - l - r) * wd
-	}
+// ****************************************************************************************************************************************
+// ****************************************************************************************************************************************
 
-	return wd
-}
+// align **********************************************************************************************************************************
+type align = string
 
-// getCellHeight **************************************************************************************************************************
-func (o *context) getCellHeight(ht float64, ln int, cfg *option) float64 {
-	if ht == 0 {
-		_, h := o.Fpdf.GetFontSize()
-		if ln <= 1 {
-			return h + (cfg.cellMargin * 2)
-		} else {
-			return h + cfg.cellMargin
-		}
-	}
-
-	return ht
-}
+// border *********************************************************************************************************************************
+type border = string
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
