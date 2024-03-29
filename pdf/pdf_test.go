@@ -19,7 +19,6 @@ func TestInit(t *testing.T) {
 	pdf, err := Init(
 		[]PageOption{
 			FontPathOption("/Users/huyungtang/Projects/golang.batches/fonts/"),
-			TemplatesOption("/Users/huyungtang/Downloads/文件範本.pdf"),
 		},
 		[]CellOption{
 			FontFamilyOption("TaipeiSansTCBeta-Regular"),
@@ -44,7 +43,6 @@ func TestInit(t *testing.T) {
 		AddPage(
 			PageSizeA4Option(true),
 		).
-		// 	SetXY(10, 50).
 		AddCell("永盛車電股份有限公司", CellAlignOption(AlignMC), FontSizeOption(15), CellBorderOption("1"), CellHeightOption(6)).
 		AddCell("永盛車電股份有限公司", CellAlignOption(AlignMC), FontSizeOption(15), CellBorderOption("1")).
 		AddCell("一二三四五六七八九十",
