@@ -60,16 +60,22 @@ func (o EncStr) String() string {
 
 // decryptString **************************************************************************************************************************
 func decryptString(val interface{}) (s string, err error) {
-	bs, isOK := val.([]byte)
-	if !isOK {
-		return "", errInvalidData
+	var str string
+	var isOk bool
+	if str, isOk = val.(string); !isOk {
+		var bs []byte
+		if bs, isOk = val.([]byte); !isOk {
+			return "", errInvalidData
+		}
+
+		if len(bs) == 0 {
+			return
+		}
+
+		str = string(bs)
 	}
 
-	if len(bs) == 0 {
-		return
-	}
-
-	s = strings.Format("$a%d$%s", encrypt.DefaCost, string(bs))
+	s = strings.Format("$a%d$%s", encrypt.DefaCost, str)
 	if s, err = encrypt.Decrypt(s); err != nil {
 		return
 	}
