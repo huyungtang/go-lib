@@ -3,6 +3,8 @@ package pdf
 import (
 	"os"
 	"testing"
+
+	"github.com/go-pdf/fpdf"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -65,6 +67,34 @@ func TestInit(t *testing.T) {
 		Output(f); err != nil {
 		t.Error(err)
 	}
+}
+
+// TestSDK
+// ****************************************************************************************************************************************
+func TestSDK(t *testing.T) {
+	out := fpdf.New("P", "mm", "A4", "/")
+	out.AddPage()
+	out.AddUTF8Font("default", "", "/Users/huyungtang/Projects/golang.batches/fonts/TaipeiSansTC/TaipeiSansTCBeta-Regular.ttf")
+	out.SetFont("default", "", 12)
+	_, ht := out.GetFontSize()
+
+	out.Cell(out.GetStringWidth("googlegg"), ht, "googlegg")
+	html := `<a href="https://www.google.com" title="google" target="_blank">google search</a><br>` +
+		`<a href="https://www.google.com" target="_blank">google search</a><br>` +
+		`<a href="https://www.google.com" target="_blank">google search</a><br>`
+	hh := out.HTMLBasicNew()
+	hh.Write(ht, html)
+
+	writer, err := os.OpenFile("/Users/huyungtang/Downloads/fpdf.pdf", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0744)
+	if err != nil {
+		t.Error(err)
+	}
+	defer writer.Close()
+
+	if err = out.OutputAndClose(writer); err != nil {
+		t.Error(err)
+	}
+
 }
 
 // type defineds **************************************************************************************************************************

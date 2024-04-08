@@ -48,7 +48,8 @@ func Init(pages []PageOption, cells []CellOption) (out PDF, err error) {
 type PDF interface {
 	AddPage(...option) PDF
 	AddBarcode128(string, ...option) PDF
-	AddCell(string, ...option) PDF
+	AddCell(text string, opts ...option) PDF
+	AddLink(txt, url string, opts ...option) PDF
 
 	GetXY() (float64, float64)
 

@@ -1,7 +1,9 @@
 package pdf
 
 import (
+	"fmt"
 	"io"
+	bases "strings"
 
 	"github.com/go-pdf/fpdf"
 	"github.com/huyungtang/go-lib/strings"
@@ -120,6 +122,46 @@ func (o *context) AddCell(text string, opts ...option) PDF {
 	return o
 }
 
+// AddLink
+// ****************************************************************************************************************************************
+func (o *context) AddLink(txt, url string, opts ...option) PDF {
+	if url != "" {
+		o.applyOptions(o.cellOptions, opts...)
+
+		if txt == "" {
+			txt = url
+		}
+
+		x, y := o.GetXY()
+		_, ht := o.fpdf.GetFontSize()
+		ht = ht + (o.fpdf.GetCellMargin() * 2)
+
+		if wd := o.fpdf.GetStringWidth(txt) + (o.fpdf.GetCellMargin() * 2); o.cellWidth < wd {
+			rs := []rune(txt)
+			tail := string(rs[len(rs)-3:])
+
+			var bs bases.Builder
+			bs.Grow(32)
+			for i := len(rs) - 4; i > 0; i-- {
+				fmt.Fprintf(&bs, "%s…%s", string(rs[0:i]), tail)
+				if wd = o.fpdf.GetStringWidth(bs.String()) + (o.fpdf.GetCellMargin() * 2); wd <= o.cellWidth {
+					txt = bs.String()
+					break
+				}
+				bs.Reset()
+			}
+		}
+
+		writer := o.fpdf.HTMLBasicNew()
+		writer.Write(ht, strings.Format(`<a href="%s" target="_blank">%s</a>`, url, txt))
+
+		o.fpdf.SetXY(x, y)
+		o.fpdf.CellFormat(o.cellWidth, ht, "", o.cellBorder, o.position, o.cellAlign, false, 0, "")
+	}
+
+	return o
+}
+
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
@@ -183,7 +225,10 @@ func (o *context) getCellText(text string) (strs []string) {
 			}
 		}
 	}
-	strs = append(strs, string(tstr))
+
+	if len(tstr) > 0 {
+		strs = append(strs, string(tstr))
+	}
 
 	return
 }
