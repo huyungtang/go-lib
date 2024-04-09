@@ -122,6 +122,14 @@ func (o *context) AddCell(text string, opts ...option) PDF {
 	return o
 }
 
+// AddDisplay
+// ****************************************************************************************************************************************
+func (o *context) AddDisplay(lbl, cnt string, opts ...option) PDF {
+	// TODO: AddDisplay Not Implemented
+
+	return o
+}
+
 // AddLink
 // ****************************************************************************************************************************************
 func (o *context) AddLink(txt, url string, opts ...option) PDF {
@@ -228,6 +236,10 @@ func (o *context) getCellText(text string) (strs []string) {
 
 	if len(tstr) > 0 {
 		strs = append(strs, string(tstr))
+	}
+
+	if len(strs) == 0 {
+		strs = append(strs, "")
 	}
 
 	return

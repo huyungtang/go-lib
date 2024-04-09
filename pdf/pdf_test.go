@@ -79,19 +79,27 @@ func TestSDK(t *testing.T) {
 	_, ht := out.GetFontSize()
 
 	out.Cell(out.GetStringWidth("googlegg"), ht, "googlegg")
-	html := `<a href="https://www.google.com" title="google" target="_blank">google search</a><br>` +
-		`<a href="https://www.google.com" target="_blank">google search</a><br>` +
-		`<a href="https://www.google.com" target="_blank">google search</a><br>`
-	hh := out.HTMLBasicNew()
-	hh.Write(ht, html)
+	// html := `<a href="https://www.google.com" title="google" target="_blank">google search</a><br>` +
+	// 	`<a href="https://www.google.com" target="_blank">google search</a><br>` +
+	// 	`<a href="https://www.google.com" target="_blank">google search</a><br>`
+	// hh := out.HTMLBasicNew()
+	// hh.Write(ht, html)
 
-	writer, err := os.OpenFile("/Users/huyungtang/Downloads/fpdf.pdf", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0744)
-	if err != nil {
-		t.Error(err)
-	}
-	defer writer.Close()
+	x, y := out.GetXY()
+	out.AddPage()
+	out.SetFont("default", "", 12)
 
-	if err = out.OutputAndClose(writer); err != nil {
+	out.SetXY(10, 10)
+	out.Cell(100, 10, "abc")
+	out.CellFormat(100, ht, "aaaa", "", 1, "", false, 0, "abb")
+	link := out.AddLink()
+	out.Link(10, 10, 10, 10, link)
+	out.SetPage(1)
+	out.SetXY(x, y+10)
+	out.CellFormat(100, ht, "test", "", 1, "", false, link, "link")
+	out.SetPage(2)
+
+	if err := out.OutputFileAndClose("/Users/huyungtang/Downloads/fpdf.pdf"); err != nil {
 		t.Error(err)
 	}
 
