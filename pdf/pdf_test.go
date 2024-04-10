@@ -45,14 +45,14 @@ func TestInit(t *testing.T) {
 		AddPage(
 			PageSizeA4Option(true),
 		).
-		AddCell("永盛車電股份有限公司", CellAlignOption(AlignMC), FontSizeOption(15), CellBorderOption("1"), CellHeightOption(6)).
-		AddCell("永盛車電股份有限公司", CellAlignOption(AlignMC), FontSizeOption(15), CellBorderOption("1")).
+		AddCell("永盛車電股份有限公司", AlignOption(AlignMC), FontSizeOption(15), BorderOption("1"), HeightOption(6)).
+		AddCell("永盛車電股份有限公司", AlignOption(AlignMC), FontSizeOption(15), BorderOption("1")).
 		AddCell("一二三四五六七八九十",
-			LocationOption(10, 50), CellWidthOption(.2), PositionTailOption(), CellBorderOption("1")).
+			LocationOption(10, 50), WidthOption(.2), PositionTailOption(), BorderOption("1")).
 		AddCell("一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十",
-			CellWidthOption(.2), PositionTailOption(), CellBorderOption("1")).
+			WidthOption(.2), PositionTailOption(), BorderOption("1")).
 		AddCell("XXXXXXXXXXXXXXXXXXXX",
-			CellWidthOption(.2), PositionTailOption(), CellBorderOption("1")).
+			WidthOption(.2), PositionTailOption(), BorderOption("1")).
 		// 	AddCell("請購單", AlignOption(AlignMC), FontSizeOption(13), CellHeightOption(7)).
 		// 	AddCell("申請人", CellWidthOption(.13), AlignOption(AlignMC), BorderOption(BorderFull), PositionOption(PositionTail)).
 		// 	AddCell("張三", CellWidthOption(.2), BorderOption(BorderFull), PositionOption(PositionTail)).

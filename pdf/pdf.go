@@ -24,11 +24,11 @@ func Init(pages []PageOption, cells []CellOption) (out PDF, err error) {
 		}, pages...),
 		cellOptions: append([]option{
 			BorderColorOption("#000000"),
-			CellMarginsOption(2),
-			CellHeightOption(0),
-			CellWidthOption(1),
-			CellAlignOption(AlignML),
-			CellBorderOption(""),
+			MarginsOption(2),
+			HeightOption(0),
+			WidthOption(1),
+			AlignOption(AlignML),
+			BorderOption(""),
 			FontFamilyOption("Arial"),
 			FontSizeOption(11),
 			PositionNewLineOption(),
@@ -49,11 +49,21 @@ type PDF interface {
 	AddPage(...option) PDF
 	AddBarcode128(string, ...option) PDF
 	AddCell(text string, opts ...option) PDF
+	AddRow(dtos []*PDFRowDTO) PDF
 	AddDisplay(label, content string, opts ...option) PDF
 	AddLink(txt, url string, opts ...option) PDF
 
 	GetXY() (float64, float64)
+	SetXY(float64, float64) PDF
+	GetContainerSize() (float64, float64)
 
 	Output(io.Writer) error
 	Close() error
+}
+
+// PDFRowDTO
+// ****************************************************************************************************************************************
+type PDFRowDTO struct {
+	Text string
+	Opts []CellOption
 }

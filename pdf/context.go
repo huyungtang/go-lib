@@ -80,10 +80,10 @@ func (o *context) AddBarcode128(text string, opts ...option) PDF {
 
 	cpts := append(opts,
 		FontSizeOption(20),
-		CellWidthOption(50),
-		CellHeightOption(4),
-		CellMarginsOption(0),
-		CellAlignOption(AlignMC),
+		WidthOption(50),
+		HeightOption(4),
+		MarginsOption(0),
+		AlignOption(AlignMC),
 		PositionBottomOption())
 	x, y := o.AddCell(text, cpts...).GetXY()
 
@@ -118,6 +118,25 @@ func (o *context) AddCell(text string, opts ...option) PDF {
 			o.fpdf.SetXY(cx, ny)
 		}
 	}
+
+	return o
+}
+
+// AddRow
+// ****************************************************************************************************************************************
+func (o *context) AddRow(dtos []*PDFRowDTO) PDF {
+	x, y := o.GetXY()
+	my := y
+	for _, dto := range dtos {
+		dto.Opts = append(dto.Opts, LocationOption(x, y), PositionBottomOption())
+		if _, cy := o.AddCell(dto.Text, dto.Opts...).GetXY(); cy > my {
+			my = cy
+		}
+		x += o.cellWidth
+	}
+
+	x, _, _, _ = o.fpdf.GetMargins()
+	o.SetXY(x, my)
 
 	return o
 }
@@ -178,6 +197,25 @@ func (o *context) AddLink(txt, url string, opts ...option) PDF {
 func (o *context) GetXY() (x float64, y float64) {
 
 	return o.fpdf.GetXY()
+}
+
+// SetXY
+// ****************************************************************************************************************************************
+func (o *context) SetXY(x, y float64) PDF {
+	o.fpdf.SetXY(x, y)
+
+	return o
+}
+
+// GetContainerSize
+// ****************************************************************************************************************************************
+func (o *context) GetContainerSize() (wd, ht float64) {
+	wd, ht = o.fpdf.GetPageSize()
+	l, t, r, b := o.fpdf.GetMargins()
+	wd = wd - l - r
+	ht = ht - t - b
+
+	return
 }
 
 // ****************************************************************************************************************************************

@@ -93,41 +93,41 @@ func BorderColorOption(rgb string) CellOption {
 	}
 }
 
-// CellAlignOption
+// AlignOption
 // ****************************************************************************************************************************************
-func CellAlignOption(align align) CellOption {
+func AlignOption(align align) CellOption {
 	return func(ctx *context) {
 		ctx.cellAlign = align
 	}
 }
 
-// CellBorderOption
+// BorderOption
 // ****************************************************************************************************************************************
-func CellBorderOption(border border) CellOption {
+func BorderOption(border border) CellOption {
 	return func(ctx *context) {
 		ctx.cellBorder = border
 	}
 }
 
-// CellMarginsOption
+// MarginsOption
 // ****************************************************************************************************************************************
-func CellMarginsOption(m float64) CellOption {
+func MarginsOption(m float64) CellOption {
 	return func(ctx *context) {
 		ctx.fpdf.SetCellMargin(m)
 	}
 }
 
-// CellHeightOption
+// HeightOption
 // ****************************************************************************************************************************************
-func CellHeightOption(ht float64) CellOption {
+func HeightOption(ht float64) CellOption {
 	return func(ctx *context) {
 		ctx.cellHeight = ht
 	}
 }
 
-// CellWidthOption
+// WidthOption
 // ****************************************************************************************************************************************
-func CellWidthOption(wd float64) CellOption {
+func WidthOption(wd float64) CellOption {
 	return func(ctx *context) {
 		ctx.cellWidth = wd
 
