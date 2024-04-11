@@ -56,7 +56,8 @@ func Reverse(s interface{}) {
 // ****************************************************************************************************************************************
 type Slice interface {
 	Append(interface{}) bool
-	GetStrings() []string
+	GetString() []string
+	GetUInt64() []uint64
 }
 
 // sliceContainer *************************************************************************************************************************
@@ -74,13 +75,26 @@ func (o *sliceContainer) Append(v interface{}) (isApp bool) {
 	return
 }
 
-// GetStrings
+// GetString
 // ****************************************************************************************************************************************
-func (o *sliceContainer) GetStrings() (strs []string) {
+func (o *sliceContainer) GetString() (strs []string) {
 	strs = make([]string, 0, len(o.store))
 	for k := range o.store {
 		if v, isOK := k.(string); isOK {
 			strs = append(strs, v)
+		}
+	}
+
+	return
+}
+
+// GetUInt64
+// ****************************************************************************************************************************************
+func (o *sliceContainer) GetUInt64() (vals []uint64) {
+	vals = make([]uint64, 0, len(o.store))
+	for k := range o.store {
+		if v, isOk := k.(uint64); isOk {
+			vals = append(vals, v)
 		}
 	}
 

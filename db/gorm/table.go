@@ -315,7 +315,7 @@ func (o *table) getColumns(entity interface{}, exp string) (cols []string) {
 		cs.Append(col)
 	}
 
-	return cs.GetStrings()
+	return cs.GetString()
 }
 
 // private functions **********************************************************************************************************************

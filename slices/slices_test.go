@@ -35,7 +35,7 @@ func TestGetString(t *testing.T) {
 	c.Append("b")
 	c.Append("c")
 
-	s := c.GetStrings()
+	s := c.GetString()
 	if len(s) != 3 {
 		t.Fail()
 	}
