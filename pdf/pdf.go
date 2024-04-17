@@ -50,7 +50,6 @@ type PDF interface {
 	AddBarcode128(string, ...option) PDF
 	AddCell(text string, opts ...option) PDF
 	AddRow(dtos []*PDFRowDTO) PDF
-	AddDisplay(label, content string, opts ...option) PDF
 	AddLink(txt, url string, opts ...option) PDF
 
 	GetXY() (float64, float64)

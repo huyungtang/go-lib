@@ -141,14 +141,6 @@ func (o *context) AddRow(dtos []*PDFRowDTO) PDF {
 	return o
 }
 
-// AddDisplay
-// ****************************************************************************************************************************************
-func (o *context) AddDisplay(lbl, cnt string, opts ...option) PDF {
-	// TODO: AddDisplay Not Implemented
-
-	return o
-}
-
 // AddLink
 // ****************************************************************************************************************************************
 func (o *context) AddLink(txt, url string, opts ...option) PDF {
