@@ -6,6 +6,7 @@ import (
 	bases "strings"
 
 	"github.com/go-pdf/fpdf"
+	"github.com/huyungtang/go-lib/barcode"
 	"github.com/huyungtang/go-lib/strings"
 	"github.com/phpdave11/gofpdi"
 )
@@ -76,20 +77,16 @@ func (o *context) AddPage(opts ...option) PDF {
 // AddBarcode128
 // ****************************************************************************************************************************************
 func (o *context) AddBarcode128(text string, opts ...option) PDF {
-	text = strings.Code128A(text)
+	o.applyOptions(o.cellOptions, opts...)
 
-	cpts := append(opts,
-		FontSizeOption(20),
-		WidthOption(50),
-		HeightOption(4),
-		MarginsOption(0),
-		AlignOption(AlignMC),
-		PositionBottomOption())
-	x, y := o.AddCell(text, cpts...).GetXY()
+	if br, err := barcode.Code128(text, 280, 280); err == nil {
+		k := strings.Random(32)
+		o.fpdf.RegisterImageReader(k, "png", br)
+		x, y := o.fpdf.GetXY()
+		o.fpdf.Image(k, x, y, o.cellWidth, o.cellHeight, false, "png", 0, "")
+	}
 
-	cpts = append(cpts, LocationOption(x, y), PositionNewLineOption())
-
-	return o.AddCell(text, cpts...)
+	return o
 }
 
 // AddCell

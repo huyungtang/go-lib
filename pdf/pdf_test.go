@@ -41,7 +41,7 @@ func TestInit(t *testing.T) {
 		AddPage(
 			TemplateOption(0),
 		).
-		AddBarcode128("E12345678901111", LocationOption(150, 10), FontFamilyOption("LibreBarcode128-Regular")).
+		AddBarcode128("E12345678901111", LocationOption(150, 10), WidthOption(50), HeightOption(12)).
 		AddPage(
 			PageSizeA4Option(true),
 		).
