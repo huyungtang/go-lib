@@ -293,6 +293,9 @@ func (o *table) getColumns(entity interface{}, exp string) (cols []string) {
 		col, isCol := tags["column"]
 		_, isRead := tags["->"]
 		write, isWrite := tags["<-"]
+		if write == "false" {
+			isWrite = false
+		}
 
 		if isIgnore ||
 			isPrimary ||
