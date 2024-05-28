@@ -125,7 +125,7 @@ func (o *context) AddRow(dtos []*PDFRowDTO) PDF {
 	x, y := o.GetXY()
 	my := y
 	for _, dto := range dtos {
-		dto.Opts = append(dto.Opts, LocationOption(x, y), PositionBottomOption())
+		dto.Opts = append(dto.Opts, Location(x, y), Below())
 		if _, cy := o.AddCell(dto.Text, dto.Opts...).GetXY(); cy > my {
 			my = cy
 		}

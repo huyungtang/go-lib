@@ -20,19 +20,19 @@ func Init(pages []PageOption, cells []CellOption) (out PDF, err error) {
 	ctx := &context{
 		fpdf: fpdf.New("", "", "", "/"),
 		pageOptions: append([]option{
-			PageMarginsOption(10, 10, 10, 10, true),
+			PageMargins(10, 10, 10, 10, true),
 		}, pages...),
 		cellOptions: append([]option{
-			BorderColorOption("#000000"),
-			MarginsOption(2),
-			HeightOption(0),
-			WidthOption(1),
-			AlignOption(AlignML),
-			BorderOption(""),
-			FontFamilyOption("Arial"),
-			FontSizeOption(11),
-			PositionNewLineOption(),
-			TextColorOption("#000000"),
+			BorderColor("#000000"),
+			Margins(2),
+			Height(0),
+			Width(1),
+			Align(AlignML),
+			Border(""),
+			FontFamily("Arial"),
+			FontSize(11),
+			NewLine(),
+			TextColor("#000000"),
 		}, cells...),
 	}
 

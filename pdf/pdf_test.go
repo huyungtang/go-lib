@@ -20,10 +20,10 @@ import (
 func TestInit(t *testing.T) {
 	pdf, err := Init(
 		[]PageOption{
-			FontPathOption("/Users/huyungtang/Projects/golang.batches/fonts/"),
+			FontPath("/Users/huyungtang/Projects/golang.batches/fonts/"),
 		},
 		[]CellOption{
-			FontFamilyOption("TaipeiSansTCBeta-Regular"),
+			FontFamily("TaipeiSansTCBeta-Regular"),
 		},
 	)
 	if err != nil {
@@ -39,20 +39,20 @@ func TestInit(t *testing.T) {
 
 	if err = pdf.
 		AddPage(
-			TemplateOption(0),
+			Template(0),
 		).
-		AddBarcode128("E12345678901111", LocationOption(150, 10), WidthOption(50), HeightOption(12)).
+		AddBarcode128("E12345678901111", Location(150, 10), Width(50), Height(12)).
 		AddPage(
-			PageSizeA4Option(true),
+			PageSizeA4(true),
 		).
-		AddCell("永盛車電股份有限公司", AlignOption(AlignMC), FontSizeOption(15), BorderOption("1"), HeightOption(6)).
-		AddCell("永盛車電股份有限公司", AlignOption(AlignMC), FontSizeOption(15), BorderOption("1")).
+		AddCell("永盛車電股份有限公司", Align(AlignMC), FontSize(15), Border("1"), Height(6)).
+		AddCell("永盛車電股份有限公司", Align(AlignMC), FontSize(15), Border("1")).
 		AddCell("一二三四五六七八九十",
-			LocationOption(10, 50), WidthOption(.2), PositionTailOption(), BorderOption("1")).
+			Location(10, 50), Width(.2), Tail(), Border("1")).
 		AddCell("一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十",
-			WidthOption(.2), PositionTailOption(), BorderOption("1")).
+			Width(.2), Tail(), Border("1")).
 		AddCell("XXXXXXXXXXXXXXXXXXXX",
-			WidthOption(.2), PositionTailOption(), BorderOption("1")).
+			Width(.2), Tail(), Border("1")).
 		// 	AddCell("請購單", AlignOption(AlignMC), FontSizeOption(13), CellHeightOption(7)).
 		// 	AddCell("申請人", CellWidthOption(.13), AlignOption(AlignMC), BorderOption(BorderFull), PositionOption(PositionTail)).
 		// 	AddCell("張三", CellWidthOption(.2), BorderOption(BorderFull), PositionOption(PositionTail)).
