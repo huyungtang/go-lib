@@ -102,7 +102,6 @@ func Join(strs []string, sep string) string {
 // LastIndex
 // ****************************************************************************************************************************************
 func LastIndex(s, ss string) int {
-
 	return base.LastIndex(s, ss)
 }
 
