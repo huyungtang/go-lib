@@ -65,13 +65,13 @@ func Fixed(str string, ml int) string {
 // HasPrefix
 // ****************************************************************************************************************************************
 func HasPrefix(str, pre string) bool {
-	return base.HasPrefix(str, pre)
+	return pre != "" && base.HasPrefix(str, pre)
 }
 
 // HasSuffix
 // ****************************************************************************************************************************************
 func HasSuffix(str, suf string) bool {
-	return base.HasSuffix(str, suf)
+	return suf != "" && base.HasSuffix(str, suf)
 }
 
 // Hex
