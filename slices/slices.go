@@ -1,8 +1,6 @@
 package slices
 
 import (
-	refl "reflect"
-
 	"github.com/huyungtang/go-lib/reflect"
 )
 
@@ -42,7 +40,7 @@ func Reverse(s interface{}) {
 	}
 
 	vs := reflect.ValueOf(s)
-	swap := refl.Swapper(vs.Interface())
+	swap := reflect.Swapper(vs.Interface())
 	for i, j := 0, vs.Len()-1; i < j; i, j = i+1, j-1 {
 		swap(i, j)
 	}

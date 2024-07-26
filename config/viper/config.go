@@ -3,7 +3,6 @@ package viper
 import (
 	"encoding/json"
 	"errors"
-	base "reflect"
 	"strconv"
 	"time"
 
@@ -115,7 +114,7 @@ func (o *database) GetStringSlice(key string, defa []string) []string {
 // ****************************************************************************************************************************************
 func (o *database) GetStruct(dto interface{}, opts ...config.Options) (err error) {
 	tp := reflect.TypeOf(dto)
-	if tp.Kind() != base.Struct {
+	if tp.Kind() != reflect.Struct {
 		return errors.New("target is not a struct")
 	}
 
@@ -142,29 +141,29 @@ func (o *database) GetStruct(dto interface{}, opts ...config.Options) (err error
 		tags["key"] = strings.Join(strings.OmitEmpty(keys), ".")
 
 		switch val.Field(i).Type().Kind() {
-		case base.Bool:
+		case reflect.Bool:
 			val.Field(i).SetBool(o.GetBool(tags["key"], tags["defa"] == "true"))
-		case base.Int, base.Int8, base.Int16, base.Int32, base.Int64:
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			defa, _ := strconv.ParseInt(tags["defa"], 10, 64)
 			val.Field(i).SetInt(int64(o.GetInt(tags["key"], int(defa))))
-		case base.String:
+		case reflect.String:
 			val.Field(i).SetString(o.GetString(tags["key"], tags["defa"]))
-		case base.Struct:
-			n := base.New(val.Field(i).Type()).Interface()
+		case reflect.Struct:
+			n := reflect.New(val.Field(i).Type()).Interface()
 			if e := o.GetStruct(n, config.PathOption(tags["key"])); e == nil {
 				val.Field(i).Set(reflect.ValueOf(n))
 			}
-		case base.Slice:
+		case reflect.Slice:
 			switch val.Field(i).Type().Elem().Kind() {
-			case base.String:
+			case reflect.String:
 				var defa []string
 				if e := o.getTagDefa(&defa, tags); e == nil {
-					val.Field(i).Set(base.ValueOf(o.GetStringSlice(tags["key"], defa)))
+					val.Field(i).Set(reflect.ValueOf(o.GetStringSlice(tags["key"], defa)))
 				}
-			case base.Int:
+			case reflect.Int:
 				var defa []int
 				if e := o.getTagDefa(&defa, tags); e == nil {
-					val.Field(i).Set(base.ValueOf(o.GetIntSlice(tags["key"], defa)))
+					val.Field(i).Set(reflect.ValueOf(o.GetIntSlice(tags["key"], defa)))
 				}
 			}
 		}
@@ -192,19 +191,19 @@ func (o *database) MergeInConfig(opts ...config.Options) (err error) {
 func (o *database) getCore(key string, defa interface{}) interface{} {
 	if o.IsSet(key) {
 		switch reflect.KindOf(defa) {
-		case base.Bool:
+		case reflect.Bool:
 			return o.Viper.GetBool(key)
-		case base.Int:
+		case reflect.Int:
 			return o.Viper.GetInt(key)
-		case base.String:
+		case reflect.String:
 			s, _ := encrypt.Decrypt(o.Viper.GetString(key))
 
 			return s
-		case base.Slice:
+		case reflect.Slice:
 			switch reflect.TypeOf(defa).Elem().Kind() {
-			case base.Int:
+			case reflect.Int:
 				return o.Viper.GetIntSlice(key)
-			case base.String:
+			case reflect.String:
 				return o.Viper.GetStringSlice(key)
 			}
 		}
