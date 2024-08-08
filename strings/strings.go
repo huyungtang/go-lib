@@ -8,6 +8,7 @@ import (
 	base "strings"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -144,6 +145,12 @@ func Random(size int) string {
 	}
 
 	return string(rs)
+}
+
+// UUID
+// ****************************************************************************************************************************************
+func UUID() string {
+	return uuid.New().String()
 }
 
 // Replace
