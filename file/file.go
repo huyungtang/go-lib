@@ -66,7 +66,9 @@ func GetDir(path string) string {
 }
 
 // check directory or file is exists or not
+//
 //	returns `NotExist (1)`, `IsFile (2)` or `IsDir (3)`
+//
 // ****************************************************************************************************************************************
 func IsExist(path string) statusEnum {
 	f, e := os.Stat(path)
@@ -175,6 +177,12 @@ func PathWorking(dirs ...string) string {
 	}
 
 	return PathTemp(dirs...)
+}
+
+// Split
+// ****************************************************************************************************************************************
+func Split(fn string) (path, name string) {
+	return filepath.Split(fn)
 }
 
 // type defineds **************************************************************************************************************************

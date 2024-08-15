@@ -66,7 +66,8 @@ func (o *watcher) Watch() (event *watcherEvent) {
 				if isOK &&
 					(e.Op&fsnotify.Op(o.Option.Op) == e.Op) &&
 					(o.Option.Filter == nil || o.Option.Filter.MatchString(e.Name)) {
-					evt.Watch <- &watcherContext{Event: file.FileOp(e.Op), Name: e.Name}
+					d, f := file.Split(e.Name)
+					evt.Watch <- &watcherContext{Event: file.FileOp(e.Op), FullName: e.Name, Dir: d, Name: f}
 				}
 			case e := <-o.Watcher.Errors:
 				evt.Error <- e
@@ -99,8 +100,10 @@ type watcherEvent struct {
 
 // watcherContext *************************************************************************************************************************
 type watcherContext struct {
-	Event file.FileOp
-	Name  string
+	Event    file.FileOp
+	Dir      string
+	Name     string
+	FullName string
 }
 
 // private functions **********************************************************************************************************************
