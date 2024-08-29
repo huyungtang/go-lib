@@ -50,6 +50,8 @@ type Table interface {
 	CreateColumns() []string
 	UpdateColumns() []string
 	RowsAffected() int64
+
+	BaseDB() interface{}
 }
 
 // Transaction

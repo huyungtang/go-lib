@@ -270,6 +270,12 @@ func (o *table) RowsAffected() int64 {
 	return o.DB.RowsAffected
 }
 
+// BaseDB
+// ****************************************************************************************************************************************
+func (o *table) BaseDB() interface{} {
+	return o.DB
+}
+
 // beforeCreate ***************************************************************************************************************************
 func (o *table) beforeCreate(ety interface{}) {
 	if e, isOK := ety.(db.Created); isOK {
