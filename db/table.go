@@ -51,7 +51,7 @@ type Table interface {
 	UpdateColumns() []string
 	RowsAffected() int64
 
-	BaseDB() interface{}
+	SubQuery() interface{}
 }
 
 // Transaction

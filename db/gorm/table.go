@@ -270,9 +270,9 @@ func (o *table) RowsAffected() int64 {
 	return o.DB.RowsAffected
 }
 
-// BaseDB
+// SubQuery
 // ****************************************************************************************************************************************
-func (o *table) BaseDB() interface{} {
+func (o *table) SubQuery() interface{} {
 	return o.DB
 }
 
