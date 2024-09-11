@@ -2,7 +2,6 @@ package times
 
 import (
 	"fmt"
-	"strconv"
 	base "time"
 )
 
@@ -110,10 +109,7 @@ func Parse(layout, value string) (v base.Time, e error) {
 // Period
 // ****************************************************************************************************************************************
 func Period(tm base.Time) (v uint64) {
-	dt := Format(tm, DateStr[0:6])
-	v, _ = strconv.ParseUint(dt, 10, 64)
-
-	return
+	return (uint64(tm.Year()) * 100) + uint64(tm.Month())
 }
 
 // Today
