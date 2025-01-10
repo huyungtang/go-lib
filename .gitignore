@@ -18,3 +18,4 @@ _*/
 ysc-*
 main.go
 .DS_Store
+.VSCodeCounter
