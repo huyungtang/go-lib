@@ -2,7 +2,9 @@ module github.com/huyungtang/go-lib
 
 replace golang.org/x/text => ./../golang.text
 
-go 1.17
+go 1.22.9
+
+toolchain go1.23.5
 
 require (
 	github.com/boombuler/barcode v1.0.1
@@ -10,7 +12,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.4
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/slack-go/slack v0.12.1
