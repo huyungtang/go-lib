@@ -5,18 +5,18 @@ package cache
 // ****************************************************************************************************************************************
 
 var (
-	ExpiredOption Options = ExpireOption(Expired)
-	KeepTTLOption Options = ExpireOption(KeepTTL)
-	StaticOption  Options = ExpireOption(Static)
+	ExpiredOption Option = ExpireOption(Expired)
+	KeepTTLOption Option = ExpireOption(KeepTTL)
+	StaticOption  Option = ExpireOption(Static)
 
-	SkipOverrideOption Options = overrideOption("NX")
-	UpdateOnlyOption   Options = overrideOption("XX")
+	SkipOverrideOption Option = overrideOption("NX")
+	UpdateOnlyOption   Option = overrideOption("XX")
 
-	LPushOption Options = cmderOption("LPUSH")
-	RPushOption Options = cmderOption("RPUSH")
+	LPushOption Option = cmderOption("LPUSH")
+	RPushOption Option = cmderOption("RPUSH")
 
-	LPopOption Options = cmderOption("LPOP")
-	RPopOption Options = cmderOption("RPOP")
+	LPopOption Option = cmderOption("LPOP")
+	RPopOption Option = cmderOption("RPOP")
 )
 
 // public functions ***********************************************************************************************************************
@@ -25,24 +25,24 @@ var (
 
 // DefaultOption
 // ****************************************************************************************************************************************
-func DefaultOption(fn DefaultFn) Options {
-	return func(co *Option) {
+func DefaultOption(fn DefaultFn) Option {
+	return func(co *Context) {
 		co.DefaFn = fn
 	}
 }
 
 // ExpireOption
 // ****************************************************************************************************************************************
-func ExpireOption(sec int64) Options {
-	return func(co *Option) {
+func ExpireOption(sec int64) Option {
+	return func(co *Context) {
 		co.Expire = sec
 	}
 }
 
 // PopCountOption
 // ****************************************************************************************************************************************
-func PopCountOption(count uint64) Options {
-	return func(o *Option) {
+func PopCountOption(count uint64) Option {
+	return func(o *Context) {
 		if count == 0 {
 			o.Count = 1
 		} else {
@@ -55,9 +55,9 @@ func PopCountOption(count uint64) Options {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Option
+// Context
 // ****************************************************************************************************************************************
-type Option struct {
+type Context struct {
 	DefaFn   DefaultFn
 	Expire   int64
 	Override string
@@ -67,7 +67,7 @@ type Option struct {
 
 // ApplyOptions
 // ****************************************************************************************************************************************
-func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
+func (o *Context) ApplyOptions(opts []Option, defa ...Option) (opt *Context) {
 	opts = append(defa, opts...)
 	for _, optFn := range opts {
 		optFn(o)
@@ -76,28 +76,28 @@ func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
 	return o
 }
 
-// Options
+// Option
 // ****************************************************************************************************************************************
-type Options func(*Option)
+type Option func(*Context)
 
 // DefaultFn
 // ****************************************************************************************************************************************
-type DefaultFn func(interface{}) (Options, error)
+type DefaultFn func(interface{}) (Option, error)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
 // overrideOption *************************************************************************************************************************
-func overrideOption(over string) Options {
-	return func(co *Option) {
+func overrideOption(over string) Option {
+	return func(co *Context) {
 		co.Override = over
 	}
 }
 
 // cmderOption ****************************************************************************************************************************
-func cmderOption(dir string) Options {
-	return func(o *Option) {
+func cmderOption(dir string) Option {
+	return func(o *Context) {
 		o.Cmder = dir
 	}
 }

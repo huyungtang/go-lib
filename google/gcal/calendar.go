@@ -19,8 +19,8 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(opts ...google.Options) (serv Service, err error) {
-	cfg := new(google.Option).
+func Init(opts ...google.Option) (serv Service, err error) {
+	cfg := new(google.Context).
 		ApplyOptions(opts,
 			CalendarIdOption("primary"),
 		)
@@ -40,23 +40,23 @@ func Init(opts ...google.Options) (serv Service, err error) {
 // service ********************************************************************************************************************************
 type service struct {
 	*base.Service
-	*google.Option
+	*google.Context
 }
 
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
 	// AddEvent(summary, event_time, CalendarId, Description, Recurrency, Timezone, AllDay, EndTime, Busy)
-	AddEvent(string, ...google.Options) google.Event
+	AddEvent(string, ...google.Option) google.Event
 	// DelEvent(eventId, CalendarId)
-	DelEvent(string, ...google.Options) google.Event
-	ListEvent(...google.Options) google.Events
+	DelEvent(string, ...google.Option) google.Event
+	ListEvent(...google.Option) google.Events
 }
 
 // AddEvent()
 // ****************************************************************************************************************************************
-func (o *service) AddEvent(summary string, opts ...google.Options) google.Event {
-	opt := &google.Option{
+func (o *service) AddEvent(summary string, opts ...google.Option) google.Event {
+	opt := &google.Context{
 		CalendarId:   o.CalendarId,
 		Transparency: "transparent",
 		StartTime:    time.Now(),
@@ -80,8 +80,8 @@ func (o *service) AddEvent(summary string, opts ...google.Options) google.Event 
 
 // DelEvent
 // ****************************************************************************************************************************************
-func (o *service) DelEvent(evtId string, opts ...google.Options) google.Event {
-	opt := (&google.Option{
+func (o *service) DelEvent(evtId string, opts ...google.Option) google.Event {
+	opt := (&google.Context{
 		CalendarId: o.CalendarId,
 	}).ApplyOptions(opts)
 
@@ -92,8 +92,8 @@ func (o *service) DelEvent(evtId string, opts ...google.Options) google.Event {
 
 // ListEvent
 // ****************************************************************************************************************************************
-func (o *service) ListEvent(opts ...google.Options) google.Events {
-	opt := (&google.Option{
+func (o *service) ListEvent(opts ...google.Option) google.Events {
+	opt := (&google.Context{
 		CalendarId: o.CalendarId,
 		MaxResult:  100,
 		StartTime:  times.Add(times.Today(), 0, -1),

@@ -17,7 +17,7 @@ import (
 // Init
 // ****************************************************************************************************************************************
 func Init(pages []PageOption, cells []CellOption) (out PDF, err error) {
-	ctx := &context{
+	ctx := &pdfContext{
 		fpdf: fpdf.New("", "", "", "/"),
 		pageOptions: append([]option{
 			PageMargins(10, 10, 10, 10, true),

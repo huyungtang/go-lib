@@ -20,7 +20,7 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(filename string, opts ...file.Options) (r Reader, err error) {
+func Init(filename string, opts ...file.Option) (r Reader, err error) {
 	if isExist := file.IsExist(filename); isExist != file.IsFile {
 		return nil, errors.New("file not found")
 	}
@@ -31,8 +31,8 @@ func Init(filename string, opts ...file.Options) (r Reader, err error) {
 	}
 
 	return &reader{
-		File:   f,
-		Option: new(file.Option).ApplyOptions(opts),
+		File:    f,
+		Context: new(file.Context).ApplyOptions(opts),
 	}, nil
 }
 
@@ -43,18 +43,18 @@ func Init(filename string, opts ...file.Options) (r Reader, err error) {
 // reader *********************************************************************************************************************************
 type reader struct {
 	*os.File
-	*file.Option
+	*file.Context
 }
 
 // reader *********************************************************************************************************************************
 func (o *reader) reader() io.Reader {
 	o.File.Seek(0, 0)
 
-	if o.Option.Encoding == nil {
+	if o.Context.Encoding == nil {
 		return o.File
 	}
 
-	return transform.NewReader(o.File, o.Option.Encoding.NewDecoder().Transformer)
+	return transform.NewReader(o.File, o.Context.Encoding.NewDecoder().Transformer)
 }
 
 // Reader

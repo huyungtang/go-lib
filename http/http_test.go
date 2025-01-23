@@ -18,7 +18,7 @@ import (
 // ****************************************************************************************************************************************
 func TestGet(t *testing.T) {
 	done := 0
-	client, err := Init("https://news.autotronic.com.tw", HandlerOption(func(ctx Context) {
+	client, err := Init("https://news.autotronic.com.tw", HandlerOption(func(ctx HttpResult) {
 		ctx.Next()
 		done++
 	}))
@@ -26,7 +26,7 @@ func TestGet(t *testing.T) {
 		t.Error(err)
 	}
 
-	client.Get("sitemap.xml", HandlerOption(func(ctx Context) {
+	client.Get("sitemap.xml", HandlerOption(func(ctx HttpResult) {
 		if ctx.StatusCode() != 200 {
 			t.Fail()
 		}
@@ -37,7 +37,7 @@ func TestGet(t *testing.T) {
 		done++
 	}))
 
-	client.Get("gsbyo3qfw7nv4hev", HandlerOption(func(ctx Context) {
+	client.Get("gsbyo3qfw7nv4hev", HandlerOption(func(ctx HttpResult) {
 		if ctx.StatusCode() != 200 {
 			t.Fail()
 		}

@@ -18,7 +18,7 @@ import (
 // FontPath
 // ****************************************************************************************************************************************
 func FontPath(path string) PageOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		if fs, err := file.ListFiles(path, `\.ttf$`); err == nil {
 			for _, f := range fs {
 				fn := file.GetFilename(f)
@@ -29,10 +29,12 @@ func FontPath(path string) PageOption {
 }
 
 // set page margins and auto page-break
+//
 //	`auto`	auto page-break
+//
 // ****************************************************************************************************************************************
 func PageMargins(left, top, right, bottom float64, auto bool) PageOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.fpdf.SetMargins(left, top, right)
 		ctx.fpdf.SetAutoPageBreak(auto, bottom)
 	}
@@ -53,7 +55,7 @@ func PageSizeA5(landscape bool) PageOption {
 // Template
 // ****************************************************************************************************************************************
 func Template(page int) PageOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		if page > -1 && ctx.pageIndex != ctx.fpdf.PageNo() && ctx.importer != nil && page < ctx.importer.GetNumPages() {
 			w, h := ctx.fpdf.GetPageSize()
 			tn, sX, sY, tX, tY := ctx.importer.UseTemplate(page, 0, 0, w, h)
@@ -65,7 +67,7 @@ func Template(page int) PageOption {
 // Templates
 // ****************************************************************************************************************************************
 func Templates(path string) PageOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		if ctx.importer == nil {
 			ctx.importer = gofpdi.NewImporter()
 			ctx.importer.SetSourceFile(path)
@@ -86,7 +88,7 @@ func Templates(path string) PageOption {
 // BorderColor
 // ****************************************************************************************************************************************
 func BorderColor(rgb string) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		if r, g, b, err := rgbColor(rgb); err == nil {
 			ctx.fpdf.SetDrawColor(r, g, b)
 		}
@@ -96,7 +98,7 @@ func BorderColor(rgb string) CellOption {
 // Align
 // ****************************************************************************************************************************************
 func Align(align align) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.cellAlign = align
 	}
 }
@@ -104,7 +106,7 @@ func Align(align align) CellOption {
 // Border
 // ****************************************************************************************************************************************
 func Border(border border) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.cellBorder = border
 	}
 }
@@ -112,7 +114,7 @@ func Border(border border) CellOption {
 // Margins
 // ****************************************************************************************************************************************
 func Margins(m float64) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.fpdf.SetCellMargin(m)
 	}
 }
@@ -120,7 +122,7 @@ func Margins(m float64) CellOption {
 // Height
 // ****************************************************************************************************************************************
 func Height(ht float64) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.cellHeight = ht
 	}
 }
@@ -128,7 +130,7 @@ func Height(ht float64) CellOption {
 // Width
 // ****************************************************************************************************************************************
 func Width(wd float64) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.cellWidth = wd
 
 		if ctx.cellWidth <= 1 {
@@ -143,7 +145,7 @@ func Width(wd float64) CellOption {
 // FontFamily
 // ****************************************************************************************************************************************
 func FontFamily(style string) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.fontFamily = style
 		ctx.fpdf.SetFont(ctx.fontFamily, "", ctx.fontSize)
 	}
@@ -152,7 +154,7 @@ func FontFamily(style string) CellOption {
 // FontSize
 // ****************************************************************************************************************************************
 func FontSize(size float64) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.fontSize = size
 		ctx.fpdf.SetFont(ctx.fontFamily, "", ctx.fontSize)
 	}
@@ -161,7 +163,7 @@ func FontSize(size float64) CellOption {
 // Location
 // ****************************************************************************************************************************************
 func Location(x, y float64) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.fpdf.SetXY(x, y)
 	}
 }
@@ -187,7 +189,7 @@ func Below() CellOption {
 // TextColor
 // ****************************************************************************************************************************************
 func TextColor(rgb string) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		if r, g, b, err := rgbColor(rgb); err == nil {
 			ctx.fpdf.SetTextColor(r, g, b)
 		}
@@ -207,7 +209,7 @@ type CellOption = option
 type PageOption = option
 
 // option *********************************************************************************************************************************
-type option func(*context)
+type option func(*pdfContext)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
@@ -215,7 +217,7 @@ type option func(*context)
 
 // pageSize *************************************************************************************************************************
 func pageSize(size fpdf.SizeType, landscape bool) option {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		if landscape {
 			size.Wd, size.Ht = size.Ht, size.Wd
 		}
@@ -225,7 +227,7 @@ func pageSize(size fpdf.SizeType, landscape bool) option {
 
 // position *************************************************************************************************************************
 func position(pos int) CellOption {
-	return func(ctx *context) {
+	return func(ctx *pdfContext) {
 		ctx.position = pos
 	}
 }

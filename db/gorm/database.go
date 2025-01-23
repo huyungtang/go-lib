@@ -24,7 +24,7 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(dsn string, opts ...db.Options) (sqlDB db.SqlDB, err error) {
+func Init(dsn string, opts ...db.Option) (sqlDB db.SqlDB, err error) {
 	var dial base.Dialector
 	d := strings.ToLower(strings.Find(dsn, `^(?i)(mssql|mysql|postgres)://`))
 	switch d {
@@ -38,7 +38,7 @@ func Init(dsn string, opts ...db.Options) (sqlDB db.SqlDB, err error) {
 		return nil, errInvalidDriver
 	}
 
-	cfg := new(db.Option).
+	cfg := new(db.Context).
 		ApplyOptions(opts,
 			db.SkipDefaultTransactionOption(true),
 		)

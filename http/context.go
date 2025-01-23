@@ -20,17 +20,17 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// context ********************************************************************************************************************************
-type context struct {
+// httpResult *****************************************************************************************************************************
+type httpResult struct {
 	Option
 	*base.Response
 	body []byte
 	err  error
 }
 
-// Context
+// HttpResult
 // ****************************************************************************************************************************************
-type Context interface {
+type HttpResult interface {
 	Body() []byte
 	Err() error
 	Next()
@@ -42,19 +42,19 @@ type Context interface {
 
 // Body
 // ****************************************************************************************************************************************
-func (o *context) Body() []byte {
+func (o *httpResult) Body() []byte {
 	return o.body
 }
 
 // Err
 // ****************************************************************************************************************************************
-func (o *context) Err() (err error) {
+func (o *httpResult) Err() (err error) {
 	return o.err
 }
 
 // Next
 // ****************************************************************************************************************************************
-func (o *context) Next() {
+func (o *httpResult) Next() {
 	o.Handler++
 	if o.Handler >= len(o.Handlers) || o.Handlers[o.Handler] == nil {
 		return
@@ -65,13 +65,13 @@ func (o *context) Next() {
 
 // Parse
 // ****************************************************************************************************************************************
-func (o *context) ParseJson(dto interface{}) (err error) {
+func (o *httpResult) ParseJson(dto interface{}) (err error) {
 	return json.Unmarshal(o.body, dto)
 }
 
 // Status
 // ****************************************************************************************************************************************
-func (o *context) Status() (s string) {
+func (o *httpResult) Status() (s string) {
 	if o.Response != nil {
 		s = o.Response.Status
 	}
@@ -81,7 +81,7 @@ func (o *context) Status() (s string) {
 
 // StatusCode
 // ****************************************************************************************************************************************
-func (o *context) StatusCode() (c int) {
+func (o *httpResult) StatusCode() (c int) {
 	if o.Response != nil {
 		c = o.Response.StatusCode
 	}
@@ -91,14 +91,14 @@ func (o *context) StatusCode() (c int) {
 
 // String
 // ****************************************************************************************************************************************
-func (o *context) String() string {
+func (o *httpResult) String() string {
 	return string(o.body)
 }
 
 // requestCore ****************************************************************************************************************************
-func (o *context) requestCore(method, path string, opts []Options) {
-	handler := HandlerOption(func(c Context) {
-		if ctx, isOK := c.(*context); isOK {
+func (o *httpResult) requestCore(method, path string, opts []Options) {
+	handler := HandlerOption(func(c HttpResult) {
+		if ctx, isOK := c.(*httpResult); isOK {
 			vals := &url.Values{}
 			for _, pars := range ctx.Params {
 				vals.Add(pars[0], pars[1])
@@ -150,7 +150,7 @@ func (o *context) requestCore(method, path string, opts []Options) {
 
 // ContextHandler
 // ****************************************************************************************************************************************
-type ContextHandler func(Context)
+type ContextHandler func(HttpResult)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

@@ -32,24 +32,24 @@ var (
 
 // AttributesOption
 // ****************************************************************************************************************************************
-func AttributesOption(attrs ...string) Options {
-	return func(o *Option) {
+func AttributesOption(attrs ...string) Option {
+	return func(o *Context) {
 		o.Attrs = append(o.Attrs, attrs...)
 	}
 }
 
 // BaseDNOption
 // ****************************************************************************************************************************************
-func BaseDNOption(dn string) Options {
-	return func(o *Option) {
+func BaseDNOption(dn string) Option {
+	return func(o *Context) {
 		o.BaseDN = dn
 	}
 }
 
 // BindRequestOption
 // ****************************************************************************************************************************************
-func BindRequestOption(user, pswd string) Options {
-	return func(o *Option) {
+func BindRequestOption(user, pswd string) Option {
+	return func(o *Context) {
 		o.SimpleBindRequest = &base.SimpleBindRequest{
 			Username:           user,
 			Password:           pswd,
@@ -60,16 +60,16 @@ func BindRequestOption(user, pswd string) Options {
 
 // GroupFilterOption
 // ****************************************************************************************************************************************
-func GroupFilterOption(filter string) Options {
-	return func(o *Option) {
+func GroupFilterOption(filter string) Option {
+	return func(o *Context) {
 		o.GroupFilter = filter
 	}
 }
 
 // UserFilterOption
 // ****************************************************************************************************************************************
-func UserFilterOption(filter string) Options {
-	return func(o *Option) {
+func UserFilterOption(filter string) Option {
+	return func(o *Context) {
 		o.UserFilter = filter
 	}
 }
@@ -78,9 +78,9 @@ func UserFilterOption(filter string) Options {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Option
+// Context
 // ****************************************************************************************************************************************
-type Option struct {
+type Context struct {
 	*base.SimpleBindRequest
 	Alias       int
 	Attrs       []string
@@ -92,7 +92,7 @@ type Option struct {
 
 // ApplyOptions
 // ****************************************************************************************************************************************
-func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
+func (o *Context) ApplyOptions(opts []Option, defa ...Option) (opt *Context) {
 	opts = append(defa, opts...)
 	for _, optFn := range opts {
 		optFn(o)
@@ -103,28 +103,28 @@ func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
 
 // GetUserDN
 // ****************************************************************************************************************************************
-func (o *Option) GetUserDN(user string) string {
+func (o *Context) GetUserDN(user string) string {
 	return strings.Format("uid=%s,cn=users,%s", user, o.BaseDN)
 }
 
-// Options
+// Option
 // ****************************************************************************************************************************************
-type Options func(*Option)
+type Option func(*Context)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
 // scopeOption ****************************************************************************************************************************
-func scopeOption(scope int) Options {
-	return func(o *Option) {
+func scopeOption(scope int) Option {
+	return func(o *Context) {
 		o.Scope = scope
 	}
 }
 
 // aliasesOption **************************************************************************************************************************
-func aliasesOption(alias int) Options {
-	return func(o *Option) {
+func aliasesOption(alias int) Option {
+	return func(o *Context) {
 		o.Alias = alias
 	}
 }

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"time"
 
-	base "github.com/go-redis/redis/v9"
 	"github.com/huyungtang/go-lib/cache"
 	"github.com/huyungtang/go-lib/times"
+	base "github.com/redis/go-redis/v9"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -20,7 +20,7 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(dsn string, opts ...cache.Option) (db cache.Database, err error) {
+func Init(dsn string, opts ...cache.Context) (db cache.Database, err error) {
 	var opt *base.Options
 	if opt, err = base.ParseURL(dsn); err != nil {
 		return
@@ -53,8 +53,8 @@ func (o *database) Exists(key string) bool {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err error) {
-	cfg := new(cache.Option).
+func (o *database) Get(key string, val interface{}, opts ...cache.Option) (err error) {
+	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
 			cache.KeepTTLOption,
@@ -78,7 +78,7 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 			return json.Unmarshal([]byte(res.Val()), val)
 		}
 	} else if cfg.DefaFn != nil {
-		var exp cache.Options
+		var exp cache.Option
 		if exp, err = cfg.DefaFn(val); err != nil {
 			return
 		}
@@ -93,8 +93,8 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 
 // Set
 // ****************************************************************************************************************************************
-func (o *database) Set(key string, val interface{}, opts ...cache.Options) (err error) {
-	cfg := new(cache.Option).
+func (o *database) Set(key string, val interface{}, opts ...cache.Option) (err error) {
+	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
 			cache.StaticOption,
@@ -110,8 +110,8 @@ func (o *database) Set(key string, val interface{}, opts ...cache.Options) (err 
 
 // Push
 // ****************************************************************************************************************************************
-func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err error) {
-	cfg := new(cache.Option).
+func (o *database) Push(key string, val interface{}, opts ...cache.Option) (err error) {
+	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
 			cache.RPushOption,
@@ -138,8 +138,8 @@ func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err
 
 // Pop
 // ****************************************************************************************************************************************
-func (o *database) Pop(key string, val interface{}, opts ...cache.Options) (err error) {
-	cfg := new(cache.Option).
+func (o *database) Pop(key string, val interface{}, opts ...cache.Option) (err error) {
+	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
 			cache.LPopOption,
@@ -189,7 +189,7 @@ func (o *database) Close() (err error) {
 // ****************************************************************************************************************************************
 
 // getArgs ********************************************************************************************************************************
-func getArgs(cfg *cache.Option) (args base.SetArgs) {
+func getArgs(cfg *cache.Context) (args base.SetArgs) {
 	args = base.SetArgs{
 		Mode: cfg.Override,
 	}
@@ -199,7 +199,7 @@ func getArgs(cfg *cache.Option) (args base.SetArgs) {
 }
 
 // getExpire ******************************************************************************************************************************
-func getExpire(opt *cache.Option) (exp time.Time, ttl time.Duration, keep bool) {
+func getExpire(opt *cache.Context) (exp time.Time, ttl time.Duration, keep bool) {
 	if opt.Expire > times.UnixSecond(times.Now()) {
 		exp = times.FromUnix(opt.Expire, 0)
 	} else if opt.Expire > cache.KeepTTL {
@@ -212,7 +212,7 @@ func getExpire(opt *cache.Option) (exp time.Time, ttl time.Duration, keep bool) 
 }
 
 // getExpireCmder *************************************************************************************************************************
-func getExpireCmder(opt *cache.Option, ctx context.Context, key string) (cmd base.Cmder) {
+func getExpireCmder(opt *cache.Context, ctx context.Context, key string) (cmd base.Cmder) {
 	if opt.Expire > times.UnixSecond(times.Now()) {
 		cmd = base.NewCmd(ctx, "EXPIREAT", key, opt.Expire)
 	} else if opt.Expire > 0 {

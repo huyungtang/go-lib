@@ -20,7 +20,7 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(filename string, opts ...file.Options) (w Writer, err error) {
+func Init(filename string, opts ...file.Option) (w Writer, err error) {
 	if isExist := file.IsExist(filename); isExist == file.IsDir {
 		return nil, errors.New("target is pointed to a directory")
 	}
@@ -29,7 +29,7 @@ func Init(filename string, opts ...file.Options) (w Writer, err error) {
 		return
 	}
 
-	cfg := new(file.Option).
+	cfg := new(file.Context).
 		ApplyOptions(opts,
 			file.Override,
 		)

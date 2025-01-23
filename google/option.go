@@ -22,8 +22,8 @@ import (
 
 // ClientSecretOption
 // ****************************************************************************************************************************************
-func ClientSecretOption(jsonKey string, scopes []string) Options {
-	return func(o *Option) {
+func ClientSecretOption(jsonKey string, scopes []string) Option {
+	return func(o *Context) {
 		if config, err := google.ConfigFromJSON([]byte(jsonKey), scopes...); err == nil {
 			o.Config = config
 		}
@@ -32,8 +32,8 @@ func ClientSecretOption(jsonKey string, scopes []string) Options {
 
 // OAuthTokenOption
 // ****************************************************************************************************************************************
-func OAuthTokenOption(token string) Options {
-	return func(o *Option) {
+func OAuthTokenOption(token string) Option {
+	return func(o *Context) {
 		tkn := new(oauth2.Token)
 		if err := json.Unmarshal([]byte(token), tkn); err == nil {
 			o.Token = tkn
@@ -45,9 +45,9 @@ func OAuthTokenOption(token string) Options {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Option
+// Context
 // ****************************************************************************************************************************************
-type Option struct {
+type Context struct {
 	*oauth2.Config
 	*oauth2.Token
 
@@ -70,7 +70,7 @@ type Option struct {
 
 // ApplyOptions
 // ****************************************************************************************************************************************
-func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
+func (o *Context) ApplyOptions(opts []Option, defa ...Option) (opt *Context) {
 	opts = append(defa, opts...)
 	for _, optFn := range opts {
 		optFn(o)
@@ -81,13 +81,13 @@ func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
 
 // GetClientOption
 // ****************************************************************************************************************************************
-func (o *Option) GetClientOption() option.ClientOption {
+func (o *Context) GetClientOption() option.ClientOption {
 	return option.WithHTTPClient(o.Config.Client(context.Background(), o.Token))
 }
 
-// Options
+// Option
 // ****************************************************************************************************************************************
-type Options func(*Option)
+type Option func(*Context)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

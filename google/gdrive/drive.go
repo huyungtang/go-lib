@@ -17,8 +17,8 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(opts ...google.Options) (serv Service, err error) {
-	cfg := new(google.Option).
+func Init(opts ...google.Option) (serv Service, err error) {
+	cfg := new(google.Context).
 		ApplyOptions(opts)
 
 	var cal *base.Service
@@ -36,7 +36,7 @@ func Init(opts ...google.Options) (serv Service, err error) {
 // service ********************************************************************************************************************************
 type service struct {
 	*base.Service
-	*google.Option
+	*google.Context
 }
 
 // Service

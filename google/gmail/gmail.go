@@ -29,9 +29,9 @@ var (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(opts ...google.Options) (serv Service, err error) {
+func Init(opts ...google.Option) (serv Service, err error) {
 	var s *base.Service
-	cfg := new(google.Option).ApplyOptions(opts)
+	cfg := new(google.Context).ApplyOptions(opts)
 	if s, err = base.NewService(context.Background(), cfg.GetClientOption()); err != nil {
 		return
 	}
@@ -51,17 +51,17 @@ type service struct {
 // Service
 // ****************************************************************************************************************************************
 type Service interface {
-	Send(...google.Options) google.Message
+	Send(...google.Option) google.Message
 }
 
 // Send
 // ****************************************************************************************************************************************
-func (o *service) Send(opts ...google.Options) google.Message {
+func (o *service) Send(opts ...google.Option) google.Message {
 	var buff bytes.Buffer
 	writer := multipart.NewWriter(&buff)
 	defer writer.Close()
 
-	cfg := (&google.Option{
+	cfg := (&google.Context{
 		Header: textproto.MIMEHeader{
 			headerContent: {strings.Format("multipart/mixed;\n  boundary=\"%s\"", writer.Boundary())},
 		},

@@ -15,11 +15,11 @@ package ldap
 // Client
 // ****************************************************************************************************************************************
 type Client interface {
-	GetUser(string, ...Options) (Entity, error)
-	GetUsers([]string, ...Options) (Result, error)
-	GetGroups([]string, ...Options) (Result, error)
-	GetGroupUsers([]string, ...Options) (Result, error)
-	Search(string, ...Options) (Result, error)
+	GetUser(string, ...Option) (Entity, error)
+	GetUsers([]string, ...Option) (Result, error)
+	GetGroups([]string, ...Option) (Result, error)
+	GetGroupUsers([]string, ...Option) (Result, error)
+	Search(string, ...Option) (Result, error)
 	Signin(string, string) error
 	Password(string, string, string) error
 	Close() error

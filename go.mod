@@ -11,10 +11,10 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-ldap/ldap/v3 v3.4.4
 	github.com/go-pdf/fpdf v0.9.0
-	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/google/uuid v1.6.0
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311
 	github.com/rabbitmq/amqp091-go v1.5.0
+	github.com/redis/go-redis/v9 v9.7.0
 	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.13.0
 	github.com/tdewolff/minify v2.3.6+incompatible
@@ -34,7 +34,7 @@ require (
 	cloud.google.com/go/compute v1.12.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20220621081337-cb9428e4ac1e // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.4 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect

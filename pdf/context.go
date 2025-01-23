@@ -48,8 +48,8 @@ const (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// context ********************************************************************************************************************************
-type context struct {
+// pdfContext *****************************************************************************************************************************
+type pdfContext struct {
 	fpdf                     *fpdf.Fpdf
 	importer                 *gofpdi.Importer
 	cellOptions, pageOptions []option
@@ -63,7 +63,7 @@ type context struct {
 
 // AddPage
 // ****************************************************************************************************************************************
-func (o *context) AddPage(opts ...option) PDF {
+func (o *pdfContext) AddPage(opts ...option) PDF {
 	o.pageIndex = o.fpdf.PageNo()
 	o.applyOptions(o.pageOptions, opts...)
 	if o.pageIndex == o.fpdf.PageNo() {
@@ -76,7 +76,7 @@ func (o *context) AddPage(opts ...option) PDF {
 
 // AddBarcode128
 // ****************************************************************************************************************************************
-func (o *context) AddBarcode128(text string, opts ...option) PDF {
+func (o *pdfContext) AddBarcode128(text string, opts ...option) PDF {
 	o.applyOptions(o.cellOptions, opts...)
 
 	if br, err := barcode.Code128(text, 280, 280); err == nil {
@@ -91,7 +91,7 @@ func (o *context) AddBarcode128(text string, opts ...option) PDF {
 
 // AddCell
 // ****************************************************************************************************************************************
-func (o *context) AddCell(text string, opts ...option) PDF {
+func (o *pdfContext) AddCell(text string, opts ...option) PDF {
 	o.applyOptions(o.cellOptions, opts...)
 
 	strs := o.getCellText(text)
@@ -121,7 +121,7 @@ func (o *context) AddCell(text string, opts ...option) PDF {
 
 // AddRow
 // ****************************************************************************************************************************************
-func (o *context) AddRow(dtos []*PDFRowDTO) PDF {
+func (o *pdfContext) AddRow(dtos []*PDFRowDTO) PDF {
 	x, y := o.GetXY()
 	my := y
 	for _, dto := range dtos {
@@ -140,7 +140,7 @@ func (o *context) AddRow(dtos []*PDFRowDTO) PDF {
 
 // AddLink
 // ****************************************************************************************************************************************
-func (o *context) AddLink(txt, url string, opts ...option) PDF {
+func (o *pdfContext) AddLink(txt, url string, opts ...option) PDF {
 	if url != "" {
 		o.applyOptions(o.cellOptions, opts...)
 
@@ -183,14 +183,14 @@ func (o *context) AddLink(txt, url string, opts ...option) PDF {
 
 // GetXY
 // ****************************************************************************************************************************************
-func (o *context) GetXY() (x float64, y float64) {
+func (o *pdfContext) GetXY() (x float64, y float64) {
 
 	return o.fpdf.GetXY()
 }
 
 // SetXY
 // ****************************************************************************************************************************************
-func (o *context) SetXY(x, y float64) PDF {
+func (o *pdfContext) SetXY(x, y float64) PDF {
 	o.fpdf.SetXY(x, y)
 
 	return o
@@ -198,7 +198,7 @@ func (o *context) SetXY(x, y float64) PDF {
 
 // GetContainerSize
 // ****************************************************************************************************************************************
-func (o *context) GetContainerSize() (wd, ht float64) {
+func (o *pdfContext) GetContainerSize() (wd, ht float64) {
 	wd, ht = o.fpdf.GetPageSize()
 	l, t, r, b := o.fpdf.GetMargins()
 	wd = wd - l - r
@@ -212,14 +212,14 @@ func (o *context) GetContainerSize() (wd, ht float64) {
 
 // Output
 // ****************************************************************************************************************************************
-func (o *context) Output(w io.Writer) (err error) {
+func (o *pdfContext) Output(w io.Writer) (err error) {
 
 	return o.fpdf.Output(w)
 }
 
 // Close
 // ****************************************************************************************************************************************
-func (o *context) Close() (err error) {
+func (o *pdfContext) Close() (err error) {
 	o.fpdf.Close()
 
 	return
@@ -229,7 +229,7 @@ func (o *context) Close() (err error) {
 // ****************************************************************************************************************************************
 
 // applyOptions ***************************************************************************************************************************
-func (o *context) applyOptions(defa []option, opts ...option) {
+func (o *pdfContext) applyOptions(defa []option, opts ...option) {
 	for _, opt := range defa {
 		opt(o)
 	}
@@ -240,7 +240,7 @@ func (o *context) applyOptions(defa []option, opts ...option) {
 }
 
 // getCellText ****************************************************************************************************************************
-func (o *context) getCellText(text string) (strs []string) {
+func (o *pdfContext) getCellText(text string) (strs []string) {
 	wd, mg := o.cellWidth, o.fpdf.GetCellMargin()
 
 	strs = make([]string, 0)

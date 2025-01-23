@@ -23,7 +23,7 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(dsn string, opts ...db.Options) (nosql db.NoSqlDB, err error) {
+func Init(dsn string, opts ...db.Option) (nosql db.NoSqlDB, err error) {
 	var u *url.URL
 	if u, err = url.Parse(dsn); err != nil {
 		return

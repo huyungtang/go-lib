@@ -18,8 +18,8 @@ const (
 )
 
 var (
-	userFilterOption  ldap.Options = ldap.UserFilterOption("(objectClass=person)")
-	groupFilterOption ldap.Options = ldap.GroupFilterOption("(objectClass=posixGroup)")
+	userFilterOption  ldap.Option = ldap.UserFilterOption("(objectClass=person)")
+	groupFilterOption ldap.Option = ldap.GroupFilterOption("(objectClass=posixGroup)")
 )
 
 // public functions ***********************************************************************************************************************
@@ -28,7 +28,7 @@ var (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(dsn string, opts ...ldap.Options) (client ldap.Client, err error) {
+func Init(dsn string, opts ...ldap.Option) (client ldap.Client, err error) {
 	var u *url.URL
 	if u, err = url.Parse(dsn); err != nil {
 		return
@@ -40,7 +40,7 @@ func Init(dsn string, opts ...ldap.Options) (client ldap.Client, err error) {
 	}
 
 	pswd, _ := u.User.Password()
-	cfg := new(ldap.Option).
+	cfg := new(ldap.Context).
 		ApplyOptions(opts,
 			ldap.BindRequestOption(u.User.Username(), pswd),
 			userFilterOption,
@@ -67,12 +67,12 @@ func Init(dsn string, opts ...ldap.Options) (client ldap.Client, err error) {
 // ****************************************************************************************************************************************
 type database struct {
 	*base.Conn
-	*ldap.Option
+	*ldap.Context
 }
 
 // GetUser
 // ****************************************************************************************************************************************
-func (o *database) GetUser(user string, opts ...ldap.Options) (ety ldap.Entity, err error) {
+func (o *database) GetUser(user string, opts ...ldap.Option) (ety ldap.Entity, err error) {
 	var res ldap.Result
 	if res, err = o.GetUsers([]string{user}, opts...); err != nil {
 		return
@@ -87,7 +87,7 @@ func (o *database) GetUser(user string, opts ...ldap.Options) (ety ldap.Entity, 
 
 // GetUsers
 // ****************************************************************************************************************************************
-func (o *database) GetUsers(users []string, opts ...ldap.Options) (rtn ldap.Result, err error) {
+func (o *database) GetUsers(users []string, opts ...ldap.Option) (rtn ldap.Result, err error) {
 	fs := make([]string, len(users))
 	for i, user := range users {
 		fs[i] = strings.Format(("(uid=%s)"), user)
@@ -100,7 +100,7 @@ func (o *database) GetUsers(users []string, opts ...ldap.Options) (rtn ldap.Resu
 
 // GetGroups
 // ****************************************************************************************************************************************
-func (o *database) GetGroups(groups []string, opts ...ldap.Options) (rtn ldap.Result, err error) {
+func (o *database) GetGroups(groups []string, opts ...ldap.Option) (rtn ldap.Result, err error) {
 	fs := make([]string, len(groups))
 	for i, group := range groups {
 		fs[i] = strings.Format(("(cn=%s)"), group)
@@ -113,7 +113,7 @@ func (o *database) GetGroups(groups []string, opts ...ldap.Options) (rtn ldap.Re
 
 // GetGroupUsers
 // ****************************************************************************************************************************************
-func (o *database) GetGroupUsers(groups []string, opts ...ldap.Options) (rtn ldap.Result, err error) {
+func (o *database) GetGroupUsers(groups []string, opts ...ldap.Option) (rtn ldap.Result, err error) {
 	fs := make([]string, len(groups))
 	for i, group := range groups {
 		fs[i] = strings.Format(("(memberOf=%s)"), group)
@@ -126,10 +126,10 @@ func (o *database) GetGroupUsers(groups []string, opts ...ldap.Options) (rtn lda
 
 // Search
 // ****************************************************************************************************************************************
-func (o *database) Search(filter string, opts ...ldap.Options) (rtn ldap.Result, err error) {
-	cfg := new(ldap.Option).
+func (o *database) Search(filter string, opts ...ldap.Option) (rtn ldap.Result, err error) {
+	cfg := new(ldap.Context).
 		ApplyOptions(opts,
-			ldap.BaseDNOption(o.Option.BaseDN),
+			ldap.BaseDNOption(o.Context.BaseDN),
 			ldap.ScopeWholeSubtreeOption,
 		)
 	req := base.NewSearchRequest(
@@ -153,7 +153,7 @@ func (o *database) Search(filter string, opts ...ldap.Options) (rtn ldap.Result,
 // Signin
 // ****************************************************************************************************************************************
 func (o *database) Signin(user, pswd string) (err error) {
-	if err = o.Conn.Bind(o.Option.GetUserDN(user), pswd); err != nil {
+	if err = o.Conn.Bind(o.Context.GetUserDN(user), pswd); err != nil {
 		return
 	}
 
@@ -172,7 +172,7 @@ func (o *database) Signin(user, pswd string) (err error) {
 // Password
 // ****************************************************************************************************************************************
 func (o *database) Password(user, oriPswd, newPswd string) (err error) {
-	req := base.NewPasswordModifyRequest(o.Option.GetUserDN(user), oriPswd, newPswd)
+	req := base.NewPasswordModifyRequest(o.Context.GetUserDN(user), oriPswd, newPswd)
 	_, err = o.Conn.PasswordModify(req)
 
 	return
@@ -190,7 +190,7 @@ func (o *database) Close() (err error) {
 
 // bind ***********************************************************************************************************************************
 func (o *database) bind() *database {
-	o.Conn.SimpleBind(o.Option.SimpleBindRequest)
+	o.Conn.SimpleBind(o.Context.SimpleBindRequest)
 
 	return o
 }

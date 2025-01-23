@@ -17,20 +17,20 @@ import (
 
 // Init
 // ****************************************************************************************************************************************
-func Init(opts ...file.Options) (event Watcher, err error) {
+func Init(opts ...file.Option) (event Watcher, err error) {
 	var fw *fsnotify.Watcher
 	if fw, err = fsnotify.NewWatcher(); err != nil {
 		return
 	}
 
-	cfg := new(file.Option).ApplyOptions(opts)
+	cfg := new(file.Context).ApplyOptions(opts)
 	if len(cfg.Path) == 0 {
 		return nil, errors.New("no path to watch")
 	}
 
 	return &watcher{
 		Watcher: fw,
-		Option:  cfg,
+		Context: cfg,
 	}, nil
 }
 
@@ -41,7 +41,7 @@ func Init(opts ...file.Options) (event Watcher, err error) {
 // watcher ********************************************************************************************************************************
 type watcher struct {
 	*fsnotify.Watcher
-	*file.Option
+	*file.Context
 }
 
 // Watcher
@@ -64,8 +64,8 @@ func (o *watcher) Watch() (event *watcherEvent) {
 			select {
 			case e, isOK := <-o.Watcher.Events:
 				if isOK &&
-					(e.Op&fsnotify.Op(o.Option.Op) == e.Op) &&
-					(o.Option.Filter == nil || o.Option.Filter.MatchString(e.Name)) {
+					(e.Op&fsnotify.Op(o.Context.Op) == e.Op) &&
+					(o.Context.Filter == nil || o.Context.Filter.MatchString(e.Name)) {
 					d, f := file.Split(e.Name)
 					evt.Watch <- &watcherContext{Event: file.FileOp(e.Op), FullName: e.Name, Dir: d, Name: f}
 				}
@@ -75,7 +75,7 @@ func (o *watcher) Watch() (event *watcherEvent) {
 		}
 	}(event)
 
-	for _, path := range o.Option.Path {
+	for _, path := range o.Context.Path {
 		o.Watcher.Add(path)
 	}
 

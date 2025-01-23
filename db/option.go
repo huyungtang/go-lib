@@ -10,16 +10,16 @@ package db
 
 // DebugOption
 // ****************************************************************************************************************************************
-func DebugOption() Options {
-	return func(o *Option) {
+func DebugOption() Option {
+	return func(o *Context) {
 		o.Debug = true
 	}
 }
 
 // SkipDefaultTransactionOption
 // ****************************************************************************************************************************************
-func SkipDefaultTransactionOption(s bool) Options {
-	return func(d *Option) {
+func SkipDefaultTransactionOption(s bool) Option {
+	return func(d *Context) {
 		d.SkipDefaultTransaction = s
 	}
 }
@@ -28,16 +28,16 @@ func SkipDefaultTransactionOption(s bool) Options {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Option
+// Context
 // ****************************************************************************************************************************************
-type Option struct {
+type Context struct {
 	Debug                  bool
 	SkipDefaultTransaction bool
 }
 
 // ApplyOptions
 // ****************************************************************************************************************************************
-func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
+func (o *Context) ApplyOptions(opts []Option, defa ...Option) (opt *Context) {
 	opts = append(defa, opts...)
 	for _, optFn := range opts {
 		optFn(o)
@@ -46,9 +46,9 @@ func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
 	return o
 }
 
-// Options
+// Option
 // ****************************************************************************************************************************************
-type Options func(*Option)
+type Option func(*Context)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************

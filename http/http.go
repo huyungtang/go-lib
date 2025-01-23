@@ -32,7 +32,7 @@ func Init(hostURL string, opts ...Options) (client HttpClient, err error) {
 		HostOption(host),
 	}, opts...)
 
-	ctx := &context{
+	ctx := &httpResult{
 		Option: Option{},
 	}
 	ctx.ApplyOptions(opts)
@@ -53,15 +53,15 @@ type HttpClient interface {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *context) Get(path string, opts ...Options) {
-	ctx := reflect.Clone(o).(*context)
+func (o *httpResult) Get(path string, opts ...Options) {
+	ctx := reflect.Clone(o).(*httpResult)
 	ctx.requestCore(base.MethodGet, path, opts)
 }
 
 // Post
 // ****************************************************************************************************************************************
-func (o *context) Post(path string, opts ...Options) {
-	ctx := reflect.Clone(o).(*context)
+func (o *httpResult) Post(path string, opts ...Options) {
+	ctx := reflect.Clone(o).(*httpResult)
 	ctx.ApplyOptions(opts, urlencodedOption)
 	ctx.requestCore(base.MethodGet, path, opts)
 }

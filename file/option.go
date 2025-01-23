@@ -13,10 +13,10 @@ import (
 // ****************************************************************************************************************************************
 
 var (
-	Big5 Options = encodingOption(traditionalchinese.Big5)
+	Big5 Option = encodingOption(traditionalchinese.Big5)
 
-	Append   Options = flagOption(os.O_CREATE | os.O_WRONLY | os.O_APPEND)
-	Override Options = flagOption(os.O_CREATE | os.O_WRONLY | os.O_TRUNC)
+	Append   Option = flagOption(os.O_CREATE | os.O_WRONLY | os.O_APPEND)
+	Override Option = flagOption(os.O_CREATE | os.O_WRONLY | os.O_TRUNC)
 )
 
 // public functions ***********************************************************************************************************************
@@ -25,24 +25,24 @@ var (
 
 // FilterOption
 // ****************************************************************************************************************************************
-func FilterOption(pattern string) Options {
-	return func(o *Option) {
+func FilterOption(pattern string) Option {
+	return func(o *Context) {
 		o.Filter = regexp.MustCompile(pattern)
 	}
 }
 
 // OperationOption
 // ****************************************************************************************************************************************
-func OperationOption(op FileOp) Options {
-	return func(o *Option) {
+func OperationOption(op FileOp) Option {
+	return func(o *Context) {
 		o.Op = o.Op | op
 	}
 }
 
 // PathOption
 // ****************************************************************************************************************************************
-func PathOption(pathes ...string) Options {
-	return func(o *Option) {
+func PathOption(pathes ...string) Option {
+	return func(o *Context) {
 		o.Path = append(o.Path, pathes...)
 	}
 }
@@ -51,9 +51,9 @@ func PathOption(pathes ...string) Options {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Option
+// Context
 // ****************************************************************************************************************************************
-type Option struct {
+type Context struct {
 	encoding.Encoding
 	Flag   int
 	Filter *regexp.Regexp
@@ -63,7 +63,7 @@ type Option struct {
 
 // ApplyOptions
 // ****************************************************************************************************************************************
-func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
+func (o *Context) ApplyOptions(opts []Option, defa ...Option) (opt *Context) {
 	opts = append(defa, opts...)
 	for _, optFn := range opts {
 		optFn(o)
@@ -72,24 +72,24 @@ func (o *Option) ApplyOptions(opts []Options, defa ...Options) (opt *Option) {
 	return o
 }
 
-// Options
+// Option
 // ****************************************************************************************************************************************
-type Options func(*Option)
+type Option func(*Context)
 
 // private functions **********************************************************************************************************************
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
 // encodingOption *************************************************************************************************************************
-func encodingOption(encode encoding.Encoding) Options {
-	return func(o *Option) {
+func encodingOption(encode encoding.Encoding) Option {
+	return func(o *Context) {
 		o.Encoding = encode
 	}
 }
 
 // flagOption *****************************************************************************************************************************
-func flagOption(flag int) Options {
-	return func(o *Option) {
+func flagOption(flag int) Option {
+	return func(o *Context) {
 		o.Flag = flag
 	}
 }

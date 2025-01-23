@@ -38,7 +38,7 @@ func TestGet(t *testing.T) {
 	var str string
 	key1 := "testing:key1"
 	if err = db.Get(key1, &str,
-		cache.DefaultOption(func(i interface{}) (cache.Options, error) {
+		cache.DefaultOption(func(i interface{}) (cache.Option, error) {
 			if s, isOK := i.(*string); isOK {
 				*s = "default value"
 			}
