@@ -15,31 +15,44 @@ import (
 // TestContext
 // ****************************************************************************************************************************************
 func TestContext(t *testing.T) {
-	ctx := Init(
-		WithValueOption("testing-key-1", "value = 1"),
-		WithValueOption("testing-key-2", "value = 2"),
-		HandlerOption(func(ctx Context) (err error) {
-			t.Logf("handler %04d start\n", 1)
-			err = ctx.Next()
-			t.Logf("handler %04d end\n", 1)
-			return
+	key := new(struct{})
+	ctx := Handler(
+		HandlerOption(func(ctx Context) error {
+			ctx.WithValue(key, 10)
+
+			if e := ctx.Next(); e != nil {
+				return e
+			}
+
+			ctx.WithValue(key, 19)
+
+			return ctx.Next()
 		}),
-		HandlerOption(func(ctx Context) (err error) {
-			t.Logf("handler %04d start\n", 2)
-			// return errors.New("text")
-			err = ctx.Next()
-			t.Logf("handler %04d end\n", 2)
-			return
+		HandlerOption(func(ctx Context) error {
+			ctx.WithValue(key, 20)
+
+			if e := ctx.Next(); e != nil {
+				return e
+			}
+
+			ctx.WithValue(key, 29)
+
+			return ctx.Next()
 		}),
-		HandlerOption(func(ctx Context) (err error) {
-			t.Logf("handler %04d start\n", 3)
-			err = ctx.Next()
-			t.Logf("handler %04d end\n", 3)
-			return
+		HandlerOption(func(ctx Context) error {
+			ctx.WithValue(key, 30)
+
+			return ctx.Next()
 		}),
 	)
-	t.Log(ctx.Next())
-	t.Fail()
+
+	if e := ctx.Next(); e != nil {
+		t.Error(e)
+	}
+
+	if v := ctx.Value(key); v != 19 {
+		t.Fail()
+	}
 }
 
 // type defineds **************************************************************************************************************************

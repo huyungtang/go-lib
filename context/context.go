@@ -12,15 +12,15 @@ import (
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// Context
+// Handler
 // ****************************************************************************************************************************************
-func Init(opts ...Option) Context {
-	ctx := &context{
-		context: base.Background(),
-		handler: -1,
+func Handler(opts ...Option) Context {
+	ctx := &handlerCtx{
+		Context: base.WithValue(base.Background(), handler{}, make([]handlerFunc, 0, len(opts))),
 	}
-	for _, optFn := range opts {
-		optFn(ctx)
+
+	for _, opt := range opts {
+		opt(ctx)
 	}
 
 	return ctx
@@ -30,81 +30,46 @@ func Init(opts ...Option) Context {
 // ****************************************************************************************************************************************
 // ****************************************************************************************************************************************
 
-// context ********************************************************************************************************************************
-type context struct {
-	context base.Context
-
-	handler  int
-	handlers []handler
-
-	messages []Message
+// handlerCtx *****************************************************************************************************************************
+type handlerCtx struct {
+	base.Context
 }
 
 // Context
 // ****************************************************************************************************************************************
 type Context interface {
-	Value(interface{}) interface{}
-	WithValue(interface{}, interface{})
-	Next() error
-	SetInfo(string)
-	SetWarn(string)
-	SetError(string)
-	Messages() []Message
-}
+	base.Context
 
-// Value
-// ****************************************************************************************************************************************
-func (o *context) Value(key interface{}) interface{} {
-	return o.context.Value(key)
+	WithValue(key, val any)
+
+	Next() error
 }
 
 // WithValue
 // ****************************************************************************************************************************************
-func (o *context) WithValue(key, val interface{}) {
-	o.context = base.WithValue(o.context, key, val)
+func (o *handlerCtx) WithValue(key, val any) {
+	o.Context = base.WithValue(o.Context, key, val)
 }
 
 // Next
 // ****************************************************************************************************************************************
-func (o *context) Next() (err error) {
-	o.handler++
-	if o.handler >= len(o.handlers) || o.handlers[o.handler] == nil {
-		return
+func (o *handlerCtx) Next() (err error) {
+	var idx int
+	if v := o.Value(handlerIndex{}); v != nil {
+		idx = v.(int)
+	} else {
+		idx = -1
 	}
 
-	return o.handlers[o.handler](o)
-}
+	idx++
 
-// Info
-// ****************************************************************************************************************************************
-func (o *context) SetInfo(message string) {
-	o.message(MessageKindInfo, message)
-}
+	if handlers := o.Value(handler{}).([]handlerFunc); len(handlers) > idx {
+		o.WithValue(handlerIndex{}, idx)
 
-// Warn
-// ****************************************************************************************************************************************
-func (o *context) SetWarn(message string) {
-	o.message(MessageKindWarn, message)
-}
+		return handlers[idx](o)
+	}
 
-// Error
-// ****************************************************************************************************************************************
-func (o *context) SetError(message string) {
-	o.message(MessageKindError, message)
-}
-
-// Message
-// ****************************************************************************************************************************************
-func (o *context) Messages() []Message {
-	return o.messages
-}
-
-// message ********************************************************************************************************************************
-func (o *context) message(kind messageKind, content string) {
-	o.messages = append(o.messages, &message{
-		kind:    kind,
-		content: content,
-	})
+	return
 }
 
 // private functions **********************************************************************************************************************
