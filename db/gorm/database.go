@@ -69,7 +69,7 @@ type database struct {
 
 // Table
 // ****************************************************************************************************************************************
-func (o *database) Table(ety interface{}) db.Table {
+func (o *database) Table(ety any) db.Table {
 	return &table{
 		DB:     o.DB.WithContext(context.Background()).Table(o.getTableName(ety)),
 		pKey:   o.getPrimaryKey(ety),
@@ -104,7 +104,7 @@ func (o *database) Ping() (err error) {
 }
 
 // getTableName ***************************************************************************************************************************
-func (o *database) getTableName(ety interface{}) (name string) {
+func (o *database) getTableName(ety any) (name string) {
 	if t, isOK := ety.(db.TableName); isOK {
 		name = t.TableName()
 	} else {
@@ -118,7 +118,7 @@ func (o *database) getTableName(ety interface{}) (name string) {
 }
 
 // getPrimaryKey **************************************************************************************************************************
-func (o *database) getPrimaryKey(ety interface{}) (pk string) {
+func (o *database) getPrimaryKey(ety any) (pk string) {
 	t := reflect.TypeOf(ety)
 	v := reflect.ValueOf(ety)
 	for i := 0; i < t.NumField(); i++ {

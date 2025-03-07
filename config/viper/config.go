@@ -112,7 +112,7 @@ func (o *database) GetStringSlice(key string, defa []string) []string {
 
 // GetStruct
 // ****************************************************************************************************************************************
-func (o *database) GetStruct(dto interface{}, opts ...config.Options) (err error) {
+func (o *database) GetStruct(dto any, opts ...config.Options) (err error) {
 	tp := reflect.TypeOf(dto)
 	if tp.Kind() != reflect.Struct {
 		return errors.New("target is not a struct")
@@ -188,7 +188,7 @@ func (o *database) MergeInConfig(opts ...config.Options) (err error) {
 }
 
 // getCore ********************************************************************************************************************************
-func (o *database) getCore(key string, defa interface{}) interface{} {
+func (o *database) getCore(key string, defa any) any {
 	if o.IsSet(key) {
 		switch reflect.KindOf(defa) {
 		case reflect.Bool:
@@ -213,7 +213,7 @@ func (o *database) getCore(key string, defa interface{}) interface{} {
 }
 
 // getTagDefa *****************************************************************************************************************************
-func (o *database) getTagDefa(dto interface{}, tags map[string]string) (err error) {
+func (o *database) getTagDefa(dto any, tags map[string]string) (err error) {
 	if d := tags["defa"]; d != "" {
 		err = json.Unmarshal([]byte(d), dto)
 	}

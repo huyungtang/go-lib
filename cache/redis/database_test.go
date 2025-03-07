@@ -35,12 +35,12 @@ func TestGet(t *testing.T) {
 	}
 	defer db.Close()
 
-	var str string
+	var val string
 	key1 := "testing:key1"
-	if err = db.Get(key1, &str,
-		cache.DefaultOption(func(i interface{}) (cache.Option, error) {
-			if s, isOK := i.(*string); isOK {
-				*s = "default value"
+	if err = db.Get(key1, &val,
+		cache.DefaultOption(func(istr any) (cache.Option, error) {
+			if str, isOK := istr.(*string); isOK {
+				*str = "default value"
 			}
 			return cache.ExpireOption(30), nil
 		}),
@@ -49,7 +49,7 @@ func TestGet(t *testing.T) {
 		t.Error(err)
 	}
 
-	if str != "default value" {
+	if val != "default value" {
 		t.Fail()
 	}
 }

@@ -58,7 +58,7 @@ type database struct {
 
 // Collection
 // ****************************************************************************************************************************************
-func (o *database) Collection(ety interface{}) db.Collection {
+func (o *database) Collection(ety any) db.Collection {
 	return &collection{
 		Collection: o.Database.Collection(o.getCollectionName(ety)),
 		aggs:       []*aggregate{{agg: aggAddFields, cmd: bson.M{"id": bson.M{"$toString": "$_id"}}}},
@@ -76,7 +76,7 @@ func (o *database) Close() (err error) {
 }
 
 // getCollectionName **********************************************************************************************************************
-func (o *database) getCollectionName(ety interface{}) (name string) {
+func (o *database) getCollectionName(ety any) (name string) {
 	if s, isOK := ety.(string); isOK {
 		name = s
 	} else if c, isOK := ety.(db.CollectionName); isOK {

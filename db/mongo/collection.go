@@ -31,7 +31,7 @@ type collection struct {
 
 // GetById
 // ****************************************************************************************************************************************
-func (o *collection) GetById(ety, id interface{}) (err error) {
+func (o *collection) GetById(ety, id any) (err error) {
 	sid, isOK := id.(string)
 	if !isOK || !primitive.IsValidObjectID(sid) {
 		return errors.New("id is not a valid hex string")
@@ -48,7 +48,7 @@ func (o *collection) GetById(ety, id interface{}) (err error) {
 
 // GetPagedList
 // ****************************************************************************************************************************************
-func (o *collection) GetPagedList(ety interface{}) (err error) {
+func (o *collection) GetPagedList(ety any) (err error) {
 	return o.Get(ety)
 }
 
@@ -86,11 +86,11 @@ func (o *collection) Limit(n int) db.Collection {
 
 // Create
 // ****************************************************************************************************************************************
-func (o *collection) Create(ety interface{}) (err error) {
+func (o *collection) Create(ety any) (err error) {
 	if reflect.IsSlice(ety) {
 		vals := reflect.ValueOf(ety)
 		lens := vals.Len()
-		dtos := make([]interface{}, lens)
+		dtos := make([]any, lens)
 		for i := 0; i < lens; i++ {
 			dtos[i] = vals.Index(i).Interface()
 			beforeCreate(dtos[i])
@@ -117,7 +117,7 @@ func (o *collection) Create(ety interface{}) (err error) {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *collection) Get(ety interface{}) (err error) {
+func (o *collection) Get(ety any) (err error) {
 	var cur *base.Cursor
 	tar := ety
 	if p, isOK := ety.(db.Paged); isOK {
@@ -170,10 +170,10 @@ func (o *collection) Count() (cnt int64, err error) {
 }
 
 // aggregates *****************************************************************************************************************************
-func (o *collection) aggregates(aggs ...*aggregate) interface{} {
+func (o *collection) aggregates(aggs ...*aggregate) any {
 	cmds := append(o.aggs, aggs...)
 	if lens := len(cmds); lens > 0 {
-		ms := make([]interface{}, lens)
+		ms := make([]any, lens)
 		for i := 0; i < lens; i++ {
 			ms[i] = cmds[i].getCmd()
 		}
@@ -189,7 +189,7 @@ func (o *collection) aggregates(aggs ...*aggregate) interface{} {
 // ****************************************************************************************************************************************
 
 // beforeCreate ***************************************************************************************************************************
-func beforeCreate(ety interface{}) {
+func beforeCreate(ety any) {
 	if e, isOK := ety.(db.Created); isOK {
 		e.Create()
 	}
@@ -199,7 +199,7 @@ func beforeCreate(ety interface{}) {
 }
 
 // afterCreate ****************************************************************************************************************************
-func afterCreate(ety, id interface{}) {
+func afterCreate(ety, id any) {
 	if etyId, isOK := ety.(db.Identity); isOK {
 		etyId.SetId(id)
 	}

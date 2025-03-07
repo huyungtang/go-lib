@@ -72,7 +72,7 @@ func (o *message) String() string {
 
 // Parse
 // ****************************************************************************************************************************************
-func (o *message) Parse(dto interface{}) (err error) {
+func (o *message) Parse(dto any) (err error) {
 	return json.Unmarshal(o.Delivery.Body, dto)
 }
 

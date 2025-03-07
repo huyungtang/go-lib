@@ -44,7 +44,7 @@ func TestIncrease(t *testing.T) {
 			if err = db.Increase("testing_increase_int", &val,
 				cache.IncreaseByOption(5),
 				cache.ExpireOption(60),
-				cache.DefaultOption(func(v interface{}) ([]cache.Options, error) {
+				cache.DefaultOption(func(v any) ([]cache.Options, error) {
 					time.Sleep(10 * time.Second)
 					*(v.(*int64)) = 6
 					return nil, nil
@@ -115,7 +115,7 @@ func TestGet(t *testing.T) {
 	}()
 
 	var val int
-	if err = db.Get("testing:mapData", &val, cache.DefaultOption(func(v interface{}) ([]cache.Options, error) {
+	if err = db.Get("testing:mapData", &val, cache.DefaultOption(func(v any) ([]cache.Options, error) {
 		val = 123
 		return []cache.Options{cache.ExpireOption(100)}, nil
 	})); err != nil {

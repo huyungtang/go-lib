@@ -29,13 +29,13 @@ func Contains(str, sub string) bool {
 
 // Currency
 // ****************************************************************************************************************************************
-func Currency(format string, val interface{}) string {
+func Currency(format string, val any) string {
 	return message.NewPrinter(language.English).Sprintf(format, val)
 }
 
 // Format
 // ****************************************************************************************************************************************
-func Format(format string, args ...interface{}) string {
+func Format(format string, args ...any) string {
 	return fmt.Sprintf(format, args...)
 }
 
@@ -132,7 +132,7 @@ func Omit(strs []string, pattern string) []string {
 
 // Parse
 // ****************************************************************************************************************************************
-func Parse(str, format string, args ...interface{}) (err error) {
+func Parse(str, format string, args ...any) (err error) {
 	_, err = fmt.Sscanf(str, format, args...)
 
 	return

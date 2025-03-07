@@ -15,7 +15,7 @@ package db
 // SqlDB
 // ****************************************************************************************************************************************
 type SqlDB interface {
-	Table(interface{}) Table
+	Table(any) Table
 	Close() error
 	Ping() error
 }
@@ -23,7 +23,7 @@ type SqlDB interface {
 // NoSqlDB
 // ****************************************************************************************************************************************
 type NoSqlDB interface {
-	Collection(interface{}) Collection
+	Collection(any) Collection
 	Close() error
 }
 

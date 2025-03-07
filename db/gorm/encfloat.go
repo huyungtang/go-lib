@@ -29,7 +29,7 @@ type EncFloat float64
 
 // Scan
 // ****************************************************************************************************************************************
-func (o *EncFloat) Scan(val interface{}) (err error) {
+func (o *EncFloat) Scan(val any) (err error) {
 	var s string
 	if s, err = decryptString(val); err != nil {
 		return

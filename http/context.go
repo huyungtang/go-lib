@@ -34,7 +34,7 @@ type HttpResult interface {
 	Body() []byte
 	Err() error
 	Next()
-	ParseJson(interface{}) error
+	ParseJson(any) error
 	Status() string
 	StatusCode() int
 	String() string
@@ -65,7 +65,7 @@ func (o *httpResult) Next() {
 
 // Parse
 // ****************************************************************************************************************************************
-func (o *httpResult) ParseJson(dto interface{}) (err error) {
+func (o *httpResult) ParseJson(dto any) (err error) {
 	return json.Unmarshal(o.body, dto)
 }
 

@@ -22,7 +22,7 @@ type Message interface {
 	Routing() string
 	Body() []byte
 	String() string
-	Parse(interface{}) error
+	Parse(any) error
 	SetError(error)
 	Err() error
 	Next()

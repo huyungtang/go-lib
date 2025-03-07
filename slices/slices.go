@@ -16,7 +16,7 @@ import (
 // ****************************************************************************************************************************************
 func New() Slice {
 	return &sliceContainer{
-		store: make(map[interface{}]bool),
+		store: make(map[any]bool),
 	}
 }
 
@@ -34,7 +34,7 @@ func IndexOf(lns int, compare func(int) bool) (idx int, exi bool) {
 
 // Reverse
 // ****************************************************************************************************************************************
-func Reverse(s interface{}) {
+func Reverse(s any) {
 	if !reflect.IsSlice(s) {
 		return
 	}
@@ -53,19 +53,19 @@ func Reverse(s interface{}) {
 // Slice
 // ****************************************************************************************************************************************
 type Slice interface {
-	Append(interface{}) bool
+	Append(any) bool
 	GetString() []string
 	GetUInt64() []uint64
 }
 
 // sliceContainer *************************************************************************************************************************
 type sliceContainer struct {
-	store map[interface{}]bool
+	store map[any]bool
 }
 
 // Append
 // ****************************************************************************************************************************************
-func (o *sliceContainer) Append(v interface{}) (isApp bool) {
+func (o *sliceContainer) Append(v any) (isApp bool) {
 	if _, isOK := o.store[v]; !isOK {
 		o.store[v], isApp = true, true
 	}

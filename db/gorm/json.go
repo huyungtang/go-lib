@@ -35,7 +35,7 @@ func (Json) GormDBDataType(db *base.DB, field *schema.Field) (s string) {
 	return
 }
 
-func (j *Json) Scan(value interface{}) (err error) {
+func (j *Json) Scan(value any) (err error) {
 	bs, ok := value.([]byte)
 	if !ok {
 		return errInvalidData
@@ -61,7 +61,7 @@ func (j Json) Value() (val driver.Value, err error) {
 
 // Marshal
 // ****************************************************************************************************************************************
-func (o *Json) Marshal(dto interface{}) (err error) {
+func (o *Json) Marshal(dto any) (err error) {
 	var bs []byte
 	if bs, err = json.Marshal(dto); err != nil {
 		return
@@ -74,7 +74,7 @@ func (o *Json) Marshal(dto interface{}) (err error) {
 
 // Unmarshal
 // ****************************************************************************************************************************************
-func (o Json) Unmarshal(dto interface{}) (err error) {
+func (o Json) Unmarshal(dto any) (err error) {
 	if len(o) == 0 {
 		return
 	}

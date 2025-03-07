@@ -45,7 +45,7 @@ const (
 
 // Clone
 // ****************************************************************************************************************************************
-func Clone(elem interface{}) interface{} {
+func Clone(elem any) any {
 	tar := base.New(TypeOf(elem))
 	tar.Elem().Set(ValueOf(elem))
 
@@ -73,7 +73,7 @@ func GetTags(field base.StructField, tag string) map[string]string {
 
 // IsObject
 // ****************************************************************************************************************************************
-func IsObject(elem interface{}) bool {
+func IsObject(elem any) bool {
 	k := KindOf(elem)
 
 	return k == base.Array ||
@@ -84,31 +84,31 @@ func IsObject(elem interface{}) bool {
 
 // IsPointer
 // ****************************************************************************************************************************************
-func IsPointer(elem interface{}) bool {
+func IsPointer(elem any) bool {
 	return base.TypeOf(elem).Kind() == base.Ptr
 }
 
 // IsString
 // ****************************************************************************************************************************************
-func IsString(elem interface{}) bool {
+func IsString(elem any) bool {
 	return unPointer(base.TypeOf(elem)).Kind() == base.String
 }
 
 // IsStruct
 // ****************************************************************************************************************************************
-func IsStruct(elem interface{}) bool {
+func IsStruct(elem any) bool {
 	return unPointer(base.TypeOf(elem)).Kind() == base.Struct
 }
 
 // IsSlice
 // ****************************************************************************************************************************************
-func IsSlice(elem interface{}) bool {
+func IsSlice(elem any) bool {
 	return unPointer(base.TypeOf(elem)).Kind() == base.Slice
 }
 
 // KindOf never return reflect.Ptr
 // ****************************************************************************************************************************************
-func KindOf(elem interface{}) base.Kind {
+func KindOf(elem any) base.Kind {
 	tp := unPointer(base.TypeOf(elem))
 
 	return tp.Kind()
@@ -128,19 +128,19 @@ func SetNil(field base.Value) {
 
 // Swapper
 // ****************************************************************************************************************************************
-func Swapper(slice interface{}) func(i, j int) {
+func Swapper(slice any) func(i, j int) {
 	return base.Swapper(slice)
 }
 
 // TypeOf
 // ****************************************************************************************************************************************
-func TypeOf(elem interface{}) base.Type {
+func TypeOf(elem any) base.Type {
 	return unPointer(base.TypeOf(elem))
 }
 
 // ValueOf
 // ****************************************************************************************************************************************
-func ValueOf(dto interface{}) base.Value {
+func ValueOf(dto any) base.Value {
 	return elemValue(base.ValueOf(dto))
 }
 

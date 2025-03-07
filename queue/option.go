@@ -26,7 +26,7 @@ var (
 
 // ArgumentsOption
 // ****************************************************************************************************************************************
-func ArgumentsOption(args map[string]interface{}) Options {
+func ArgumentsOption(args map[string]any) Options {
 	return func(qo *Option) {
 		qo.Arguments = args
 	}
@@ -90,7 +90,7 @@ func InternalOption(i bool) Options {
 
 // JsonMessageOption
 // ****************************************************************************************************************************************
-func JsonMessageOption(dto interface{}) Options {
+func JsonMessageOption(dto any) Options {
 	bs, _ := json.Marshal(dto)
 
 	return messageOption("application/json", bs)

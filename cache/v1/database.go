@@ -30,33 +30,33 @@ type Database interface {
 
 		Options: *KeepTTLOption(), DefaultOption(), ExpireOption()
 	*/
-	Get(string, interface{}, ...Options) error
+	Get(string, any, ...Options) error
 
 	/*
 		GetSlice(cachedKey, slice_value)
 	*/
-	GetSlice(string, interface{}, ...Options) error
+	GetSlice(string, any, ...Options) error
 
 	/*
 		Increase(cachedKey, value)
 
 		value: int64 or float64
 	*/
-	Increase(string, interface{}, ...Options) error
+	Increase(string, any, ...Options) error
 
 	/*
 		Push(cachedKey, value, Options)
 
 		Options: *DirectionRightOption(), ExpireOption()
 	*/
-	Push(string, interface{}, ...Options) error
+	Push(string, any, ...Options) error
 
 	/*
 		Set(cachedKey, value, Options)
 
 		Options: *StaticOption(), SkipOverrideOption(), UpdateOnlyOption(), ExpireOption()
 	*/
-	Set(string, interface{}, ...Options) error
+	Set(string, any, ...Options) error
 
 	Close() error
 }

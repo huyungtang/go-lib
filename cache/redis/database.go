@@ -53,7 +53,7 @@ func (o *database) Exists(key string) bool {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *database) Get(key string, val interface{}, opts ...cache.Option) (err error) {
+func (o *database) Get(key string, val any, opts ...cache.Option) (err error) {
 	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
@@ -93,7 +93,7 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Option) (err e
 
 // Set
 // ****************************************************************************************************************************************
-func (o *database) Set(key string, val interface{}, opts ...cache.Option) (err error) {
+func (o *database) Set(key string, val any, opts ...cache.Option) (err error) {
 	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
@@ -110,7 +110,7 @@ func (o *database) Set(key string, val interface{}, opts ...cache.Option) (err e
 
 // Push
 // ****************************************************************************************************************************************
-func (o *database) Push(key string, val interface{}, opts ...cache.Option) (err error) {
+func (o *database) Push(key string, val any, opts ...cache.Option) (err error) {
 	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,
@@ -138,7 +138,7 @@ func (o *database) Push(key string, val interface{}, opts ...cache.Option) (err 
 
 // Pop
 // ****************************************************************************************************************************************
-func (o *database) Pop(key string, val interface{}, opts ...cache.Option) (err error) {
+func (o *database) Pop(key string, val any, opts ...cache.Option) (err error) {
 	cfg := new(cache.Context).
 		ApplyOptions(
 			opts,

@@ -19,29 +19,29 @@ type Table interface {
 
 	LockForUpdate() Table
 
-	Select(interface{}, ...interface{}) Table
+	Select(any, ...any) Table
 	Omit(...string) Table
 
-	Join(string, ...interface{}) Table
-	Preload(string, ...interface{}) Table
+	Join(string, ...any) Table
+	Preload(string, ...any) Table
 
 	Available() Table
-	Where(interface{}, ...interface{}) Table
-	Having(interface{}, ...interface{}) Table
+	Where(any, ...any) Table
+	Having(any, ...any) Table
 
-	Order(interface{}) Table
+	Order(any) Table
 	Group(string) Table
 
 	Offset(int) Table
 	Limit(int) Table
 
-	Create(interface{}) error
-	Get(interface{}) error
-	Update(interface{}) error
-	Delete(interface{}) error
+	Create(any) error
+	Get(any) error
+	Update(any) error
+	Delete(any) error
 	Count() (int64, error)
 
-	Exec(string, ...interface{}) error
+	Exec(string, ...any) error
 
 	Begin() Transaction
 
@@ -51,7 +51,7 @@ type Table interface {
 	UpdateColumns() []string
 	RowsAffected() int64
 
-	SubQuery() interface{}
+	SubQuery() any
 }
 
 // Transaction
@@ -66,8 +66,8 @@ type Transaction interface {
 // Query
 // ****************************************************************************************************************************************
 type Query interface {
-	GetById(interface{}, interface{}) error
-	GetPagedList(interface{}) error
+	GetById(any, any) error
+	GetPagedList(any) error
 }
 
 // TableName

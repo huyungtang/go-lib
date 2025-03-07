@@ -25,22 +25,19 @@ import (
 type table struct {
 	*base.DB
 	pKey   string
-	entity interface{}
+	entity any
 }
 
 // GetById
 // ****************************************************************************************************************************************
-func (o *table) GetById(ety, id interface{}) (err error) {
+func (o *table) GetById(ety, id any) (err error) {
 	return o.DB.
-		Where(
-			strings.Format("%s = @id", o.pKey),
-			map[string]interface{}{"id": id},
-		).Take(ety).Error
+		Where(strings.Format("%s = @id", o.pKey), map[string]any{"id": id}).Take(ety).Error
 }
 
 // GetPagedList
 // ****************************************************************************************************************************************
-func (o *table) GetPagedList(ety interface{}) (err error) {
+func (o *table) GetPagedList(ety any) (err error) {
 	return o.Get(ety)
 }
 
@@ -56,7 +53,7 @@ func (o *table) LockForUpdate() db.Table {
 
 // Select
 // ****************************************************************************************************************************************
-func (o *table) Select(qry interface{}, cols ...interface{}) db.Table {
+func (o *table) Select(qry any, cols ...any) db.Table {
 	o.DB = o.DB.Select(qry, cols...)
 
 	return o
@@ -72,7 +69,7 @@ func (o *table) Omit(cols ...string) db.Table {
 
 // Join
 // ****************************************************************************************************************************************
-func (o *table) Join(qry string, args ...interface{}) db.Table {
+func (o *table) Join(qry string, args ...any) db.Table {
 	o.DB = o.DB.Joins(qry, args...)
 
 	return o
@@ -80,7 +77,7 @@ func (o *table) Join(qry string, args ...interface{}) db.Table {
 
 // Preload
 // ****************************************************************************************************************************************
-func (o *table) Preload(qry string, args ...interface{}) db.Table {
+func (o *table) Preload(qry string, args ...any) db.Table {
 	o.DB = o.DB.Preload(qry, args...)
 
 	return o
@@ -98,7 +95,7 @@ func (o *table) Available() db.Table {
 
 // Where
 // ****************************************************************************************************************************************
-func (o *table) Where(qry interface{}, args ...interface{}) db.Table {
+func (o *table) Where(qry any, args ...any) db.Table {
 	o.DB = o.DB.Where(qry, args...)
 
 	return o
@@ -106,7 +103,7 @@ func (o *table) Where(qry interface{}, args ...interface{}) db.Table {
 
 // Having
 // ****************************************************************************************************************************************
-func (o *table) Having(qry interface{}, args ...interface{}) db.Table {
+func (o *table) Having(qry any, args ...any) db.Table {
 	o.DB = o.DB.Having(qry, args...)
 
 	return o
@@ -114,7 +111,7 @@ func (o *table) Having(qry interface{}, args ...interface{}) db.Table {
 
 // Order
 // ****************************************************************************************************************************************
-func (o *table) Order(col interface{}) db.Table {
+func (o *table) Order(col any) db.Table {
 	o.DB = o.DB.Order(col)
 
 	return o
@@ -146,7 +143,7 @@ func (o *table) Limit(n int) db.Table {
 
 // Create
 // ****************************************************************************************************************************************
-func (o *table) Create(ety interface{}) (err error) {
+func (o *table) Create(ety any) (err error) {
 	if reflect.IsSlice(ety) {
 		vals := reflect.ValueOf(ety)
 		for i := 0; i < vals.Len(); i++ {
@@ -161,7 +158,7 @@ func (o *table) Create(ety interface{}) (err error) {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *table) Get(ety interface{}) (err error) {
+func (o *table) Get(ety any) (err error) {
 	tar := ety
 	if p, isOK := ety.(db.Paged); isOK {
 		var cnt int64
@@ -181,7 +178,7 @@ func (o *table) Get(ety interface{}) (err error) {
 
 // Update
 // ****************************************************************************************************************************************
-func (o *table) Update(ety interface{}) (err error) {
+func (o *table) Update(ety any) (err error) {
 	if e, isOK := ety.(db.Updated); isOK {
 		e.Update()
 		o.DB.Statement.Selects = append(o.DB.Statement.Selects, "updated_at")
@@ -192,7 +189,7 @@ func (o *table) Update(ety interface{}) (err error) {
 
 // Delete
 // ****************************************************************************************************************************************
-func (o *table) Delete(ety interface{}) (err error) {
+func (o *table) Delete(ety any) (err error) {
 	if e, isOK := ety.(db.Deleted); isOK {
 		e.Delete()
 		o.DB.Statement.Selects = append(o.DB.Statement.Selects, "deleted_at")
@@ -206,8 +203,8 @@ func (o *table) Delete(ety interface{}) (err error) {
 // Count
 // ****************************************************************************************************************************************
 func (o *table) Count() (cnt int64, err error) {
-	var p map[string][]interface{}
-	p, o.DB.Statement.Preloads = o.DB.Statement.Preloads, make(map[string][]interface{})
+	var p map[string][]any
+	p, o.DB.Statement.Preloads = o.DB.Statement.Preloads, make(map[string][]any)
 	err = o.DB.Count(&cnt).Error
 	o.DB.Statement.Preloads = p
 
@@ -216,7 +213,7 @@ func (o *table) Count() (cnt int64, err error) {
 
 // Exec
 // ****************************************************************************************************************************************
-func (o *table) Exec(sqlcmd string, args ...interface{}) (err error) {
+func (o *table) Exec(sqlcmd string, args ...any) (err error) {
 	return o.DB.Exec(sqlcmd, args...).Error
 }
 
@@ -272,12 +269,12 @@ func (o *table) RowsAffected() int64 {
 
 // SubQuery
 // ****************************************************************************************************************************************
-func (o *table) SubQuery() interface{} {
+func (o *table) SubQuery() any {
 	return o.DB
 }
 
 // beforeCreate ***************************************************************************************************************************
-func (o *table) beforeCreate(ety interface{}) {
+func (o *table) beforeCreate(ety any) {
 	if e, isOK := ety.(db.Created); isOK {
 		e.Create()
 	}
@@ -288,7 +285,7 @@ func (o *table) beforeCreate(ety interface{}) {
 }
 
 // getColumns *****************************************************************************************************************************
-func (o *table) getColumns(entity interface{}, exp string) (cols []string) {
+func (o *table) getColumns(entity any, exp string) (cols []string) {
 	tp := reflect.TypeOf(entity)
 	cs := slices.New()
 	for i := 0; i < tp.NumField(); i++ {

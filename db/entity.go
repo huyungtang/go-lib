@@ -15,7 +15,7 @@ package db
 // Identity
 // ****************************************************************************************************************************************
 type Identity interface {
-	SetId(interface{})
+	SetId(any)
 }
 
 // Paged
@@ -23,7 +23,7 @@ type Identity interface {
 type Paged interface {
 	GetPageIndex() int
 	GetPagedSize() int
-	GetDataDTO() interface{}
+	GetDataDTO() any
 	SetCount(int64)
 }
 

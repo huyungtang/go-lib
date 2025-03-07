@@ -86,7 +86,7 @@ func (o *database) Exists(key string) (exs bool, err error) {
 
 // Get
 // ****************************************************************************************************************************************
-func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err error) {
+func (o *database) Get(key string, val any, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.KeepTTLOption()}, opts...)
 	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
 		var cmds []base.Cmder
@@ -122,20 +122,20 @@ func (o *database) Get(key string, val interface{}, opts ...cache.Options) (err 
 
 // GetSlice
 // ****************************************************************************************************************************************
-func (o *database) GetSlice(key string, val interface{}, opts ...cache.Options) (err error) {
+func (o *database) GetSlice(key string, val any, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.KeepTTLOption(), cache.DirectionLeftOption()}, opts...)
 	var cmds []base.Cmder
 	if cmds, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
 		p.Process(context.Background(), base.NewIntCmd(context.Background(), cmderLLen, key))
 		if cmds, err = p.Exec(context.Background()); err == nil && cmds[0].(*base.IntCmd).Val() > 0 {
-			args := make([]interface{}, 3)
+			args := make([]any, 3)
 			switch cfg.Direction {
 			case cache.DirectionLeft:
 				args[0] = cmderLPop
 			case cache.DirectionRight:
 				args[0] = cmderRPop
 			}
-			copy(args[1:3], []interface{}{key, cmds[0].(*base.IntCmd).Val()})
+			copy(args[1:3], []any{key, cmds[0].(*base.IntCmd).Val()})
 
 			p.Process(context.Background(), base.NewSliceCmd(context.Background(), args...))
 
@@ -172,7 +172,7 @@ func (o *database) GetSlice(key string, val interface{}, opts ...cache.Options) 
 
 // Increase
 // ****************************************************************************************************************************************
-func (o *database) Increase(key string, val interface{}, opts ...cache.Options) (err error) {
+func (o *database) Increase(key string, val any, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{
 		cache.IncreaseByOption(1),
 		cache.IncreaseByFloatOption(1),
@@ -240,17 +240,17 @@ func (o *database) Increase(key string, val interface{}, opts ...cache.Options) 
 
 // Push
 // ****************************************************************************************************************************************
-func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err error) {
+func (o *database) Push(key string, val any, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.DirectionRightOption()}, opts...)
 	_, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
-		args := make([]interface{}, 3)
+		args := make([]any, 3)
 		switch cfg.Direction {
 		case cache.DirectionLeft:
 			args[0] = cmderLPush
 		case cache.DirectionRight:
 			args[0] = cmderRPush
 		}
-		copy(args[1:3], []interface{}{key, valueOf(val)})
+		copy(args[1:3], []any{key, valueOf(val)})
 
 		p.Process(context.Background(), base.NewStatusCmd(context.Background(), args...))
 
@@ -266,7 +266,7 @@ func (o *database) Push(key string, val interface{}, opts ...cache.Options) (err
 
 // Set
 // ****************************************************************************************************************************************
-func (o *database) Set(key string, val interface{}, opts ...cache.Options) (err error) {
+func (o *database) Set(key string, val any, opts ...cache.Options) (err error) {
 	cfg := cache.ApplyOptions([]cache.Options{cache.StaticOption()}, opts...)
 	if _, err = o.Client.Pipelined(context.Background(), func(p base.Pipeliner) (e error) {
 		p.Process(context.Background(), setCore(key, val, cfg))
@@ -319,7 +319,7 @@ func (*database) ProcessPipelineHook(next base.ProcessPipelineHook) base.Process
 
 // expireCore *****************************************************************************************************************************
 func expireCore(key string, cfg *cache.Option) (cmd *base.StatusCmd) {
-	args := make([]interface{}, 0, 3)
+	args := make([]any, 0, 3)
 	if cfg.Expire == cache.ExpirationStatic {
 		args = append(args, cmderPersist, key)
 	} else if cfg.Expire == cache.ExpirationExpired {
@@ -338,9 +338,9 @@ func expireCore(key string, cfg *cache.Option) (cmd *base.StatusCmd) {
 }
 
 // setCore ********************************************************************************************************************************
-func setCore(key string, val interface{}, cfg *cache.Option) (cmd *base.StatusCmd) {
-	args := make([]interface{}, 3, 4)
-	copy(args[0:3], []interface{}{cmderSet, key, valueOf(val)})
+func setCore(key string, val any, cfg *cache.Option) (cmd *base.StatusCmd) {
+	args := make([]any, 3, 4)
+	copy(args[0:3], []any{cmderSet, key, valueOf(val)})
 
 	switch cfg.Update {
 	case cache.SetSkipOverride:
@@ -353,7 +353,7 @@ func setCore(key string, val interface{}, cfg *cache.Option) (cmd *base.StatusCm
 }
 
 // valueOf ********************************************************************************************************************************
-func valueOf(v interface{}) interface{} {
+func valueOf(v any) any {
 	if reflect.IsObject(v) {
 		b, _ := json.Marshal(v)
 
@@ -366,7 +366,7 @@ func valueOf(v interface{}) interface{} {
 }
 
 // parseValue *****************************************************************************************************************************
-func parseValue(val interface{}, cmd *base.StringCmd) (err error) {
+func parseValue(val any, cmd *base.StringCmd) (err error) {
 	switch t := val.(type) {
 	case *string:
 		*t = cmd.Val()

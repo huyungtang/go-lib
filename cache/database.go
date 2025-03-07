@@ -25,16 +25,16 @@ type Database interface {
 	Exists(string) bool
 
 	// Get(key, value, DefaultOption, ExpireOption, *KeepTTLOption)
-	Get(string, interface{}, ...Option) error
+	Get(string, any, ...Option) error
 
 	// Set(key, value, ExpireOption, *StaticOption)
-	Set(string, interface{}, ...Option) error
+	Set(string, any, ...Option) error
 
 	// Push(key, value, ExpireOption, *RPushOpiton, *StaticOption)
-	Push(string, interface{}, ...Option) error
+	Push(string, any, ...Option) error
 
 	// Pop(key, value, *PopCountOption(1), *LPopOpiton)
-	Pop(string, interface{}, ...Option) error
+	Pop(string, any, ...Option) error
 
 	// Del(keys)
 	Del(...string) error

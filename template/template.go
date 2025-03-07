@@ -67,15 +67,15 @@ func (o *template) minifier(reader io.Reader) (err error) {
 // ****************************************************************************************************************************************
 type Template interface {
 	// Execute(dto)
-	Execute(interface{}) error
+	Execute(any) error
 
 	// ExecuteTemplate(template, dto)
-	ExecuteTemplate(string, interface{}) error
+	ExecuteTemplate(string, any) error
 }
 
 // Execute
 // ****************************************************************************************************************************************
-func (o *template) Execute(data interface{}) (err error) {
+func (o *template) Execute(data any) (err error) {
 	var buf bytes.Buffer
 	if err = o.Template.Execute(&buf, data); err != nil {
 		return
@@ -86,7 +86,7 @@ func (o *template) Execute(data interface{}) (err error) {
 
 // ExecuteTemplate
 // ****************************************************************************************************************************************
-func (o *template) ExecuteTemplate(name string, data interface{}) (err error) {
+func (o *template) ExecuteTemplate(name string, data any) (err error) {
 	var buf bytes.Buffer
 	if err = o.Template.ExecuteTemplate(&buf, name, data); err != nil {
 		return

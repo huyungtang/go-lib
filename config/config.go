@@ -21,7 +21,7 @@ type Config interface {
 	GetIntSlice(string, []int) []int
 	GetString(string, string) string
 	GetStringSlice(string, []string) []string
-	GetStruct(interface{}, ...Options) error
+	GetStruct(any, ...Options) error
 
 	MergeInConfig(...Options) error
 }

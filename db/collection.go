@@ -27,9 +27,9 @@ type Collection interface {
 	Offset(int) Collection
 	Limit(int) Collection
 
-	Create(interface{}) error
-	Get(interface{}) error
-	// Update(interface{}) error
+	Create(any) error
+	Get(any) error
+	// Update(any) error
 	// Delete() error
 	Count() (int64, error)
 }

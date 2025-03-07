@@ -25,7 +25,7 @@ type EncStr string
 
 // Scan
 // ****************************************************************************************************************************************
-func (o *EncStr) Scan(val interface{}) (err error) {
+func (o *EncStr) Scan(val any) (err error) {
 	var s string
 	if s, err = decryptString(val); err != nil {
 		return
@@ -59,7 +59,7 @@ func (o EncStr) String() string {
 // ****************************************************************************************************************************************
 
 // decryptString **************************************************************************************************************************
-func decryptString(val interface{}) (s string, err error) {
+func decryptString(val any) (s string, err error) {
 	var str string
 	var isOk bool
 	if str, isOk = val.(string); !isOk {
