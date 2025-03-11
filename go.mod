@@ -2,9 +2,9 @@ module github.com/huyungtang/go-lib
 
 replace golang.org/x/text => ./../golang.text
 
-go 1.22.9
+go 1.23.0
 
-toolchain go1.23.5
+toolchain go1.24.1
 
 require (
 	github.com/boombuler/barcode v1.0.1
@@ -20,10 +20,10 @@ require (
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/xuri/excelize/v2 v2.8.0
 	go.mongodb.org/mongo-driver v1.10.3
-	golang.org/x/crypto v0.12.0
+	golang.org/x/crypto v0.23.0
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
-	golang.org/x/text v0.12.0
+	golang.org/x/text v0.15.0
 	google.golang.org/api v0.103.0
 	gorm.io/driver/mysql v1.4.3
 	gorm.io/driver/postgres v1.4.4
@@ -83,9 +83,9 @@ require (
 	github.com/xuri/nfp v0.0.0-20230819163627-dc951e3ffe1a // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c // indirect
 	google.golang.org/grpc v1.50.1 // indirect
