@@ -39,7 +39,7 @@ func TestGet(t *testing.T) {
 	key1 := "testing:key1"
 	if err = db.Get(key1, &val,
 		cache.DefaultOption(func(istr any) (cache.Option, error) {
-			if str, isOK := istr.(*string); isOK {
+			if str, isMatched := istr.(*string); isMatched {
 				*str = "default value"
 			}
 			return cache.ExpireOption(30), nil

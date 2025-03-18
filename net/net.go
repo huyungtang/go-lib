@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/huyungtang/go-lib/slices"
+	"github.com/rdegges/go-ipify"
 )
 
 // constants & variables ******************************************************************************************************************
@@ -47,6 +48,14 @@ func IsPrivate(addr string) bool {
 	})
 
 	return isExists
+}
+
+// GetPublicIP
+// ****************************************************************************************************************************************
+func GetPublicIP() (str string) {
+	str, _ = ipify.GetIp()
+
+	return
 }
 
 // ParseURL

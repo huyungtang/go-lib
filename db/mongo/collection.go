@@ -32,8 +32,8 @@ type collection struct {
 // GetById
 // ****************************************************************************************************************************************
 func (o *collection) GetById(ety, id any) (err error) {
-	sid, isOK := id.(string)
-	if !isOK || !primitive.IsValidObjectID(sid) {
+	sid, isMatched := id.(string)
+	if !isMatched || !primitive.IsValidObjectID(sid) {
 		return errors.New("id is not a valid hex string")
 	}
 
@@ -120,7 +120,7 @@ func (o *collection) Create(ety any) (err error) {
 func (o *collection) Get(ety any) (err error) {
 	var cur *base.Cursor
 	tar := ety
-	if p, isOK := ety.(db.Paged); isOK {
+	if p, isMatched := ety.(db.Paged); isMatched {
 		var cnt int64
 		if cnt, err = o.Count(); err != nil {
 			return
@@ -190,17 +190,17 @@ func (o *collection) aggregates(aggs ...*aggregate) any {
 
 // beforeCreate ***************************************************************************************************************************
 func beforeCreate(ety any) {
-	if e, isOK := ety.(db.Created); isOK {
+	if e, isMatched := ety.(db.Created); isMatched {
 		e.Create()
 	}
-	if e, isOK := ety.(db.Updated); isOK {
+	if e, isMatched := ety.(db.Updated); isMatched {
 		e.Update()
 	}
 }
 
 // afterCreate ****************************************************************************************************************************
 func afterCreate(ety, id any) {
-	if etyId, isOK := ety.(db.Identity); isOK {
+	if etyId, isMatched := ety.(db.Identity); isMatched {
 		etyId.SetId(id)
 	}
 }

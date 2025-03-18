@@ -13,7 +13,7 @@ package context
 func HandlerOption(fn handlerFunc) Option {
 	return func(hc Context) {
 		key := handler{}
-		if handlers, isOK := hc.Value(key).([]handlerFunc); isOK {
+		if handlers, isMatched := hc.Value(key).([]handlerFunc); isMatched {
 			handlers = append(handlers, fn)
 			hc.WithValue(key, handlers)
 		}

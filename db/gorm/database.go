@@ -105,7 +105,7 @@ func (o *database) Ping() (err error) {
 
 // getTableName ***************************************************************************************************************************
 func (o *database) getTableName(ety any) (name string) {
-	if t, isOK := ety.(db.TableName); isOK {
+	if t, isMatched := ety.(db.TableName); isMatched {
 		name = t.TableName()
 	} else {
 		name = strings.ToLower(reflect.TypeOf(ety).Name())

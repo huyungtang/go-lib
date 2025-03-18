@@ -86,7 +86,7 @@ func (o *table) Preload(qry string, args ...any) db.Table {
 // Available
 // ****************************************************************************************************************************************
 func (o *table) Available() db.Table {
-	if _, isOK := o.entity.(db.Deleted); isOK {
+	if _, isMatched := o.entity.(db.Deleted); isMatched {
 		o.DB = o.DB.Where("deleted_at = 0")
 	}
 
@@ -160,7 +160,7 @@ func (o *table) Create(ety any) (err error) {
 // ****************************************************************************************************************************************
 func (o *table) Get(ety any) (err error) {
 	tar := ety
-	if p, isOK := ety.(db.Paged); isOK {
+	if p, isMatched := ety.(db.Paged); isMatched {
 		var cnt int64
 		if cnt, err = o.Count(); err != nil {
 			return
@@ -179,7 +179,7 @@ func (o *table) Get(ety any) (err error) {
 // Update
 // ****************************************************************************************************************************************
 func (o *table) Update(ety any) (err error) {
-	if e, isOK := ety.(db.Updated); isOK {
+	if e, isMatched := ety.(db.Updated); isMatched {
 		e.Update()
 		o.DB.Statement.Selects = append(o.DB.Statement.Selects, "updated_at")
 	}
@@ -190,7 +190,7 @@ func (o *table) Update(ety any) (err error) {
 // Delete
 // ****************************************************************************************************************************************
 func (o *table) Delete(ety any) (err error) {
-	if e, isOK := ety.(db.Deleted); isOK {
+	if e, isMatched := ety.(db.Deleted); isMatched {
 		e.Delete()
 		o.DB.Statement.Selects = append(o.DB.Statement.Selects, "deleted_at")
 
@@ -275,11 +275,11 @@ func (o *table) SubQuery() any {
 
 // beforeCreate ***************************************************************************************************************************
 func (o *table) beforeCreate(ety any) {
-	if e, isOK := ety.(db.Created); isOK {
+	if e, isMatched := ety.(db.Created); isMatched {
 		e.Create()
 	}
 
-	if e, isOK := ety.(db.Updated); isOK {
+	if e, isMatched := ety.(db.Updated); isMatched {
 		e.Update()
 	}
 }

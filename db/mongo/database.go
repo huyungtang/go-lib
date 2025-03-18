@@ -77,9 +77,9 @@ func (o *database) Close() (err error) {
 
 // getCollectionName **********************************************************************************************************************
 func (o *database) getCollectionName(ety any) (name string) {
-	if s, isOK := ety.(string); isOK {
+	if s, isMatched := ety.(string); isMatched {
 		name = s
-	} else if c, isOK := ety.(db.CollectionName); isOK {
+	} else if c, isMatched := ety.(db.CollectionName); isMatched {
 		name = c.CollectionName()
 	} else {
 		name = reflect.TypeOf(ety).Name()

@@ -61,10 +61,10 @@ func (o EncStr) String() string {
 // decryptString **************************************************************************************************************************
 func decryptString(val any) (s string, err error) {
 	var str string
-	var isOk bool
-	if str, isOk = val.(string); !isOk {
+	var isMatched bool
+	if str, isMatched = val.(string); !isMatched {
 		var bs []byte
-		if bs, isOk = val.([]byte); !isOk {
+		if bs, isMatched = val.([]byte); !isMatched {
 			return "", errInvalidData
 		}
 

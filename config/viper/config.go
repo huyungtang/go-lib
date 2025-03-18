@@ -134,7 +134,7 @@ func (o *database) GetStruct(dto any, opts ...config.Options) (err error) {
 			continue
 		}
 
-		if _, isOk := tags["key"]; !isOk {
+		if _, isMatched := tags["key"]; !isMatched {
 			tags["key"] = tp.Field(i).Name
 		}
 		keys := append(cfg.Pathes, tags["key"])

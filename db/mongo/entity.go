@@ -25,7 +25,7 @@ type Identity struct {
 // SetId
 // ****************************************************************************************************************************************
 func (o *Identity) SetId(id any) {
-	if id, isOK := id.(primitive.ObjectID); isOK {
+	if id, isMatched := id.(primitive.ObjectID); isMatched {
 		o.Id = id.Hex()
 	}
 }

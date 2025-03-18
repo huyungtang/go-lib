@@ -86,7 +86,7 @@ func (o *reader) Readln() (evt *readerEvent) {
 
 	LOOP:
 		for {
-			if isOK := s.Scan(); isOK {
+			if s.Scan() {
 				ln++
 				c.Read <- &readerContext{LineNo: ln, Content: s.Text()}
 			} else {
