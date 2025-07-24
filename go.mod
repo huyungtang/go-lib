@@ -14,6 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311
 	github.com/rabbitmq/amqp091-go v1.5.0
+	github.com/rdegges/go-ipify v0.0.0-20150526035502-2d94a6a86c40
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.13.0
@@ -68,7 +69,6 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rdegges/go-ipify v0.0.0-20150526035502-2d94a6a86c40 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
